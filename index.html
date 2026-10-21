@@ -238,8 +238,9 @@
   #bookSel{font-size:.9rem}
   @media(max-width:639px){
     #catRow{top:44px;bottom:auto}
-    .mtab{width:28px;height:46px;font-size:1.15rem;border-radius:0 12px 12px 0}
-    .gtab{width:26px;height:38px;font-size:.9rem;top:calc(42% - 12px)}
+    #bookSel{max-width:calc(100vw - 120px)}
+    .mtab{width:28px;height:46px;font-size:1.15rem;border-radius:0 12px 12px 0;top:36vh}
+    .gtab{width:26px;height:38px;font-size:.9rem;top:calc(36vh + 64px)}
   }
 </style>
 </head>
@@ -265,8 +266,8 @@
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
       <div class="min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><h1 id="appTitle" class="apptitle font-bold leading-snug min-w-0">🐱 ระบบจัดการวัสดุสำนักงาน 🐱</h1></div>
       <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-        <div class="relative flex-1 sm:flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
-          <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 sm:!py-2.5 sm:!w-72"></select></div>
+        <div class="relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
+          <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
         <button onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
       </div>
       <div id="catRow" class="no-print"></div>
