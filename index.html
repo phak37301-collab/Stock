@@ -236,9 +236,21 @@
   .icon-btn:hover{background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;border-color:transparent}
   .icon-btn:active{transform:scale(.92)}
   #bookSel{font-size:.9rem}
+  .lowchip{display:none;flex:none;align-items:center;gap:.4rem;padding:.5rem .85rem;border-radius:999px;font-size:.78rem;font-weight:700;background:#fff1f2;color:#be123c;border:1.5px solid #fecdd3;box-shadow:0 4px 10px rgba(225,29,72,.12);white-space:nowrap}
+  .lowchip.ok{background:#ecfdf5;color:#047857;border-color:#a7f3d0;box-shadow:0 4px 10px rgba(16,185,129,.12)}
+  .hero-paw{display:none;position:absolute;right:16px;top:8px;font-size:2rem;opacity:.9;transform:rotate(-14deg);z-index:1;pointer-events:none}
   @media(max-width:639px){
-    #catRow{top:44px;bottom:auto}
-    #bookSel{max-width:calc(100vw - 120px)}
+    /* หัวเว็บมือถือ: แถว 1 = ชื่อ (ปุ่มรีเฟรชลอยขวาบนสุดเสมอ), แถว 2 = ชีท + ชิปสถานะ */
+    .hdr.hdr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 8px;padding:12px 14px 14px;border-bottom:0;border-radius:0 0 24px 24px;
+      background:radial-gradient(circle at 100% 0,rgba(139,92,246,.20),transparent 55%),linear-gradient(180deg,#f5f3ff,#fff);box-shadow:0 10px 24px rgba(99,102,241,.14)}
+    .hdr .t-row{grid-column:1/-1;width:auto;min-height:40px;padding-right:52px}
+    #hdrCtl{display:contents}
+    .hdr .selw{grid-column:1;justify-self:start;max-width:100%;min-width:0}
+    #bookSel{max-width:100%}
+    .hdr .lowchip{display:inline-flex;grid-column:2}
+    #refreshBtn{position:absolute;top:12px;right:14px;width:40px;height:40px;z-index:3}
+    #catRow{top:52px;bottom:auto}
+    .hero-paw{display:block}
     .mtab{width:28px;height:46px;font-size:1.15rem;border-radius:0 12px 12px 0;top:36vh}
     .gtab{width:26px;height:38px;font-size:.9rem;top:calc(36vh + 64px)}
   }
@@ -264,11 +276,12 @@
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
-      <div class="min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><h1 id="appTitle" class="apptitle font-bold leading-snug min-w-0">🐱 ระบบจัดการวัสดุสำนักงาน 🐱</h1></div>
-      <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-        <div class="relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
+      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><h1 id="appTitle" class="apptitle font-bold leading-snug min-w-0">🐱 ระบบจัดการวัสดุสำนักงาน 🐱</h1></div>
+      <div id="hdrCtl" class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <div class="selw relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
-        <button onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
+        <button type="button" id="lowChip" class="lowchip" onclick="goInventory('low')"></button>
+        <button id="refreshBtn" onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
       </div>
       <div id="catRow" class="no-print"></div>
       
@@ -278,9 +291,9 @@
   <section id="panel-inventory" class="space-y-4">
 <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
   <div class="hero">
-    <div class="hero-art"><i class="fa-solid fa-boxes-stacked"></i><i class="fa-solid fa-circle-check"></i></div>
+    <div class="hero-art"><i class="fa-solid fa-boxes-stacked"></i><i class="fa-solid fa-circle-check"></i></div><span class="hero-paw" aria-hidden="true">🐾</span>
     <div class="relative z-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-      <div><p class="text-lg font-bold leading-tight">ภาพรวมคลังวันนี้</p>
+      <div><p id="heroHi" class="text-xs text-white/90 mb-0.5"></p><p class="text-lg font-bold leading-tight">ภาพรวมคลังวันนี้</p>
         <p class="text-xs text-white/85 mt-0.5"><span id="heroBook">-</span> • <i class="fa-regular fa-calendar mr-1"></i><span id="heroDate"></span></p></div>
       <div class="flex items-center gap-4 sm:gap-6 sm:pr-24">
         <button onclick="goInventory('all')" class="hstat"><b id="stat-total">-</b><span>วัสดุทั้งหมด</span></button><i class="vdiv"></i>
@@ -462,6 +475,7 @@ window.onload = () => {
   preset('month', true);
   paintAll(); catInit();
   $('heroDate').innerText = beDate(ymd(new Date())) + ' • เวอร์ชัน 4';
+  { const h = new Date().getHours(); $('heroHi').innerText = h < 12 ? '☀️ สวัสดีตอนเช้า' : h < 17 ? '🌤️ สวัสดีตอนบ่าย' : '🌙 สวัสดีตอนเย็น'; }
   google.script.run.withSuccessHandler(initBooks).withFailureHandler(showError).getBooks();
 };
 
@@ -724,6 +738,11 @@ function switchBook(k) {
   if (mode === 'move') fetchMove();
 }
 
+function paintLowChip(n) {
+  const c = $('lowChip'); if (!c) return;
+  c.classList.toggle('ok', !n);
+  c.innerHTML = n ? '<i class="fa-solid fa-triangle-exclamation"></i>ใกล้หมด ' + num(n) : '<i class="fa-solid fa-circle-check"></i>ปกติทั้งหมด';
+}
 function toggleMenu() { $('side').classList.toggle('open'); $('scrim').classList.toggle('show'); }
 function closeMenu() { $('side').classList.remove('open'); $('scrim').classList.remove('show'); }
 function switchTab(t) {
@@ -748,7 +767,7 @@ function loadAllData() {
       populateMaterials(all.materials); $('historyFilterSelect').value = hf;
       histAll = all.history || []; applyHistFilter(); fillPeople();
       stock = r.items; lowMap = {}; stock.forEach(i => lowMap[i.code] = i.isLow);
-      $('stat-total').innerText = r.totalItems; $('stat-normal').innerText = r.normalStockCount; $('stat-low').innerText = r.lowStockCount;
+      $('stat-total').innerText = r.totalItems; $('stat-normal').innerText = r.normalStockCount; $('stat-low').innerText = r.lowStockCount; paintLowChip(r.lowStockCount);
       paintMatList('inv'); paintMatList('rep'); paintAll(); renderInventory(); renderReport(); renderSide(); fillAdjSel(); renderCount(); fillUnits();
       $('refreshIcon').classList.remove('fa-spin');
       if (pendingSel) { const ps = pendingSel; pendingSel = null; $(ps.t + '_sel').value = ps.code; unitChange(ps.t); openTx(ps.t); }
