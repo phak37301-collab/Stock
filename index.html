@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🐱 ระบบจัดการวัสดุสำนักงาน 🐱</title>
+<link rel="icon" href="logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -236,7 +237,7 @@
 <button type="button" id="menuTab" class="mtab no-print" onclick="toggleMenu()" aria-label="เปิดเมนู">☰</button>
 <div class="shell">
   <aside id="side" class="side no-print">
-    <div class="side-head"><div class="side-logo"><i class="fa-solid fa-boxes-stacked"></i></div><span>เมนู</span></div>
+    <div class="side-head"><div class="side-logo"><img src="logo.png" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:14px" onerror="this.outerHTML='<i class=&quot;fa-solid fa-boxes-stacked&quot;></i>'"></div><span>เมนู</span></div>
     <button class="nav active" data-tab="inventory"><i class="fa-solid fa-house"></i><span>ภาพรวม</span></button>
     <button class="nav" data-tab="history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></button>
     <button class="nav" data-tab="report"><i class="fa-solid fa-file-lines"></i><span>รายงาน</span></button>
@@ -249,8 +250,8 @@
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-slate-100">
-      <div class="min-w-0 flex items-center gap-3"><div class="min-w-0"><h1 id="appTitle" class="text-lg sm:text-2xl font-bold leading-tight truncate">ระบบคลังสต็อก</h1>
-        <p class="text-xs text-slate-400 hidden sm:block">รับเข้า • เบิกจ่าย • รายงาน</p></div></div>
+      <div class="min-w-0 flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-11 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><div class="min-w-0"><h1 id="appTitle" class="text-lg sm:text-2xl font-bold leading-tight truncate">🐱 ระบบจัดการวัสดุสำนักงาน 🐱</h1>
+        <p id="appSub" class="text-xs sm:text-sm font-semibold text-indigo-600 truncate">รับเข้า • เบิกจ่าย • รายงาน</p></div></div>
       <div class="flex items-center gap-2 sm:gap-3">
         <div class="relative"><span class="absolute left-4 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-11 !py-2.5 !w-40 sm:!w-60 font-medium"></select></div>
@@ -724,7 +725,9 @@ function loadAllData() {
   if (!book) return;
   const b = book;
   $('heroBook').innerText = bookName();
-  $('appTitle').innerText = document.title = 'ระบบคลัง' + bookName();
+  $('appSub').innerText = '🗂️ ' + bookName();
+  document.title = '🐱 ระบบจัดการวัสดุสำนักงาน 🐱 - ' + bookName();
+  
   $('refreshIcon').classList.add('fa-spin');
   google.script.run
     .withSuccessHandler(all => {
