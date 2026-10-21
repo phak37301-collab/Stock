@@ -231,6 +231,16 @@
   @media(max-width:639px){.gpanel{bottom:calc(62px + env(safe-area-inset-bottom,0px))}}
   .mtab{position:fixed;left:0;top:calc(42% - 64px);z-index:51;width:38px;height:56px;border-radius:0 16px 16px 0;background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;font-size:1.5rem;line-height:1;display:grid;place-items:center;box-shadow:6px 6px 18px rgba(79,70,229,.35);cursor:pointer;transition:left .28s ease}
   body.gopen .mtab{left:min(340px,86vw)}
+  /* ---------- ปรับหัวเว็บ/ปุ่มรีเฟรช/แท็บข้างบนมือถือ ---------- */
+  .icon-btn{flex:none;background:#fff;color:#6366f1;border:1.5px solid #ddd6fe;box-shadow:0 4px 12px rgba(99,102,241,.18);font-size:1rem}
+  .icon-btn:hover{background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;border-color:transparent}
+  .icon-btn:active{transform:scale(.92)}
+  #bookSel{font-size:.9rem}
+  @media(max-width:639px){
+    #catRow{top:44px;bottom:auto}
+    .mtab{width:28px;height:46px;font-size:1.15rem;border-radius:0 12px 12px 0}
+    .gtab{width:26px;height:38px;font-size:.9rem;top:calc(42% - 12px)}
+  }
 </style>
 </head>
 <body>
@@ -255,9 +265,9 @@
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
       <div class="min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><h1 id="appTitle" class="apptitle font-bold leading-snug min-w-0">🐱 ระบบจัดการวัสดุสำนักงาน 🐱</h1></div>
       <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-        <div class="relative flex-1 sm:flex-none"><span class="absolute left-4 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
-          <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-11 !py-2.5 sm:!w-72"></select></div>
-        <button onclick="loadAllData()" class="icon-btn" title="รีเฟรช"><span id="refreshIcon" style="display:inline-block">🔄</span></button>
+        <div class="relative flex-1 sm:flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
+          <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 sm:!py-2.5 sm:!w-72"></select></div>
+        <button onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
       </div>
       <div id="catRow" class="no-print"></div>
       
