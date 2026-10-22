@@ -8,7 +8,11 @@
 /* โลโก้: ลองหลายชื่อไฟล์ (GitHub Pages แยกตัวพิมพ์เล็ก/ใหญ่) + ?v= กันมือถือจำผลเก่า */
 var LOGO_TRY=['Logo.webp?v=4','logo.webp?v=4','Logo.png?v=4','logo.png?v=4'];
 function logoErr(img){var n=(+img.getAttribute('data-n')||0)+1;if(n<LOGO_TRY.length){img.setAttribute('data-n',n);img.src=LOGO_TRY[n];}else{img.style.display='none';}}
-function logoOk(){var i=document.getElementById('ttlIco');if(i)i.style.display='none';}
+var logoBlob=null;
+function logoOk(img){var i=document.getElementById('ttlIco');if(i)i.style.display='none';
+  if(img&&!img.getAttribute('data-b')&&window.fetch){img.setAttribute('data-b','1');fetch(img.currentSrc||img.src).then(function(r){return r.blob();}).then(function(b){logoBlob=b;}).catch(function(){});}}
+/* กดที่โลโก้เพื่อเล่นอนิเมชันใหม่ (ใช้ไฟล์ที่โหลดไว้แล้ว ไม่โหลดซ้ำ) */
+function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;img.classList.add('jump');setTimeout(function(){img.classList.remove('jump');},600);if(!logoBlob)return;var old=img.src,u=URL.createObjectURL(logoBlob);img.src=u;if(old.indexOf('blob:')===0)URL.revokeObjectURL(old);}catch(e){}}
 </script>
 <link rel="icon" type="image/webp" href="Logo.webp?v=4">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -336,8 +340,6 @@ function logoOk(){var i=document.getElementById('ttlIco');if(i)i.style.display='
     #bookSel{font-size:.85rem;padding-top:.45rem!important;padding-bottom:.45rem!important}
     .lowchip{gap:.3rem}
     .lowchip .lc{padding:.32rem .6rem;font-size:.7rem;border-width:1.5px;box-shadow:none}
-    #catRow{top:auto;bottom:0}
-    .kc{width:40px;height:26px}.kc svg{width:40px;height:26px}
   }
   @media(max-width:380px){.lowchip .lt{display:none}}
 
@@ -355,10 +357,17 @@ function logoOk(){var i=document.getElementById('ttlIco');if(i)i.style.display='
   }
   /* มือถือแนวนอน (จอเตี้ย): หัวเว็บไม่ลอยติดจอ + กระชับ เพื่อให้เห็นรายการมากขึ้น */
   @media(max-height:500px){
-    .hdr.hdr{position:static!important}
+    .hdr.hdr{position:relative!important}
     .ttl-sub{display:none}
     .hdr{padding-top:8px!important;padding-bottom:8px!important}
   }
+
+  /* โลโก้ขยับเบาๆ (ไฟล์ Logo.webp เป็นภาพนิ่ง) — ลบคลาส logo-idle ออกจาก <img> ถ้าใช้ไฟล์ที่ขยับได้เอง */
+  .logo-idle{transform-origin:50% 100%;animation:logoBreath 2.6s ease-in-out infinite;cursor:pointer}
+  .logo-idle.jump{animation:logoJump .55s ease-out}
+  @keyframes logoBreath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.95)}}
+  @keyframes logoJump{0%{transform:translateY(0) scale(1.08,.9)}35%{transform:translateY(-9px) scale(.95,1.08)}70%{transform:translateY(0) scale(1.06,.93)}100%{transform:scale(1,1)}}
+  @media(prefers-reduced-motion:reduce){.logo-idle{animation:none}}
 </style>
 </head>
 <body>
@@ -384,7 +393,7 @@ function logoOk(){var i=document.getElementById('ttlIco');if(i)i.style.display='
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
-      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="Logo.webp?v=4" alt="โลโก้" class="h-10 sm:h-14 w-auto flex-none" style="object-fit:contain" onload="logoOk()" onerror="logoErr(this)"><div class="min-w-0 flex items-center gap-3"><span id="ttlIco" class="ttl-ico" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span><div class="min-w-0"><h1 id="appTitle" class="apptitle ttl-grad font-bold leading-tight min-w-0">ระบบจัดการวัสดุสำนักงาน</h1><div class="ttl-sub">Office Supplies · เบิก รับเข้า ติดตามสต็อก</div></div></div></div>
+      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="Logo.webp?v=4" alt="โลโก้" class="logo-idle h-10 sm:h-14 w-auto flex-none" onload="logoOk(this)" onerror="logoErr(this)" onclick="logoReplay(this)" title="กดเพื่อเล่นอนิเมชันอีกครั้ง" style="object-fit:contain;cursor:pointer"><div class="min-w-0 flex items-center gap-3"><span id="ttlIco" class="ttl-ico" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span><div class="min-w-0"><h1 id="appTitle" class="apptitle ttl-grad font-bold leading-tight min-w-0">ระบบจัดการวัสดุสำนักงาน</h1><div class="ttl-sub">Office Supplies · เบิก รับเข้า ติดตามสต็อก</div></div></div></div>
       <div id="hdrCtl" class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
         <div class="selw relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
