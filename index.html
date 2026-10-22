@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบจัดการวัสดุสำนักงาน</title>
-<link rel="icon" href="Logo.png">
+<script>
+/* โลโก้: ลองหลายชื่อไฟล์ (GitHub Pages แยกตัวพิมพ์เล็ก/ใหญ่) + ?v= กันมือถือจำผลเก่า */
+var LOGO_TRY=['Logo.webp?v=4','logo.webp?v=4','Logo.png?v=4','logo.png?v=4'];
+function logoErr(img){var n=(+img.getAttribute('data-n')||0)+1;if(n<LOGO_TRY.length){img.setAttribute('data-n',n);img.src=LOGO_TRY[n];}else{img.style.display='none';}}
+function logoOk(){var i=document.getElementById('ttlIco');if(i)i.style.display='none';}
+</script>
+<link rel="icon" type="image/webp" href="Logo.webp?v=4">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -332,11 +338,27 @@
     .lowchip .lc{padding:.32rem .6rem;font-size:.7rem;border-width:1.5px;box-shadow:none}
     #catRow{top:auto;bottom:0}
     .kc{width:40px;height:26px}.kc svg{width:40px;height:26px}
-    .mtab{top:auto;left:12px;bottom:calc(74px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;font-size:1.3rem;box-shadow:0 8px 20px rgba(79,70,229,.42)}
-    body.gopen .mtab{left:calc(min(340px,86vw) + 12px)}
-    .gtab{top:auto;bottom:68px;left:calc(100% + 12px);width:46px;height:46px;border-radius:50%;font-size:1.25rem;box-shadow:0 8px 20px rgba(79,70,229,.42)}
   }
   @media(max-width:380px){.lowchip .lt{display:none}}
+
+  /* ===== ปุ่มเมนู ☰ + จรวด 🚀: อยู่ติดกัน เป็นปุ่มลอยแยกจากแผงเกม กดเปิด/ปิดได้ทั้งคอมและมือถือ ===== */
+  .mtab{top:calc(42% - 40px)}
+  .gtab{position:fixed;left:0;top:calc(42% + 22px);z-index:51;width:38px;height:44px;border-radius:0 16px 16px 0;font-size:1.2rem;transition:left .28s ease}
+  body.gopen .gtab{left:min(340px,86vw)}
+  :root{--fb:calc(18px + env(safe-area-inset-bottom,0px))}
+  @media(max-width:639px){:root{--fb:calc(74px + env(safe-area-inset-bottom,0px))}}
+  @media(max-width:639px),(max-height:500px){
+    .mtab,.gtab{top:auto;left:12px;width:46px;height:46px;border-radius:50%;box-shadow:0 8px 20px rgba(79,70,229,.42)}
+    .mtab{bottom:var(--fb);font-size:1.3rem}
+    .gtab{bottom:calc(var(--fb) + 56px);font-size:1.25rem}
+    body.gopen .mtab,body.gopen .gtab{left:calc(min(340px,86vw) + 12px)}
+  }
+  /* มือถือแนวนอน (จอเตี้ย): หัวเว็บไม่ลอยติดจอ + กระชับ เพื่อให้เห็นรายการมากขึ้น */
+  @media(max-height:500px){
+    .hdr.hdr{position:static!important}
+    .ttl-sub{display:none}
+    .hdr{padding-top:8px!important;padding-bottom:8px!important}
+  }
 </style>
 </head>
 <body>
@@ -346,7 +368,7 @@
 <button type="button" id="menuTab" class="mtab no-print" onclick="toggleMenu()" aria-label="เปิดเมนู">☰</button>
 <div class="shell">
   <aside id="side" class="side no-print">
-    <div class="side-head"><div class="side-logo"><img src="Logo.png" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:14px" onerror="this.outerHTML='<i class=&quot;fa-solid fa-boxes-stacked&quot;></i>'"></div><span>เมนู</span></div>
+    <div class="side-head"><div class="side-logo"><img src="Logo.webp?v=4" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:14px" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='Logo.png?v=4';}else{this.outerHTML='<i class=&quot;fa-solid fa-boxes-stacked&quot;></i>';}"></div><span>เมนู</span></div>
     <button class="nav active" data-tab="inventory"><i class="fa-solid fa-house"></i><span>ภาพรวม</span></button>
     <button class="nav" data-tab="history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></button>
     <button class="nav" data-tab="requests"><i class="fa-solid fa-inbox"></i><span>คำขอเบิก</span><b class="rbadge"></b></button>
@@ -362,7 +384,7 @@
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
-      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="Logo.png" alt="โลโก้" class="h-10 sm:h-14 w-auto flex-none" style="object-fit:contain" onload="var i=document.getElementById('ttlIco');if(i)i.style.display='none'" onerror="this.remove()"><div class="min-w-0 flex items-center gap-3"><span id="ttlIco" class="ttl-ico" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span><div class="min-w-0"><h1 id="appTitle" class="apptitle ttl-grad font-bold leading-tight min-w-0">ระบบจัดการวัสดุสำนักงาน</h1><div class="ttl-sub">Office Supplies · เบิก รับเข้า ติดตามสต็อก</div></div></div></div>
+      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="Logo.webp?v=4" alt="โลโก้" class="h-10 sm:h-14 w-auto flex-none" style="object-fit:contain" onload="logoOk()" onerror="logoErr(this)"><div class="min-w-0 flex items-center gap-3"><span id="ttlIco" class="ttl-ico" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span><div class="min-w-0"><h1 id="appTitle" class="apptitle ttl-grad font-bold leading-tight min-w-0">ระบบจัดการวัสดุสำนักงาน</h1><div class="ttl-sub">Office Supplies · เบิก รับเข้า ติดตามสต็อก</div></div></div></div>
       <div id="hdrCtl" class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
         <div class="selw relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
@@ -733,13 +755,14 @@ function catInit() {
 const G = { open: false, state: 'ready', raf: 0, last: 0, w: 300, h: 500, dpr: 1, best: 0, overAt: 0, stars: [], planets: [], bullets: [], parts: [] };
 function gBuild() {
   const p = document.createElement('aside'); p.id = 'gamePanel'; p.className = 'gpanel no-print';
-  p.innerHTML = `<button type="button" id="gTab" class="gtab" title="เกมจรวด" aria-label="เปิด/ปิดเกมจรวด">🚀</button>
+  p.innerHTML = `
     <div class="gframe">
       <div class="gbar"><b>🚀 ยิงดาวเคราะห์</b><span class="gbs">สูงสุด <i id="gBest">0</i></span><button type="button" class="gx" id="gClose" aria-label="ปิดเกม">✕</button></div>
       <div class="ghud"><div class="gs">คะแนน <b id="gScore">0</b></div><div class="gs">เลเวล <b id="gLv">1</b></div><div id="gLives" class="gl"></div></div>
       <div class="gcvw" id="gWrap"><canvas id="gcv" tabindex="0"></canvas><div id="gMsg" class="gmsg"></div></div>
     </div>`;
   document.body.appendChild(p);
+  const gt = document.createElement('button'); gt.type = 'button'; gt.id = 'gTab'; gt.className = 'gtab no-print'; gt.title = 'เปิด/ปิดเกมจรวด'; gt.setAttribute('aria-label', 'เปิด/ปิดเกมจรวด'); gt.textContent = '🚀'; document.body.appendChild(gt);
   G.cv = $('gcv'); G.c = G.cv.getContext('2d'); G.wrap = $('gWrap');
   $('gTab').onclick = () => toggleGame(); $('gClose').onclick = () => toggleGame(false);
   G.wrap.addEventListener('pointermove', gAim);
