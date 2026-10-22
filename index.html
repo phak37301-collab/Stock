@@ -190,7 +190,7 @@
     .bn.active{color:#4f46e5;font-weight:600;background:#eef2ff}
     .fab-wrap{flex-direction:row;right:12px;bottom:calc(74px + env(safe-area-inset-bottom,0px));gap:10px}
     .fab{width:50px;height:50px}.fab .emo{font-size:1.4rem}
-    body[data-tab=count] .fab-wrap{display:none}
+    body[data-page=count] .fab-wrap{display:none}
   }
   /* ---------- แมววิ่งบนแถบหัว ---------- */
   #catRow{position:absolute;left:0;right:0;bottom:0;height:0;pointer-events:none;z-index:5}
@@ -245,12 +245,11 @@
     /* หัวเว็บมือถือ: แถว 1 = ชื่อ (ปุ่มรีเฟรชลอยขวาบนสุดเสมอ), แถว 2 = ชีท + ชิปสถานะ */
     .hdr.hdr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 8px;padding:12px 14px 14px;border-bottom:0;border-radius:0 0 24px 24px;
       background:radial-gradient(circle at 100% 0,rgba(139,92,246,.20),transparent 55%),linear-gradient(180deg,#f5f3ff,#fff);box-shadow:0 10px 24px rgba(99,102,241,.14)}
-    .hdr .t-row{grid-column:1/-1;width:auto;min-height:40px;padding-right:52px}
+    .hdr .t-row{grid-column:1/-1;width:auto;min-height:40px;padding-right:102px}
     #hdrCtl{display:contents}
     .hdr .selw{grid-column:1;justify-self:start;max-width:100%;min-width:0}
     #bookSel{max-width:100%}
     .hdr .lowchip{display:inline-flex;grid-column:2}
-    #refreshBtn{position:absolute;top:12px;right:14px;width:40px;height:40px;z-index:3}
     #catRow{top:52px;bottom:auto}
     .hero-paw{display:block}
     .mtab{width:28px;height:46px;font-size:1.15rem;border-radius:0 12px 12px 0;top:36vh}
@@ -272,13 +271,31 @@
   body:not(.is-admin) .gtab,body:not(.is-admin) #lowChip,body:not(.is-admin) main>section:not(#userHome){display:none!important}
   body.is-admin #userHome{display:none}
   #userHome{display:block}
-  #adminBtn{position:fixed;left:14px;bottom:14px;z-index:44;font-size:.72rem;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:.4rem .8rem;box-shadow:0 4px 12px rgba(15,23,42,.1)}
   @media(max-width:640px){body.is-admin .fab-wrap{bottom:calc(74px + env(safe-area-inset-bottom,0px))}body:not(.is-admin) .fab-wrap{bottom:calc(18px + env(safe-area-inset-bottom,0px))}}
   .nav,.bn{position:relative}
   .rbadge{display:none;position:absolute;top:5px;right:12px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#f43f5e;color:#fff;font-size:.65rem;font-weight:700;place-items:center;box-shadow:0 2px 6px rgba(244,63,94,.5)}
   .bn .rbadge{top:0;right:calc(50% - 26px)}
   .b-wait{background:#fef3c7;color:#b45309}
   .rcard{border-left:4px solid #fbbf24}.rcard.ok{border-left-color:#34d399}.rcard.no{border-left-color:#fb7185}
+
+  /* ---------- ปุ่มด้านขวาของหัวเว็บ: กระดิ่งแจ้งเตือน / รีเฟรช / เข้าสู่ระบบ-ออกจากระบบ ---------- */
+  .hdr-act{display:flex;align-items:center;gap:.55rem;flex:none}
+  #bellBtn{position:relative}
+  .bellN{display:none;position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#f43f5e;color:#fff;font-size:.66rem;font-weight:700;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(244,63,94,.5)}
+  .bellN.show{display:grid}
+  #bellBtn.ring i{animation:bellring .9s ease;transform-origin:50% 0}
+  @keyframes bellring{0%,100%{transform:rotate(0)}15%{transform:rotate(18deg)}30%{transform:rotate(-16deg)}45%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}75%{transform:rotate(4deg)}}
+  .adm-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;height:42px;padding:0 1.05rem;border-radius:999px;font-size:.82rem;font-weight:600;white-space:nowrap;color:#4f46e5;background:#fff;border:1.5px solid #ddd6fe;box-shadow:0 4px 12px rgba(99,102,241,.18);cursor:pointer;transition:.15s}
+  .adm-btn:hover{background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;border-color:transparent}
+  .adm-btn:active{transform:scale(.95)}
+  .adm-btn.on{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(5,150,105,.35)}
+  .adm-btn.on:hover{filter:brightness(1.08);background:linear-gradient(135deg,#10b981,#059669)}
+  @media(max-width:639px){
+    .hdr-act{position:absolute;top:12px;right:14px;z-index:3;gap:.5rem}
+    .hdr-act .icon-btn,.hdr-act .adm-btn{width:40px;height:40px;padding:0}
+    .adm-btn span{display:none}
+    body.is-admin .hdr .t-row{padding-right:150px}
+  }
 </style>
 </head>
 <body>
@@ -308,7 +325,11 @@
         <div class="selw relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
         <div id="lowChip" class="lowchip"></div>
-        <button id="refreshBtn" onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
+        <div id="hdrAct" class="hdr-act no-print">
+          <button type="button" id="bellBtn" class="icon-btn admin-only" onclick="bellClick()" title="คำขอเบิกที่รออนุมัติ (กดเพื่อเปิดดู / อนุญาตแจ้งเตือนบนเครื่องนี้)" aria-label="แจ้งเตือนคำขอเบิก"><i class="fa-solid fa-bell"></i><b id="bellN" class="bellN"></b></button>
+          <button type="button" id="refreshBtn" onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
+          <button type="button" id="adminBtn" class="adm-btn" onclick="adminToggle()" title="เข้าสู่ระบบแอดมิน" aria-label="เข้าสู่ระบบแอดมิน"><i id="adminIcon" class="fa-solid fa-lock"></i><span id="adminBtnTxt">เข้าสู่ระบบ</span></button>
+        </div>
       </div>
       <div id="catRow" class="no-print"></div>
       
@@ -456,7 +477,6 @@
 <datalist id="people"></datalist>
 <datalist id="units"></datalist>
 <div id="printArea"></div>
-<button id="adminBtn" class="no-print" onclick="adminToggle()"><i class="fa-solid fa-lock mr-1"></i><span id="adminBtnTxt">แอดมิน</span></button>
 
 <script>
 /* ===== ตัวเชื่อมเมื่อโฮสต์นอก Apps Script (เช่น GitHub Pages) =====
@@ -492,7 +512,11 @@ let isAdmin = false;
 const api = (fn, ...a) => new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...a));
 function applyRole() {
   document.body.classList.toggle('is-admin', isAdmin);
-  $('adminBtnTxt').innerText = isAdmin ? 'ออกจากโหมดแอดมิน' : 'แอดมิน';
+  $('adminBtnTxt').innerText = isAdmin ? 'ออกจากระบบ' : 'เข้าสู่ระบบ';
+  $('adminIcon').className = 'fa-solid ' + (isAdmin ? 'fa-lock-open' : 'fa-lock');
+  $('adminBtn').classList.toggle('on', isAdmin);
+  { const t = isAdmin ? 'ออกจากโหมดแอดมิน' : 'เข้าสู่ระบบแอดมิน'; $('adminBtn').title = t; $('adminBtn').setAttribute('aria-label', t); }
+  if (!isAdmin) { reqPrev = null; setBell(0); }
   $('fabOutTxt').innerText = isAdmin ? 'เบิกของ' : 'ขอเบิกของ';
   if (!isAdmin) { try { switchTab('inventory'); } catch (e) {} closeTx(); try { toggleGame(false); } catch (e) {} }
   isAdmin ? loadRequests(true) : paintMyReqs();
@@ -585,7 +609,7 @@ window.onload = () => {
   ['in_date', 'out_date', 'rep_start', 'rep_end', 'adj_date', 'count_date', 'job_date'].forEach(id => initDate(id));
   $('invFilters').innerHTML = filterBar('inv');
   $('repFilters').innerHTML = filterBar('rep');
-  document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+  document.querySelectorAll('button[data-tab]').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeTx(); closeMenu(); } });
   document.addEventListener('click', e => document.querySelectorAll('details.relative[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
   preset('month', true);
@@ -864,7 +888,7 @@ function paintLowChip(low, ok) {
 (async function restoreAdmin() { let p = ''; try { p = sessionStorage.getItem('adm') || ''; } catch (e) {} if (p) { const r = await adminLogin(p); if (r !== true) applyRole(); } else applyRole(); })();
 
 /* ================= คำขอเบิก / อนุมัติ ================= */
-let reqData = [], reqCounts = [], reqFilter = 'รออนุมัติ', reqPrev = null;
+var reqData = [], reqCounts = [], reqFilter = 'รออนุมัติ', reqPrev = null, reqTotal = 0;
 function myReqIds() { try { return JSON.parse(localStorage.getItem('myReqs') || '[]'); } catch (e) { return []; } }
 function rememberReq(id) {
   const a = myReqIds().filter(x => x.id !== id); a.unshift({ id: id, book: book });
@@ -893,7 +917,8 @@ function loadRequests(quiet) {
     reqData = r.list || []; reqCounts = r.counts || [];
     const total = reqCounts.reduce((s, x) => s + x.count, 0);
     document.querySelectorAll('.rbadge').forEach(e => { e.innerText = total; e.style.display = total ? 'grid' : 'none'; });
-    if (reqPrev !== null && total > reqPrev) Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'มีคำขอเบิกใหม่ ' + (total - reqPrev) + ' รายการ', showConfirmButton: false, timer: 5000 });
+    setBell(total);
+    if (reqPrev !== null && total > reqPrev) notifyNew(total - reqPrev);
     reqPrev = total; renderRequests();
   }).withFailureHandler(e => { if (!quiet) showError(e); }).getRequestPanel(b, f);
 }
@@ -932,15 +957,49 @@ async function decideReq(id, decision, force) {
     loadAllData();
   }).withFailureHandler(showError).decideRequest({ book: book, id: id, decision: decision, reason: reason, force: !!force });
 }
-// เช็กคำขอใหม่/สถานะอัตโนมัติทุก 60 วินาที
-setInterval(() => { if (document.hidden) return; isAdmin ? loadRequests(true) : paintMyReqs(); }, 60000);
+/* ===== แจ้งเตือนคำขอเบิกใหม่ (แอดมิน) =====
+   กระดิ่งบนหัวเว็บ + เลขหน้าแท็บ + แจ้งเตือนของเบราว์เซอร์ (เมื่ออนุญาต) + ป๊อปอัปมุมจอ */
+function paintTitle() {
+  document.title = document.title.replace(/^\(\d+\)\s*/, '');
+  if (reqTotal > 0) document.title = '(' + reqTotal + ') ' + document.title;
+}
+function setBell(n) {
+  reqTotal = n || 0;
+  const b = $('bellN'); if (b) { b.textContent = reqTotal > 99 ? '99+' : reqTotal; b.classList.toggle('show', reqTotal > 0); }
+  const bb = $('bellBtn'); if (bb) bb.title = reqTotal ? 'มีคำขอเบิกรออนุมัติ ' + reqTotal + ' รายการ' : 'ไม่มีคำขอเบิกรออนุมัติ';
+  paintTitle();
+}
+function notifyNew(n) {
+  const msg = 'มีคำขอเบิกใหม่ ' + n + ' รายการ';
+  const bb = $('bellBtn'); if (bb) { bb.classList.remove('ring'); void bb.offsetWidth; bb.classList.add('ring'); }
+  if (!document.hidden) Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: msg, showConfirmButton: false, timer: 6000, timerProgressBar: true });
+  try {
+    if (window.Notification && Notification.permission === 'granted') {
+      const nt = new Notification(msg, { body: 'กดเพื่อเปิดดูคำขอเบิก', tag: 'req-new', renotify: true });
+      nt.onclick = () => { window.focus(); reqFilter = 'รออนุมัติ'; switchTab('requests'); nt.close(); };
+    }
+  } catch (e) {}
+}
+async function bellClick() {
+  if (!isAdmin) return;
+  try {
+    if (window.Notification && Notification.permission === 'default') {
+      const p = await Notification.requestPermission();
+      Swal.fire({ toast: true, position: 'top-end', icon: p === 'granted' ? 'success' : 'info', title: p === 'granted' ? 'เปิดแจ้งเตือนบนเครื่องนี้แล้ว' : 'ไม่ได้อนุญาตแจ้งเตือนของเบราว์เซอร์', showConfirmButton: false, timer: 2500 });
+    }
+  } catch (e) {}
+  reqFilter = 'รออนุมัติ'; switchTab('requests');
+}
+// เช็กคำขอใหม่/สถานะอัตโนมัติทุก 45 วินาที (แอดมินเช็กต่อแม้เปิดแท็บค้างไว้เบื้องหลัง เพื่อให้แจ้งเตือนทัน)
+setInterval(() => { if (isAdmin) loadRequests(true); else if (!document.hidden) paintMyReqs(); }, 45000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && isAdmin) loadRequests(true); });
 function toggleMenu() { $('side').classList.toggle('open'); $('scrim').classList.toggle('show'); }
 function closeMenu() { $('side').classList.remove('open'); $('scrim').classList.remove('show'); }
 function switchTab(t) {
   if (!isAdmin && t !== 'inventory') return;
-  closeMenu(); document.body.dataset.tab = t;
+  closeMenu(); document.body.dataset.page = t;
   ['inventory','history','requests','report','count'].forEach(x => $('panel-' + x).classList.toggle('hidden', x !== t));
-  document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('button[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
   if (t === 'requests') loadRequests();
   if (t === 'report') renderReport();
   if (t === 'count') renderCount();
@@ -950,7 +1009,7 @@ function loadAllData() {
   if (!book) return;
   const b = book;
   $('heroBook').innerText = bookName();
-  document.title = '🐱 ระบบจัดการวัสดุสำนักงาน 🐱 - ' + bookName();
+  document.title = '🐱 ระบบจัดการวัสดุสำนักงาน 🐱 - ' + bookName(); paintTitle();
   
   $('refreshIcon').classList.add('fa-spin');
   google.script.run
