@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบจัดการวัสดุสำนักงาน</title>
-<link rel="icon" href="logo.png">
+<link rel="icon" href="Logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -270,6 +270,8 @@
   body:not(.is-admin) .side,body:not(.is-admin) #menuTab,body:not(.is-admin) .bnav,body:not(.is-admin) .gpanel,
   body:not(.is-admin) .gtab,body:not(.is-admin) #lowChip,body:not(.is-admin) main>section:not(#userHome){display:none!important}
   body.is-admin #userHome{display:none}
+  /* ผู้ใช้ทั่วไป: มีปุ่ม "ขอเบิกของ" ในการ์ดกลางหน้าอยู่แล้ว จึงซ่อนปุ่มลอยที่ซ้ำกัน */
+  body:not(.is-admin) .fab-wrap{display:none!important}
   #userHome{display:block}
   @media(max-width:640px){body.is-admin .fab-wrap{bottom:calc(74px + env(safe-area-inset-bottom,0px))}body:not(.is-admin) .fab-wrap{bottom:calc(18px + env(safe-area-inset-bottom,0px))}}
   .nav,.bn{position:relative}
@@ -322,7 +324,7 @@
 <button type="button" id="menuTab" class="mtab no-print" onclick="toggleMenu()" aria-label="เปิดเมนู">☰</button>
 <div class="shell">
   <aside id="side" class="side no-print">
-    <div class="side-head"><div class="side-logo"><img src="logo.png" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:14px" onerror="this.outerHTML='<i class=&quot;fa-solid fa-boxes-stacked&quot;></i>'"></div><span>เมนู</span></div>
+    <div class="side-head"><div class="side-logo"><img src="Logo.png" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:14px" onerror="this.outerHTML='<i class=&quot;fa-solid fa-boxes-stacked&quot;></i>'"></div><span>เมนู</span></div>
     <button class="nav active" data-tab="inventory"><i class="fa-solid fa-house"></i><span>ภาพรวม</span></button>
     <button class="nav" data-tab="history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></button>
     <button class="nav" data-tab="requests"><i class="fa-solid fa-inbox"></i><span>คำขอเบิก</span><b class="rbadge"></b></button>
@@ -338,7 +340,7 @@
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
-      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><div class="min-w-0 flex items-center gap-3"><span class="ttl-ico" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span><div class="min-w-0"><h1 id="appTitle" class="apptitle ttl-grad font-bold leading-tight min-w-0">ระบบจัดการวัสดุสำนักงาน</h1><div class="ttl-sub">Office Supplies · เบิก รับเข้า ติดตามสต็อก</div></div></div></div>
+      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="Logo.png" alt="โลโก้" class="h-10 sm:h-14 w-auto flex-none" style="object-fit:contain" onload="var i=document.getElementById('ttlIco');if(i)i.style.display='none'" onerror="this.remove()"><div class="min-w-0 flex items-center gap-3"><span id="ttlIco" class="ttl-ico" aria-hidden="true"><i class="fa-solid fa-boxes-stacked"></i></span><div class="min-w-0"><h1 id="appTitle" class="apptitle ttl-grad font-bold leading-tight min-w-0">ระบบจัดการวัสดุสำนักงาน</h1><div class="ttl-sub">Office Supplies · เบิก รับเข้า ติดตามสต็อก</div></div></div></div>
       <div id="hdrCtl" class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
         <div class="selw relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
