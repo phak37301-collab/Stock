@@ -315,6 +315,28 @@
   .qty-pill{flex:none;display:inline-flex;align-items:baseline;gap:.25rem;background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;border-radius:999px;padding:.3rem .85rem;font-weight:700;font-size:1.05rem;box-shadow:0 6px 14px rgba(244,63,94,.28)}
   .qty-pill small{font-size:.7rem;font-weight:500;opacity:.9}
   .mini-req{background:#fff;border:1px solid #ece9fb;border-radius:14px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+
+  /* ===== มือถือ: หัวเว็บกระชับ + ปุ่มเมนู/เกมจรวดย้ายมาซ้ายล่าง ===== */
+  @media(max-width:639px){
+    .hdr.hdr{padding:8px 12px 10px;gap:8px 6px;border-radius:0 0 20px 20px;box-shadow:0 6px 16px rgba(99,102,241,.12)}
+    .hdr .t-row{min-height:40px;padding-right:90px;gap:8px}
+    body.is-admin .hdr .t-row{padding-right:134px}
+    .t-row img{height:38px!important;width:auto}
+    .ttl-ico{width:36px;height:36px;border-radius:12px;font-size:.95rem}
+    .apptitle{font-size:clamp(.86rem,4.2vw,1.05rem)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ttl-sub{display:none}
+    .hdr-act{top:8px;right:12px;gap:6px}
+    .hdr-act .icon-btn,.hdr-act .adm-btn{width:38px;height:38px;font-size:.95rem}
+    #bookSel{font-size:.85rem;padding-top:.45rem!important;padding-bottom:.45rem!important}
+    .lowchip{gap:.3rem}
+    .lowchip .lc{padding:.32rem .6rem;font-size:.7rem;border-width:1.5px;box-shadow:none}
+    #catRow{top:auto;bottom:0}
+    .kc{width:40px;height:26px}.kc svg{width:40px;height:26px}
+    .mtab{top:auto;left:12px;bottom:calc(74px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;font-size:1.3rem;box-shadow:0 8px 20px rgba(79,70,229,.42)}
+    body.gopen .mtab{left:calc(min(340px,86vw) + 12px)}
+    .gtab{top:auto;bottom:68px;left:calc(100% + 12px);width:46px;height:46px;border-radius:50%;font-size:1.25rem;box-shadow:0 8px 20px rgba(79,70,229,.42)}
+  }
+  @media(max-width:380px){.lowchip .lt{display:none}}
 </style>
 </head>
 <body>
@@ -903,8 +925,8 @@ function switchBook(k) {
 function paintLowChip(low, ok) {
   const c = $('lowChip'); if (!c) return;
   c.innerHTML =
-    `<button type="button" class="lc low" onclick="goInventory('low')"><i class="fa-solid fa-triangle-exclamation"></i>ใกล้หมด ${num(low)}</button>` +
-    `<button type="button" class="lc ok" onclick="goInventory('ok')"><i class="fa-solid fa-circle-check"></i>ปกติ ${num(ok)}</button>`;
+    `<button type="button" class="lc low" onclick="goInventory('low')"><i class="fa-solid fa-triangle-exclamation"></i><span class="lt">ใกล้หมด</span> ${num(low)}</button>` +
+    `<button type="button" class="lc ok" onclick="goInventory('ok')"><i class="fa-solid fa-circle-check"></i><span class="lt">ปกติ</span> ${num(ok)}</button>`;
 }
 (async function restoreAdmin() { let p = ''; try { p = sessionStorage.getItem('adm') || ''; } catch (e) {} if (p) { const r = await adminLogin(p); if (r !== true) applyRole(); } else applyRole(); })();
 
