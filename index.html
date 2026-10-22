@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐱 ระบบจัดการวัสดุสำนักงาน 🐱</title>
+<title>ระบบจัดการวัสดุสำนักงาน</title>
 <link rel="icon" href="logo.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -315,6 +315,7 @@
     <button class="nav" onclick="closeMenu();openMat()"><i class="fa-solid fa-circle-plus"></i><span>เพิ่มวัสดุใหม่</span></button>
     <button class="nav" onclick="closeMenu();openSettings()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
     <button class="nav" onclick="closeMenu();openJob()"><i class="fa-solid fa-book"></i><span>ใบงานเข้าเล่ม</span></button>
+    <button class="nav" onclick="closeMenu();openJobCfg()"><i class="fa-solid fa-screwdriver-wrench"></i><span>ตั้งค่าสูตรเข้าเล่ม</span></button>
     <button class="nav" onclick="closeMenu();toggleGame()"><i class="fa-solid fa-rocket"></i><span>เกมจรวด (แผงซ้าย)</span></button>
     <button class="nav" onclick="toggleCat()"><i class="fa-solid fa-cat"></i><span id="catLbl">แมววิ่ง: เปิด</span></button>
   </aside>
@@ -463,6 +464,7 @@
     <div id="panel-adj" class="hidden"></div>
     <div id="panel-mat" class="hidden"></div>
     <div id="panel-job" class="hidden"></div>
+    <div id="panel-jobcfg" class="hidden"></div>
   </div>
 </div>
 
@@ -1296,7 +1298,7 @@ function openTx(t) {
   if (!$(t + '_date').value) setDate(t + '_date', ymd(new Date()));
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
 }
-function closeTx() { $('modal').classList.add('hidden'); $('panel-job').classList.add('hidden'); document.body.style.overflow = ''; }
+function closeTx() { $('modal').classList.add('hidden'); $('panel-job').classList.add('hidden'); $('panel-jobcfg').classList.add('hidden'); document.body.style.overflow = ''; }
 function populateMaterials(list) {
   materials = list;
   const opts = list.map(m => `<option value="${esc(m.code)}">[${esc(m.code)}] ${esc(m.name)} (${esc(m.unit)})</option>`).join('');
@@ -1707,13 +1709,148 @@ function exportCSV() {
 
 /* ================= ใบงานเข้าเล่ม ================= */
 let jobSeq = 0, jobTimer = 0, jobOK = false;
+/* ================= ตั้งค่าสูตรเข้าเล่ม (แก้ในเว็บ ระบบเขียนลงแท็บ "สูตรเข้าเล่ม" ให้เอง) ================= */
+let JC = null, jcFromJob = false;
+const jcNum = v => (v === '' || v === null || v === undefined || isNaN(Number(v))) ? null : Number(v);
+const jcName = c => { const m = materials.find(x => x.code === c); return m ? m.name : c; };
+function jcOpts(sel) {
+  const list = materials.slice().sort((a, b) => a.code.localeCompare(b.code));
+  let h = '<option value="">-- เลือกวัสดุ --</option>' + list.map(m => `<option value="${esc(m.code)}"${m.code === sel ? ' selected' : ''}>[${esc(m.code)}] ${esc(m.name)} (${esc(m.unit)})</option>`).join('');
+  if (sel && !list.some(m => m.code === sel)) h += `<option value="${esc(sel)}" selected>[${esc(sel)}] (ไม่พบในรายการวัสดุ)</option>`;
+  return h;
+}
+const jcDelBtn = (k, i) => `<button type="button" class="w-8 h-8 flex-none rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-500" onclick="jcDel('${k}',${i})" aria-label="ลบแถวนี้"><i class="fa-solid fa-xmark"></i></button>`;
+function jcRows(key) {
+  if (key === 'spines') return JC.spines.map((s, i) => `<div class="flex items-center gap-2">
+    <input type="number" min="1" step="1" class="inp !w-20 text-center" value="${esc(s.from)}" placeholder="จาก" aria-label="จากแผ่น" oninput="jcSet('spines',${i},'from',this.value)">
+    <span class="text-slate-400">–</span>
+    <input type="number" min="1" step="1" class="inp !w-20 text-center" value="${esc(s.to)}" placeholder="ไม่จำกัด" aria-label="ถึงแผ่น" oninput="jcSet('spines',${i},'to',this.value)">
+    <select class="inp flex-1 min-w-0" onchange="jcSet('spines',${i},'code',this.value)">${jcOpts(s.code)}</select>${jcDelBtn('spines', i)}</div>`).join('');
+  return JC[key].map((c, i) => `<div class="flex items-center gap-2">
+    <select class="inp flex-1 min-w-0" onchange="jcSet('${key}',${i},'code',this.value)">${jcOpts(c.code)}</select>
+    <input type="number" min="0" step="any" class="inp !w-20 text-center" value="${esc(c.per)}" aria-label="จำนวนต่อเล่ม" oninput="jcSet('${key}',${i},'per',this.value)">
+    <span class="text-[11px] text-slate-400 flex-none">/เล่ม</span>${jcDelBtn(key, i)}</div>`).join('');
+}
+const jcSection = (key, title, hint, extra) => `<div class="rounded-2xl bg-white p-3 space-y-2">
+  <div><div class="text-sm font-semibold">${title}</div><p class="text-[11px] text-slate-400">${hint}</p></div>
+  <div id="jc_${key}" class="space-y-2">${jcRows(key)}</div>${extra || ''}
+  <button type="button" onclick="jcAdd('${key}')" class="chip !py-1.5"><i class="fa-solid fa-plus mr-1.5"></i>เพิ่ม${key === 'spines' ? 'ช่วง' : 'รายการ'}</button></div>`;
+function paintJcList(key) { const el = $('jc_' + key); if (el) el.innerHTML = jcRows(key); if (key === 'spines') jcIssues(); jcPrev(); }
+function jcSet(key, i, field, val) { JC[key][i][field] = val; if (key === 'spines') jcIssues(); jcPrev(); }
+function jcAdd(key) {
+  if (key === 'spines') { const last = JC.spines[JC.spines.length - 1], lt = last ? jcNum(last.to) : null; JC.spines.push({ from: lt !== null ? lt + 1 : (last ? '' : 1), to: '', code: '' }); }
+  else JC[key].push({ code: '', per: 1 });
+  paintJcList(key);
+}
+function jcDel(key, i) { JC[key].splice(i, 1); paintJcList(key); }
+function jcIssues() {
+  const rows = JC.spines.map(s => ({ from: jcNum(s.from), to: jcNum(s.to) })).filter(s => s.from !== null).sort((a, b) => a.from - b.from), msg = [];
+  const rg = (a, b) => `${a}–${b === null ? 'ไม่จำกัด' : b}`;
+  if (rows.length && rows[0].from > 1) msg.push(['warn', `ยังไม่มีสันสำหรับ 1–${rows[0].from - 1} แผ่น`]);
+  for (let i = 1; i < rows.length; i++) {
+    const p = rows[i - 1];
+    if (p.to === null || rows[i].from <= p.to) msg.push(['err', `ช่วง ${rg(p.from, p.to)} ทับกับ ${rg(rows[i].from, rows[i].to)}`]);
+    else if (rows[i].from > p.to + 1) msg.push(['warn', `ยังไม่มีสันสำหรับ ${p.to + 1}–${rows[i].from - 1} แผ่น`]);
+  }
+  const last = rows[rows.length - 1]; if (last && last.to !== null) msg.push(['warn', `ยังไม่มีสันสำหรับเกิน ${last.to} แผ่น`]);
+  const box = $('jc_spissue'); if (box) box.innerHTML = msg.map(([k, t]) => `<div class="text-[11px] ${k === 'err' ? 'text-rose-600 font-semibold' : 'text-amber-600'}">${k === 'err' ? '⛔' : '⚠️'} ${esc(t)}</div>`).join('');
+  return msg.some(m => m[0] === 'err');
+}
+function jcPrev() {
+  const box = $('jc_prev'); if (!box) return;
+  const t = JC.t, copies = Math.floor(Number(t.copies)), pages = Math.floor(Number(t.pages));
+  if (!(copies > 0) || !(pages > 0)) { box.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">กรอกจำนวนเล่มและจำนวนหน้าเพื่อทดลองคำนวณ</div>'; return; }
+  const waste = Number(JC.waste) || 0, sheets = Math.ceil(pages / (t.duplex === '2' ? 2 : 1)), lines = [], warn = [];
+  const add = (role, code, qty) => { const l = lines.find(x => x.code === code); if (l) { l.qty += qty; l.role += ' + ' + role; } else lines.push({ role, code, qty }); };
+  if (JC.paper) add('กระดาษ', JC.paper, Math.ceil(sheets * copies * (1 + waste / 100))); else warn.push('ยังไม่ได้เลือกกระดาษ');
+  const sp = JC.spines.map(s => ({ from: jcNum(s.from), to: jcNum(s.to), code: s.code })).filter(s => s.code && s.from !== null).find(s => sheets >= s.from && sheets <= (s.to === null ? 1e9 : s.to));
+  if (sp) add('สัน', sp.code, copies); else warn.push(`ไม่มีสันที่รองรับ ${num(sheets)} แผ่น/เล่ม`);
+  const covers = t.cover === 'soft' ? JC.soft.map(c => ({ ...c, role: 'ปกอ่อน' })) : JC.clear.map(c => ({ ...c, role: 'ปกใส' })).concat(JC.back.map(c => ({ ...c, role: 'ปกหลัง' })));
+  const okc = covers.filter(c => c.code && Number(c.per) > 0);
+  okc.forEach(c => add(c.role, c.code, Math.ceil(Number(c.per) * copies)));
+  if (!okc.length) warn.push(t.cover === 'soft' ? 'ยังไม่ได้ตั้งค่าปกอ่อน' : 'ยังไม่ได้ตั้งค่าปกใส / ปกหลัง');
+  box.innerHTML = `<div class="text-xs text-slate-500 pb-1">${num(sheets)} แผ่น/เล่ม · เผื่อเสียกระดาษ ${num(waste)}%</div>` +
+    lines.map(l => `<div class="flex items-center justify-between gap-2 py-1 text-sm border-t border-slate-100"><div class="min-w-0"><span class="text-[11px] text-slate-400">${esc(l.role)}</span> <span class="font-medium">${esc(jcName(l.code))}</span></div><b class="flex-none">${num(l.qty)}</b></div>`).join('') +
+    warn.map(w => `<div class="text-xs text-rose-600 mt-1">⚠️ ${esc(w)}</div>`).join('');
+}
+function renderJobCfg() {
+  JC.t = JC.t || { copies: 10, pages: 100, duplex: '1', cover: 'clear' };
+  const t = JC.t;
+  $('panel-jobcfg').innerHTML = `
+  <div class="card p-6 border-t-4 border-indigo-500 rounded-b-none sm:rounded-b-2xl">
+    <div class="flex items-start justify-between mb-4">
+      <div><h2 class="font-semibold">ตั้งค่าสูตรเข้าเล่ม</h2><p class="text-xs text-slate-400">กำหนดว่าใบงานใช้วัสดุอะไร และคำนวณอย่างไร ไม่ต้องไปแก้ในชีท</p>
+        <p class="text-xs mt-1 font-medium text-indigo-600"><i class="fa-solid fa-database mr-1"></i>ชีท: <span>${esc(bookName())}</span></p></div>
+      <button type="button" onclick="jcClose()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400" aria-label="ปิด"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-3">
+      <div class="rounded-2xl bg-white p-3 space-y-2">
+        <div><div class="text-sm font-semibold">กระดาษที่ใช้พิมพ์</div><p class="text-[11px] text-slate-400">จำนวนกระดาษ = แผ่นต่อเล่ม × จำนวนเล่ม × (1 + เผื่อเสีย%)</p></div>
+        <select class="inp" onchange="JC.paper=this.value;jcPrev()">${jcOpts(JC.paper)}</select>
+        <div><label class="text-xs font-medium">เผื่อเสีย (%) ค่าเริ่มต้น <span class="text-slate-400 font-normal">(แก้เฉพาะงานได้ในใบงาน)</span></label>
+          <input type="number" min="0" max="100" step="any" class="inp mt-1 !w-32" value="${esc(JC.waste)}" oninput="JC.waste=this.value;jcPrev()"></div>
+      </div>
+      ${jcSection('spines', 'สัน (เลือกตามจำนวนแผ่นต่อเล่ม)', 'ใส่ช่วงแผ่น แล้วเลือกสันของช่วงนั้น ใช้ 1 อันต่อเล่ม ช่อง "ถึง" ว่าง = ไม่จำกัด · แผ่นต่อเล่ม = จำนวนหน้า (หน้าเดียว) หรือ จำนวนหน้า ÷ 2 (สองหน้า)', '<div id="jc_spissue" class="space-y-0.5"></div>')}
+      ${jcSection('clear', 'ปกใส', 'ใช้เมื่อเลือก "ปกใส + ปกหลัง" ในใบงาน · ใส่จำนวนที่ใช้ต่อ 1 เล่ม')}
+      ${jcSection('back', 'ปกหลัง', 'ใช้คู่กับปกใส · ใส่จำนวนที่ใช้ต่อ 1 เล่ม')}
+      ${jcSection('soft', 'ปกอ่อน', 'ใช้เมื่อเลือก "ปกอ่อน" ในใบงาน · ถ้าใช้หลายชิ้นต่อเล่ม ให้เพิ่มหลายรายการ')}
+      <div class="rounded-2xl bg-white p-3">
+        <div class="text-sm font-semibold">ทดลองคำนวณ</div><p class="text-[11px] text-slate-400 mb-2">ดูผลตามค่าที่กำลังตั้ง (ยังไม่ต้องบันทึก)</p>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" min="1" class="inp" placeholder="จำนวนเล่ม" value="${esc(t.copies)}" oninput="JC.t.copies=this.value;jcPrev()" aria-label="จำนวนเล่ม">
+          <input type="number" min="1" class="inp" placeholder="หน้าต่อเล่ม" value="${esc(t.pages)}" oninput="JC.t.pages=this.value;jcPrev()" aria-label="จำนวนหน้าต่อเล่ม">
+          <select class="inp" onchange="JC.t.duplex=this.value;jcPrev()"><option value="1"${t.duplex === '1' ? ' selected' : ''}>หน้าเดียว</option><option value="2"${t.duplex === '2' ? ' selected' : ''}>สองหน้า</option></select>
+          <select class="inp" onchange="JC.t.cover=this.value;jcPrev()"><option value="clear"${t.cover === 'clear' ? ' selected' : ''}>ปกใส + ปกหลัง</option><option value="soft"${t.cover === 'soft' ? ' selected' : ''}>ปกอ่อน</option></select>
+        </div>
+        <div id="jc_prev" class="mt-2"></div>
+      </div>
+    </div>
+    <div class="sticky bottom-0 -mx-6 -mb-6 mt-4 px-6 py-3 flex gap-2 border-t border-slate-200" style="background:#f3f2fb">
+      <button type="button" onclick="jcClose()" class="flex-none px-5 py-3 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-600">${jcFromJob ? 'กลับ' : 'ปิด'}</button>
+      <button type="button" id="jc_btn" onclick="saveJobCfg()" class="flex-1 py-3 rounded-xl text-white text-sm font-semibold g-in"><i class="fa-solid fa-floppy-disk mr-2"></i>บันทึกสูตร</button>
+    </div>
+  </div>`;
+  jcIssues(); jcPrev();
+}
+function openJobCfg(fromJob) {
+  if (needAdmin()) return;
+  if (!book) return;
+  jcFromJob = !!fromJob;
+  ['panel-in', 'panel-out', 'panel-adj', 'panel-mat', 'panel-job'].forEach(id => $(id).classList.add('hidden'));
+  $('panel-jobcfg').classList.remove('hidden');
+  $('panel-jobcfg').innerHTML = '<div class="card p-8 text-center text-sm text-slate-400 rounded-b-none sm:rounded-b-2xl"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดสูตร...</div>';
+  $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  const b = book, keepT = JC && JC.t;
+  google.script.run.withSuccessHandler(c => {
+    if (b !== book) return;
+    JC = Object.assign({ paper: '', waste: 0, spines: [], clear: [], back: [], soft: [] }, c, { book: b, t: keepT || null });
+    renderJobCfg();
+  }).withFailureHandler(e => { closeTx(); showError(e); }).getBindingConfigFull(b);
+}
+function jcClose() { jcFromJob ? openJob() : closeTx(); }
+function saveJobCfg() {
+  if (!JC.paper) return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกกระดาษ' });
+  if (jcIssues()) return Swal.fire({ icon: 'error', title: 'ช่วงแผ่นของสันทับกัน', text: 'กรุณาแก้ช่วงที่ทับกันก่อนบันทึก' });
+  const btn = $('jc_btn'), label = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+  google.script.run
+    .withSuccessHandler(r => {
+      btn.disabled = false; btn.innerHTML = label;
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'บันทึกสูตรเข้าเล่มแล้ว', text: r.message, showConfirmButton: false, timer: 3500 });
+      jcClose();
+    })
+    .withFailureHandler(err => { btn.disabled = false; btn.innerHTML = label; showError(err); })
+    .saveBindingConfig({ book: JC.book, paper: JC.paper, waste: JC.waste, spines: JC.spines, clear: JC.clear, back: JC.back, soft: JC.soft });
+}
+
 function buildJobForm() {
   $('panel-job').innerHTML = `
   <div class="card p-6 border-t-4 border-indigo-500 rounded-b-none sm:rounded-b-2xl">
     <div class="flex items-start justify-between mb-4">
       <div><h2 class="font-semibold">ใบงานเข้าเล่ม</h2><p class="text-xs text-slate-400">กรอกข้อมูลงาน ระบบคำนวณวัสดุแล้วเบิกให้ครั้งเดียว</p>
         <p class="text-xs mt-1 font-medium text-indigo-600"><i class="fa-solid fa-database mr-1"></i>เบิกจากชีท: <span id="job_bk"></span></p></div>
-      <button type="button" onclick="closeTx()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      <div class="flex items-center gap-1 flex-none"><button type="button" onclick="openJobCfg(true)" class="chip !py-1.5"><i class="fa-solid fa-gear mr-1.5"></i>ตั้งค่าสูตร</button>
+        <button type="button" onclick="closeTx()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
     </div>
     <form onsubmit="submitJob(event)" class="space-y-4">
       <div><label class="text-xs font-medium">ชื่อโครงการ / หน่วยงาน *</label><input id="job_project" required class="inp mt-1" autocomplete="off" oninput="jobPrev()"></div>
@@ -1725,7 +1862,7 @@ function buildJobForm() {
         <div class="col-span-2"><label class="text-xs font-medium">สัน</label>
           <div class="inline-flex p-1 rounded-full bg-slate-100 ml-2"><button type="button" id="jobsp-auto" class="tab active" onclick="setJobSpine('auto')">อัตโนมัติ</button><button type="button" id="jobsp-man" class="tab" onclick="setJobSpine('man')">เลือกเอง</button></div>
           <select id="job_spine" class="inp mt-1 hidden" onchange="jobPrev()"></select>
-          <p id="job_spnote" class="text-[11px] text-slate-400 mt-1">ระบบเลือกสันตามจำนวนแผ่นต่อเล่ม จากตารางในแท็บ "สูตรเข้าเล่ม"</p></div>
+          <p id="job_spnote" class="text-[11px] text-slate-400 mt-1">ระบบเลือกสันตามจำนวนแผ่นต่อเล่ม ตามที่ตั้งไว้ใน "ตั้งค่าสูตรเข้าเล่ม"</p></div>
         <div><label class="text-xs font-medium">เผื่อเสีย (%)</label><input type="number" id="job_waste" min="0" step="any" class="inp mt-1" oninput="jobPrev()"></div>
       </div>
       <div class="grid sm:grid-cols-2 gap-3">
@@ -1740,7 +1877,7 @@ function buildJobForm() {
 function openJob() {
   if (needAdmin()) return;
   if (!book) return;
-  ['panel-in', 'panel-out', 'panel-adj', 'panel-mat'].forEach(id => $(id).classList.add('hidden'));
+  ['panel-in', 'panel-out', 'panel-adj', 'panel-mat', 'panel-jobcfg'].forEach(id => $(id).classList.add('hidden'));
   $('panel-job').classList.remove('hidden'); $('job_bk').innerText = bookName();
   setDate('job_date', ymd(new Date()));
   if (!$('job_person').value) $('job_person').value = PREPARER.name;
@@ -1768,7 +1905,7 @@ function setJobSpine(m) {
   jobSpineMode = m;
   $('jobsp-auto').classList.toggle('active', m === 'auto'); $('jobsp-man').classList.toggle('active', m === 'man');
   $('job_spine').classList.toggle('hidden', m !== 'man');
-  $('job_spnote').innerText = m === 'auto' ? 'ระบบเลือกสันตามจำนวนแผ่นต่อเล่ม จากตารางในแท็บ "สูตรเข้าเล่ม"' : 'เลือกสันเอง ใช้ 1 อันต่อเล่ม (ไม่ดูช่วงแผ่น)';
+  $('job_spnote').innerText = m === 'auto' ? 'ระบบเลือกสันตามจำนวนแผ่นต่อเล่ม ตามที่ตั้งไว้ใน "ตั้งค่าสูตรเข้าเล่ม"' : 'เลือกสันเอง ใช้ 1 อันต่อเล่ม (ไม่ดูช่วงแผ่น)';
   if (m === 'man') fillJobSpines();
   jobPrev();
 }
