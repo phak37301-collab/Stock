@@ -154,9 +154,9 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   .doc table.dt thead{display:table-header-group}
   .doc table.dt tr{page-break-inside:avoid}
   .doc .r{text-align:right}.doc .c{text-align:center}
-  .doc .sum{width:100%}
+  .doc .sum{width:100%;table-layout:fixed}
   .doc .sum{border-spacing:6pt 0;border-collapse:separate;margin:4pt -6pt}
-  .doc .sum td{padding:7pt 6pt;text-align:center;width:25%;border-radius:6pt;font-size:9.5pt}
+  .doc .sum td{padding:7pt 6pt;text-align:center;border-radius:6pt;font-size:9.5pt}
   .doc .sum td:nth-child(1){background:#eef2ff;color:#3730a3}.doc .sum td:nth-child(2){background:#d1fae5;color:#047857}
   .doc .sum td:nth-child(3){background:#ffe4e6;color:#be123c}.doc .sum td:nth-child(4){background:#fef3c7;color:#b45309}
   .doc .sum b{display:block;font-size:13pt}
@@ -371,6 +371,12 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   @keyframes logoBreath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.95)}}
   @keyframes logoJump{0%{transform:translateY(0) scale(1.08,.9)}35%{transform:translateY(-9px) scale(.95,1.08)}70%{transform:translateY(0) scale(1.06,.93)}100%{transform:scale(1,1)}}
   @media(prefers-reduced-motion:reduce){.logo-idle{animation:none}}
+
+  /* ---------- คืนเบิก ---------- */
+  .b-ret{background:#ccfbf1;color:#0f766e}
+  .chip.on-ret{background:#ccfbf1;border-color:#2dd4bf;color:#0f766e}
+  .g-ret{background:linear-gradient(135deg,#2dd4bf,#0d9488);box-shadow:0 10px 24px rgba(13,148,136,.35)}
+  .g-ret:hover{filter:brightness(1.07)}
 </style>
 </head>
 <body>
@@ -383,13 +389,14 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <div class="side-head"><div class="side-logo"><img src="Logo.png?v=5" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:14px" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='Logo.webp?v=5';}else{this.outerHTML='<i class=&quot;fa-solid fa-boxes-stacked&quot;></i>';}"></div><span>เมนู</span></div>
     <button class="nav active" data-tab="inventory"><i class="fa-solid fa-house"></i><span>ภาพรวม</span></button>
     <button class="nav" data-tab="history"><i class="fa-solid fa-clock-rotate-left"></i><span>ประวัติ</span></button>
-    <button class="nav" data-tab="requests"><i class="fa-solid fa-inbox"></i><span>คำขอเบิก</span><b class="rbadge"></b></button>
+    <button class="nav" data-tab="requests"><i class="fa-solid fa-inbox"></i><span>คำขอเบิก/คืน</span><b class="rbadge"></b></button>
     <button class="nav" data-tab="report"><i class="fa-solid fa-file-lines"></i><span>รายงาน</span></button>
     <button class="nav" data-tab="count"><i class="fa-solid fa-clipboard-check"></i><span>ตรวจนับ</span></button>
     <button class="nav" onclick="closeMenu();openAdj()"><i class="fa-solid fa-sliders"></i><span>ปรับยอดสต็อก</span></button>
     <button class="nav" onclick="closeMenu();openMat()"><i class="fa-solid fa-circle-plus"></i><span>เพิ่มวัสดุใหม่</span></button>
     <button class="nav" onclick="closeMenu();openSettings()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
     <button class="nav" onclick="closeMenu();openJob()"><i class="fa-solid fa-book"></i><span>ใบงานเข้าเล่ม</span></button>
+    <button class="nav" onclick="closeMenu();openRet()"><i class="fa-solid fa-rotate-left"></i><span>คืนเบิก</span></button>
     <button class="nav" onclick="closeMenu();openJobCfg()"><i class="fa-solid fa-screwdriver-wrench"></i><span>ตั้งค่าสูตรเข้าเล่ม</span></button>
     <button class="nav" onclick="closeMenu();toggleGame()"><i class="fa-solid fa-rocket"></i><span>เกมจรวด (แผงซ้าย)</span></button>
     <button class="nav" onclick="toggleRocketBtn()"><i class="fa-solid fa-eye-slash"></i><span id="rktLbl">ปุ่มจรวด: เปิด</span></button>
@@ -415,8 +422,10 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   <section id="userHome" class="card p-8 text-center space-y-4 max-w-xl mx-auto mt-6">
     <div class="text-5xl">📦</div>
     <h2 class="text-lg font-semibold">เบิกวัสดุสำนักงาน</h2>
-    <p class="text-sm text-slate-500">กดปุ่มด้านล่างเพื่อส่งคำขอเบิก แอดมินจะอนุมัติก่อน แล้วระบบจึงตัดสต็อก<br>เลือกชีทที่ต้องการจากช่องด้านบน</p>
-    <button onclick="openTx('out')" class="g-out text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-box-open mr-2"></i>ขอเบิกของ</button>
+    <p class="text-sm text-slate-500">กดปุ่มด้านล่างเพื่อส่งคำขอเบิกหรือคำขอคืน แอดมินจะอนุมัติก่อน แล้วระบบจึงปรับสต็อก<br>เลือกชีทที่ต้องการจากช่องด้านบน</p>
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <button onclick="openTx('out')" class="g-out text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-box-open mr-2"></i>ขอเบิกของ</button>
+      <button onclick="openRet()" class="g-ret text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-rotate-left mr-2"></i>ขอคืนของ</button></div>
     <div class="text-left pt-4 border-t border-slate-100"><div class="flex items-center justify-between"><h3 class="text-sm font-semibold">คำขอของฉัน</h3><button onclick="paintMyReqs()" class="text-xs text-indigo-600 font-medium"><i class="fa-solid fa-arrows-rotate mr-1"></i>เช็กสถานะ</button></div>
       <div id="myReqs" class="mt-2 space-y-2 text-sm text-slate-400">ยังไม่มีคำขอ</div></div>
   </section>
@@ -424,7 +433,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   <section id="panel-requests" class="hidden space-y-4">
     <div class="card p-5">
       <div class="flex items-center justify-between flex-wrap gap-2">
-        <div><h2 class="font-semibold text-sm">คำขอเบิกวัสดุ</h2><p class="text-xs text-slate-400">เมื่ออนุมัติ ระบบจะตัดสต็อกและบันทึกลงแท็บ “เบิก” ให้อัตโนมัติ</p></div>
+        <div><h2 class="font-semibold text-sm">คำขอเบิก / คืนวัสดุ</h2><p class="text-xs text-slate-400">เมื่ออนุมัติ ระบบจะตัดสต็อกและบันทึกลงแท็บ “เบิก” ให้อัตโนมัติ</p></div>
         <div id="reqChips" class="flex gap-2 flex-wrap"></div>
       </div>
       <div id="reqOther" class="mt-3 flex gap-2 flex-wrap"></div>
@@ -530,6 +539,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
 <div class="fab-wrap no-print">
   <button class="fab g-out" onclick="openTx('out')" title="เบิกของ" aria-label="เบิกของ"><em class="emo">📦</em><span id="fabOutTxt">ขอเบิกของ</span></button>
   <button class="fab g-in admin-only" onclick="openTx('in')" title="รับของเข้าคลัง" aria-label="รับของเข้าคลัง"><em class="emo">🚚</em><span>รับของเข้า</span></button>
+  <button class="fab g-ret admin-only" onclick="openRet()" title="คืนเบิก" aria-label="คืนเบิก"><em class="emo">↩️</em><span>คืนเบิก</span></button>
 </div>
 
 <!-- Transaction modal -->
@@ -541,6 +551,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <div id="panel-mat" class="hidden"></div>
     <div id="panel-job" class="hidden"></div>
     <div id="panel-jobcfg" class="hidden"></div>
+    <div id="panel-ret" class="hidden"></div>
   </div>
 </div>
 
@@ -683,8 +694,8 @@ const newF = () => ({ st: new Set(), un: new Set(), mt: new Set(), ty: new Set()
 const F = { inv: newF(), rep: newF() };
 
 window.onload = () => {
-  buildForm('in'); buildForm('out'); buildAdjForm(); buildMatForm(); buildJobForm();
-  ['in_date', 'out_date', 'rep_start', 'rep_end', 'adj_date', 'count_date', 'job_date'].forEach(id => initDate(id));
+  buildForm('in'); buildForm('out'); buildAdjForm(); buildMatForm(); buildJobForm(); buildRetForm();
+  ['in_date', 'out_date', 'rep_start', 'rep_end', 'adj_date', 'count_date', 'job_date', 'ret_date'].forEach(id => initDate(id));
   $('invFilters').innerHTML = filterBar('inv');
   $('repFilters').innerHTML = filterBar('rep');
   document.querySelectorAll('button[data-tab]').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
@@ -996,7 +1007,7 @@ function paintMyReqs() {
     if (b !== book || isAdmin) return;
     el.innerHTML = (list && list.length) ? list.map(r => `<div class="mini-req">
       <div class="who">${avatar(r.person || '?')}<div class="min-w-0">
-        <div class="text-slate-800">เบิก ${(r.items || [{ name: r.name, qty: r.qty, unit: r.unit }]).map(it => esc(it.name) + ' <b class="text-rose-600">' + num(it.qty) + '</b> ' + esc(it.unit)).join(', ')}</div>
+        <div class="text-slate-800">${r.kind === 'คืน' ? 'คืน' : 'เบิก'} ${(r.items || [{ name: r.name, qty: r.qty, unit: r.unit }]).map(it => esc(it.name) + ' <b class="text-rose-600">' + num(it.qty) + '</b> ' + esc(it.unit)).join(', ')}</div>
         <div class="text-[11px] text-slate-400">${esc(r.reqAt)} · ${esc(r.id)}</div></div></div>
       <span class="badge ${reqBadge(r.status)} flex-none">${esc(r.status)}</span></div>`).join('') : 'ไม่พบคำขอ';
   }).withFailureHandler(() => {}).getRequestStatuses(b, ids);
@@ -1025,10 +1036,10 @@ function renderRequests() {
     const pend = r.status === 'รออนุมัติ';
     return `<div class="card rcard ${r.status === 'อนุมัติ' ? 'ok' : r.status === 'ไม่อนุมัติ' ? 'no' : ''} p-4">
       <div class="flex items-center justify-between gap-2">
-        <div class="who">${avatar(r.person)}<div class="min-w-0"><div class="who-sub">${esc(r.id)} · ส่งเมื่อ ${esc(r.reqAt)}</div></div></div>
+        <div class="who">${avatar(r.person)}<div class="min-w-0"><div class="who-sub">${r.kind === 'คืน' ? '<b class="text-teal-600">↩️ ขอคืน</b> · ' : ''}${esc(r.id)} · ส่งเมื่อ ${esc(r.reqAt)}</div></div></div>
         <span class="badge ${reqBadge(r.status)} flex-none">${esc(r.status)}</span></div>
-      ${r.items.map(it => `<div class="item-box"><div class="item-name"><span class="text-slate-400 text-xs font-medium block">ขอเบิก</span>${esc(it.name)}<span class="block text-[11px] font-normal text-slate-400">คงเหลือ ${it.balance == null ? '-' : num(it.balance)} ${esc(it.unit)}${it.balance != null && it.qty > it.balance ? ' <b class="text-rose-600">(เกินยอดคงเหลือ)</b>' : ''}</span></div><span class="qty-pill">${num(it.qty)}<small>${esc(it.unit)}</small></span></div>`).join('')}
-      <div class="mt-2 text-xs text-slate-500">${r.items.length} รายการ · วันที่เบิก ${thDate(r.txDate)}${r.note ? ' · หมายเหตุ: ' + esc(r.note) : ''}</div>
+      ${r.items.map(it => `<div class="item-box"><div class="item-name"><span class="text-slate-400 text-xs font-medium block">${r.kind === 'คืน' ? 'ขอคืน' : 'ขอเบิก'}</span>${esc(it.name)}<span class="block text-[11px] font-normal text-slate-400">${r.kind === 'คืน' ? (it.withdrawn == null ? '' : esc(r.person) + ' เบิกไว้สุทธิ ' + num(it.withdrawn) + ' ' + esc(it.unit) + (it.qty > it.withdrawn ? ' <b class="text-amber-600">(คืนเกินที่เบิกไว้)</b>' : '')) : 'คงเหลือ ' + (it.balance == null ? '-' : num(it.balance)) + ' ' + esc(it.unit) + (it.balance != null && it.qty > it.balance ? ' <b class="text-rose-600">(เกินยอดคงเหลือ)</b>' : '')}</span></div><span class="qty-pill">${num(it.qty)}<small>${esc(it.unit)}</small></span></div>`).join('')}
+      <div class="mt-2 text-xs text-slate-500">${r.items.length} รายการ · ${r.kind === 'คืน' ? 'วันที่คืน' : 'วันที่เบิก'} ${thDate(r.txDate)}${r.note ? ' · หมายเหตุ: ' + esc(r.note) : ''}</div>
       ${pend ? `<div class="mt-3 flex gap-2"><button onclick="decideReq('${esc(r.id)}','approve')" class="flex-1 py-2 rounded-xl text-white text-sm font-semibold bg-emerald-500 hover:bg-emerald-600"><i class="fa-solid fa-check mr-1"></i>อนุมัติ</button>
         <button onclick="decideReq('${esc(r.id)}','reject')" class="flex-1 py-2 rounded-xl text-sm font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100"><i class="fa-solid fa-xmark mr-1"></i>ไม่อนุมัติ</button></div>`
         : `<div class="mt-2 text-xs text-slate-400">พิจารณาเมื่อ ${esc(r.decidedAt || '-')}${r.reason ? ' · ' + esc(r.reason) : ''}</div>`}
@@ -1036,18 +1047,18 @@ function renderRequests() {
 }
 async function decideReq(id, decision, force) {
   const r0 = reqData.find(x => x.id === id); if (!r0) return;
-  const what = `<b>${esc(r0.person)}</b> ขอเบิก ${r0.items.length} รายการ<div style="text-align:left;margin-top:8px;font-size:.9rem">` + r0.items.map(it => `• ${esc(it.name)} <b>${num(it.qty)}</b> ${esc(it.unit)}`).join('<br>') + '</div>';
+  const what = `<b>${esc(r0.person)}</b> ขอ${r0.kind === 'คืน' ? 'คืน' : 'เบิก'} ${r0.items.length} รายการ<div style="text-align:left;margin-top:8px;font-size:.9rem">` + r0.items.map(it => `• ${esc(it.name)} <b>${num(it.qty)}</b> ${esc(it.unit)}`).join('<br>') + '</div>';
   let reason = '';
   if (decision === 'reject') {
     const r = await Swal.fire({ title: 'ไม่อนุมัติคำขอนี้?', html: what, input: 'text', inputPlaceholder: 'เหตุผล (ไม่บังคับ)', showCancelButton: true, confirmButtonText: 'ไม่อนุมัติ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#f43f5e' });
     if (!r.isConfirmed) return; reason = r.value || '';
   } else if (!force) {
-    const r = await Swal.fire({ title: 'อนุมัติและตัดสต็อก?', html: what, showCancelButton: true, confirmButtonText: 'อนุมัติ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#10b981' });
+    const r = await Swal.fire({ title: r0.kind === 'คืน' ? 'อนุมัติรับคืนเข้าคลัง?' : 'อนุมัติและตัดสต็อก?', html: what, showCancelButton: true, confirmButtonText: 'อนุมัติ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#10b981' });
     if (!r.isConfirmed) return;
   }
   Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
   google.script.run.withSuccessHandler(res => {
-    if (res.needConfirm) return Swal.fire({ icon: 'warning', title: 'เบิกเกินยอดคงเหลือ', html: (res.over || [res]).map(o => `<b>${esc(o.name)}</b><br>คงเหลือ ${num(o.balance)} ${esc(o.unit)} แต่ขอเบิก ${num(o.qty)}`).join('<br><br>') + '<br><br>ยอดจะติดลบ ต้องการอนุมัติต่อหรือไม่?', showCancelButton: true, confirmButtonText: 'อนุมัติต่อ', cancelButtonText: 'กลับ', confirmButtonColor: '#f43f5e' }).then(x => { if (x.isConfirmed) decideReq(id, 'approve', true); });
+    if (res.needConfirm) return Swal.fire({ icon: 'warning', title: res.kind === 'คืน' ? 'คืนมากกว่าที่เบิกไว้' : 'เบิกเกินยอดคงเหลือ', html: (res.over || [res]).map(o => res.kind === 'คืน' ? `<b>${esc(o.name)}</b><br>เบิกไปสุทธิ ${num(o.withdrawn)} ${esc(o.unit)} แต่ขอคืน ${num(o.qty)}` : `<b>${esc(o.name)}</b><br>คงเหลือ ${num(o.balance)} ${esc(o.unit)} แต่ขอเบิก ${num(o.qty)}`).join('<br><br>') + '<br><br>' + (res.kind === 'คืน' ? 'ต้องการอนุมัติรับคืนต่อหรือไม่?' : 'ยอดจะติดลบ ต้องการอนุมัติต่อหรือไม่?'), showCancelButton: true, confirmButtonText: 'อนุมัติต่อ', cancelButtonText: 'กลับ', confirmButtonColor: '#f43f5e' }).then(x => { if (x.isConfirmed) decideReq(id, 'approve', true); });
     Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 2200, showConfirmButton: false });
     loadAllData();
   }).withFailureHandler(showError).decideRequest({ book: book, id: id, decision: decision, reason: reason, force: !!force });
@@ -1065,12 +1076,12 @@ function setBell(n) {
   paintTitle();
 }
 function notifyNew(n) {
-  const msg = 'มีคำขอเบิกใหม่ ' + n + ' รายการ';
+  const msg = 'มีคำขอใหม่ ' + n + ' รายการ (เบิก/คืน)';
   const bb = $('bellBtn'); if (bb) { bb.classList.remove('ring'); void bb.offsetWidth; bb.classList.add('ring'); }
   if (!document.hidden) Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: msg, showConfirmButton: false, timer: 6000, timerProgressBar: true });
   try {
     if (window.Notification && Notification.permission === 'granted') {
-      const nt = new Notification(msg, { body: 'กดเพื่อเปิดดูคำขอเบิก', tag: 'req-new', renotify: true });
+      const nt = new Notification(msg, { body: 'กดเพื่อเปิดดูคำขอเบิก/คืน', tag: 'req-new', renotify: true });
       nt.onclick = () => { window.focus(); reqFilter = 'รออนุมัติ'; switchTab('requests'); nt.close(); };
     }
   } catch (e) {}
@@ -1164,7 +1175,7 @@ function paintChips(c) {
   $(c + '_un').innerHTML = units.map(u => `<button class="chip ${f.un.has(u) ? 'on' : ''}" onclick="tog('${c}','un',this.dataset.v)" data-v="${esc(u)}">${esc(u)}</button>`).join('') || '<span class="lbl">-</span>';
   if (c === 'rep') {
     $('rep_tyWrap').classList.toggle('hidden', mode !== 'move');
-    $('rep_ty').innerHTML = ['รับเข้า','เบิกจ่าย','ปรับยอด'].map(t => `<button class="chip ${f.ty.has(t) ? (t === 'รับเข้า' ? 'on-ok' : t === 'เบิกจ่าย' ? 'on-low' : 'on-adj') : ''}" onclick="tog('rep','ty','${t}')">${t}</button>`).join('');
+    $('rep_ty').innerHTML = ['รับเข้า','เบิกจ่าย','คืนเบิก','ปรับยอด'].map(t => `<button class="chip ${f.ty.has(t) ? (t === 'รับเข้า' ? 'on-ok' : t === 'เบิกจ่าย' ? 'on-low' : t === 'คืนเบิก' ? 'on-ret' : 'on-adj') : ''}" onclick="tog('rep','ty','${t}')">${t}</button>`).join('');
   }
   $(c + '_mtLabel').innerText = f.mt.size ? `วัสดุ: เลือก ${f.mt.size} รายการ` : 'วัสดุ: ทั้งหมด';
   $(c + '_dd').firstElementChild.classList.toggle('on', f.mt.size > 0);
@@ -1270,11 +1281,11 @@ function renderInventory() {
 const COVER_DAYS = 30; // สั่งให้พอใช้กี่วัน (แก้ตัวเลขนี้ได้)
 let USE = {};
 function calcUsage() {
-  const now = Date.now(), out = histAll.filter(h => h.type === 'เบิกจ่าย' && h.rawDate), m = {};
+  const now = Date.now(), out = histAll.filter(h => (h.type === 'เบิกจ่าย' || h.type === 'คืนเบิก') && h.rawDate), m = {};
   const first = out.reduce((a, h) => Math.min(a, h.rawDate), now);
   const span = Math.min(60, Math.max(14, (now - first) / 864e5));
-  out.forEach(h => { if (now - h.rawDate <= 60 * 864e5) m[h.code] = (m[h.code] || 0) + (Number(h.quantity) || 0); });
-  Object.keys(m).forEach(k => m[k] = m[k] / span);
+  out.forEach(h => { if (now - h.rawDate <= 60 * 864e5) m[h.code] = (m[h.code] || 0) + (h.type === 'คืนเบิก' ? -1 : 1) * (Number(h.quantity) || 0); });
+  Object.keys(m).forEach(k => m[k] = Math.max(0, m[k]) / span);
   return m;
 }
 function useCells(i) {
@@ -1397,7 +1408,7 @@ function openTx(t) {
   if (!$(t + '_date').value) setDate(t + '_date', ymd(new Date()));
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
 }
-function closeTx() { $('modal').classList.add('hidden'); $('panel-job').classList.add('hidden'); $('panel-jobcfg').classList.add('hidden'); document.body.style.overflow = ''; }
+function closeTx() { $('modal').classList.add('hidden'); $('panel-job').classList.add('hidden'); $('panel-jobcfg').classList.add('hidden'); $('panel-ret').classList.add('hidden'); document.body.style.overflow = ''; }
 function populateMaterials(list) {
   materials = list;
   const opts = list.map(m => `<option value="${esc(m.code)}">[${esc(m.code)}] ${esc(m.name)} (${esc(m.unit)})</option>`).join('');
@@ -1534,6 +1545,132 @@ function submitMat(e) {
     .addMaterial({ book: book, code: code, name: name, unit: unit, minStock: $('mat_min').value, openQty: $('mat_open').value, person: $('mat_person').value });
 }
 
+/* ================= คืนเบิก (แอดมินบันทึกเมื่อพนักงานนำของที่ใช้ไม่หมดมาคืน) ================= */
+let RET = [{ code: '', qty: '' }];
+const retName = c => { const m = materials.find(x => x.code === c); return m ? m.name : c; };
+// เบิกสุทธิของคนนี้ = เบิกจ่าย - คืนเบิก ที่เคยบันทึกไว้ (ชื่อเทียบแบบไม่สนตัวพิมพ์/ช่องว่างหัวท้าย)
+function retNet(person, code) {
+  const k = String(person || '').trim().toLowerCase(); if (!k) return null;
+  let n = 0;
+  histAll.forEach(h => {
+    if (h.code !== code || String(h.person || '').trim().toLowerCase() !== k) return;
+    if (h.type === 'เบิกจ่าย') n += Number(h.quantity) || 0; else if (h.type === 'คืนเบิก') n -= Number(h.quantity) || 0;
+  });
+  return Math.round(n * 1e6) / 1e6;
+}
+function retOpts(sel) {
+  const list = materials.slice().sort((a, b) => a.code.localeCompare(b.code));
+  return '<option value="">-- เลือกวัสดุ --</option>' + list.map(m => `<option value="${esc(m.code)}"${m.code === sel ? ' selected' : ''}>[${esc(m.code)}] ${esc(m.name)} (${esc(m.unit)})</option>`).join('');
+}
+function retRowHint(i) {
+  if (!isAdmin) return '';
+  const r = RET[i], el = $('ret_person'), p = el ? el.value.trim() : '';
+  if (!r || !r.code || !p) return '';
+  const n = retNet(p, r.code), m = materials.find(x => x.code === r.code), over = Number(r.qty) > n;
+  return `<span class="${over ? 'text-amber-600 font-semibold' : 'text-slate-400'}">${esc(p)} เบิกไปสุทธิ ${num(n)} ${esc(m ? m.unit : '')}${over ? ' · คืนเกินที่เบิกไว้' : ''}</span>`;
+}
+function paintRet() {
+  const el = $('ret_list'); if (!el) return;
+  el.innerHTML = RET.map((r, i) => `<div class="mini-req" style="display:block">
+    <div class="flex items-center gap-2"><select class="inp flex-1 min-w-0" onchange="retSet(${i},'code',this.value)">${retOpts(r.code)}</select>
+      <input type="number" min="0" step="any" class="inp !w-24 text-center" placeholder="จำนวน" value="${esc(r.qty)}" oninput="retSet(${i},'qty',this.value)" aria-label="จำนวนที่คืน">
+      <button type="button" class="w-8 h-8 flex-none rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-500" onclick="retDel(${i})" aria-label="ลบรายการ"><i class="fa-solid fa-xmark"></i></button></div>
+    <div id="ret_h${i}" class="text-[11px] mt-1" style="min-height:1em">${retRowHint(i)}</div></div>`).join('');
+}
+function retSet(i, k, v) { RET[i][k] = v; const h = $('ret_h' + i); if (h) h.innerHTML = retRowHint(i); }
+function retAdd() { RET.push({ code: '', qty: '' }); paintRet(); }
+function retDel(i) { RET.splice(i, 1); if (!RET.length) RET.push({ code: '', qty: '' }); paintRet(); }
+function retPersonChange() { retSuggest(); RET.forEach((r, i) => { const h = $('ret_h' + i); if (h) h.innerHTML = retRowHint(i); }); }
+// ทางลัด: วัสดุที่คนนี้เบิกไว้ใน 30 วันล่าสุด กดแล้วเพิ่มเป็นรายการคืนได้เลย
+function retSuggest() {
+  if (!isAdmin) { const b0 = $('ret_sug'); if (b0) b0.innerHTML = ''; return; }
+  const box = $('ret_sug'), p = $('ret_person') ? $('ret_person').value.trim() : ''; if (!box) return;
+  if (!p) { box.innerHTML = ''; return; }
+  const k = p.toLowerCase(), since = Date.now() - 30 * 864e5, recent = {};
+  histAll.forEach(h => { if (h.type === 'เบิกจ่าย' && h.rawDate && h.rawDate >= since && String(h.person || '').trim().toLowerCase() === k) recent[h.code] = true; });
+  const codes = Object.keys(recent).filter(c => retNet(p, c) > 0).slice(0, 10);
+  box.innerHTML = codes.length ? `<div class="text-[11px] text-slate-400 mb-1">${esc(p)} เบิกไว้ใน 30 วันล่าสุด — กดเพื่อเพิ่มเป็นรายการคืน</div><div class="flex flex-wrap gap-2">` +
+    codes.map(c => `<button type="button" class="chip" onclick="retPick('${esc(c)}')">${esc(retName(c))} <b>${num(retNet(p, c))}</b></button>`).join('') + '</div>' : '';
+}
+function retPick(code) {
+  if (RET.some(r => r.code === code)) return;
+  const empty = RET.findIndex(r => !r.code);
+  if (empty >= 0) RET[empty].code = code; else RET.push({ code: code, qty: '' });
+  paintRet();
+}
+function buildRetForm() {
+  $('panel-ret').innerHTML = `
+  <div class="card p-6 border-t-4 border-teal-400 rounded-b-none sm:rounded-b-2xl">
+    <div class="flex items-start justify-between mb-4">
+      <div><h2 id="ret_ttl" class="font-semibold">คืนเบิกวัสดุ</h2><p id="ret_sub" class="text-xs text-slate-400">พนักงานเบิกไปแล้วใช้ไม่หมด นำของมาคืนเข้าคลัง</p>
+        <p class="text-xs mt-1 font-medium text-teal-600"><i class="fa-solid fa-database mr-1"></i>บันทึกลง: <span id="ret_bk"></span></p></div>
+      <button type="button" onclick="closeTx()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400" aria-label="ปิด"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form onsubmit="submitRet(event)" class="space-y-4">
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div><label class="text-xs font-medium">วันที่คืน *</label><input type="text" id="ret_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
+        <div><label class="text-xs font-medium">ผู้คืน (ชื่อเดียวกับที่เบิกไว้) *</label><input id="ret_person" required list="people" autocomplete="off" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"></div>
+      </div>
+      <div id="ret_sug"></div>
+      <div><label class="text-xs font-medium">รายการที่คืน *</label>
+        <div id="ret_list" class="space-y-2 mt-1"></div>
+        <button type="button" onclick="retAdd()" class="mt-2 w-full py-2.5 rounded-xl border-2 border-dashed border-teal-300 text-teal-600 text-sm font-semibold hover:bg-teal-50"><i class="fa-solid fa-plus mr-1"></i>เพิ่มรายการ</button></div>
+      <div><label class="text-xs font-medium">หมายเหตุ</label><input id="ret_note" class="inp mt-1" placeholder="เช่น งานยกเลิก / ใช้ไม่หมด (ไม่บังคับ)"></div>
+      <button id="ret_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold g-ret"><i class="fa-solid fa-rotate-left mr-2"></i><span id="ret_btxt">บันทึกคืนเบิก</span></button>
+    </form>
+  </div>`;
+}
+function openRet() {
+  if (!book) return;
+  ['panel-in', 'panel-out', 'panel-adj', 'panel-mat', 'panel-job', 'panel-jobcfg'].forEach(id => $(id).classList.add('hidden'));
+  $('panel-ret').classList.remove('hidden'); $('ret_bk').innerText = bookName();
+  $('ret_ttl').innerText = isAdmin ? 'คืนเบิกวัสดุ' : 'ขอคืนวัสดุ';
+  $('ret_sub').innerText = isAdmin ? 'พนักงานเบิกไปแล้วใช้ไม่หมด นำของมาคืนเข้าคลัง' : 'ส่งคำขอให้แอดมินอนุมัติ ยอดคงเหลือจะเพิ่มเมื่อได้รับอนุมัติ';
+  $('ret_btxt').innerText = isAdmin ? 'บันทึกคืนเบิก' : 'ส่งคำขอคืน';
+  setDate('ret_date', ymd(new Date()));
+  RET = [{ code: '', qty: '' }]; $('ret_person').value = ''; $('ret_note').value = '';
+  paintRet(); retSuggest();
+  $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+}
+function submitRet(e) { e.preventDefault(); sendRet(false); }
+// ผู้ใช้ทั่วไป: ส่งคำขอคืน (ยังไม่เพิ่มสต็อก จนกว่าแอดมินจะอนุมัติ)
+function sendRetReq(items) {
+  const btn = $('ret_btn'), label = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังส่งคำขอ...';
+  const done = () => { btn.disabled = false; btn.innerHTML = label; };
+  google.script.run.withSuccessHandler(r => {
+    done(); closeTx();
+    if (r.id) rememberReq(r.id);
+    Swal.fire({ icon: 'success', title: 'ส่งคำขอคืนแล้ว', text: r.message, timer: 4500, showConfirmButton: true, confirmButtonText: 'ตกลง' });
+    RET = [{ code: '', qty: '' }]; $('ret_note').value = ''; paintRet(); loadAllData();
+  }).withFailureHandler(err => { done(); showError(err); })
+  .submitReturnRequest({ book: book, txDate: $('ret_date').value, personName: $('ret_person').value, note: $('ret_note').value, items: items });
+}
+function sendRet(force) {
+  const items = RET.filter(r => r.code && Number(r.qty) > 0).map(r => ({ code: r.code, qty: Number(r.qty) }));
+  if (!items.length) return Swal.fire({ icon: 'info', title: 'ยังไม่มีรายการคืน', text: 'เลือกวัสดุและใส่จำนวนที่คืน' });
+  if (!isAdmin) return sendRetReq(items);
+  const btn = $('ret_btn'), label = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+  const done = () => { btn.disabled = false; btn.innerHTML = label; };
+  google.script.run
+    .withSuccessHandler(r => {
+      done();
+      if (r.needConfirm) {
+        return Swal.fire({
+          icon: 'warning', title: 'คืนมากกว่าที่เบิกไว้',
+          html: r.over.map(o => `<b>${esc(o.name)}</b><br>เบิกไปสุทธิ ${num(o.withdrawn)} ${esc(o.unit)} แต่คืน ${num(o.qty)}`).join('<br><br>') + '<br><br>ต้องการบันทึกต่อหรือไม่?',
+          showCancelButton: true, confirmButtonText: 'บันทึกต่อ', cancelButtonText: 'กลับไปแก้', confirmButtonColor: '#0d9488'
+        }).then(x => { if (x.isConfirmed) sendRet(true); });
+      }
+      closeTx();
+      Swal.fire({ icon: 'success', title: 'บันทึกคืนเบิกแล้ว', text: r.message, timer: 2800, showConfirmButton: false });
+      loadAllData();
+    })
+    .withFailureHandler(err => { done(); showError(err); })
+    .recordReturn({ book: book, txDate: $('ret_date').value, personName: $('ret_person').value, note: $('ret_note').value, items: items, force: !!force });
+}
+
 /* ================= ปรับยอดสต็อก ================= */
 let adjMode = 'count';
 function buildAdjForm() {
@@ -1639,20 +1776,20 @@ function submitAdj(e) {
 /* ================= History ================= */
 function loadHistory(code) { const b = book; google.script.run.withSuccessHandler(h => { if (b === book) renderHistory(h); }).getAllHistory(code, b); }
 let histData = [], histType = 'all';
-const histGroup = t => t === 'รับเข้า' ? 'in' : t === 'เบิกจ่าย' ? 'out' : 'adj';
-const tyLabel = t => (t === 'รับเข้า' || t === 'เบิกจ่าย') ? t : 'ปรับยอด';
+const histGroup = t => t === 'รับเข้า' ? 'in' : t === 'เบิกจ่าย' ? 'out' : t === 'คืนเบิก' ? 'ret' : 'adj';
+const tyLabel = t => (t === 'รับเข้า' || t === 'เบิกจ่าย' || t === 'คืนเบิก') ? t : 'ปรับยอด';
 function setHistType(k) { histType = k; paintHist(); }
 function renderHistory(list) { histData = list || []; paintHist(); }
 function paintHist() {
-  const cnt = { all: histData.length, in: 0, out: 0, adj: 0 };
+  const cnt = { all: histData.length, in: 0, out: 0, ret: 0, adj: 0 };
   histData.forEach(h => cnt[histGroup(h.type)]++);
-  $('histChips').innerHTML = [['all', 'ทั้งหมด', ''], ['in', 'รับเข้า', 'on-ok'], ['out', 'เบิกจ่าย', 'on-low'], ['adj', 'ปรับยอด', 'on-adj']]
+  $('histChips').innerHTML = [['all', 'ทั้งหมด', ''], ['in', 'รับเข้า', 'on-ok'], ['out', 'เบิกจ่าย', 'on-low'], ['ret', 'คืนเบิก', 'on-ret'], ['adj', 'ปรับยอด', 'on-adj']]
     .map(([k, l, c]) => `<button class="chip ${histType === k ? (c || 'on') : ''}" onclick="setHistType('${k}')">${l} <b>${cnt[k]}</b></button>`).join('');
   const list = histType === 'all' ? histData : histData.filter(h => histGroup(h.type) === histType);
   $('historyBody').innerHTML = list.length ? list.map(h => {
     const g = histGroup(h.type);
-    const badge = g === 'in' ? 'b-in' : g === 'out' ? 'b-out' : 'b-adj';
-    const col = g === 'in' ? 'text-emerald-600' : g === 'out' ? 'text-rose-600' : 'text-amber-600';
+    const badge = g === 'in' ? 'b-in' : g === 'out' ? 'b-out' : g === 'ret' ? 'b-ret' : 'b-adj';
+    const col = g === 'in' ? 'text-emerald-600' : g === 'out' ? 'text-rose-600' : g === 'ret' ? 'text-teal-600' : 'text-amber-600';
     const q = g === 'adj' ? (h.type === 'ปรับเพิ่ม' ? '+' : '−') + num(h.quantity) : num(h.quantity);
     return `<tr class="hover:bg-slate-50">
       <td class="font-mono text-slate-500">${thDate(h.date)}</td><td><span class="badge ${badge}">${esc(h.type)}</span></td>
@@ -1662,8 +1799,8 @@ function paintHist() {
   }).join('') : '<tr><td colspan="8" class="text-center py-10 text-slate-400">ไม่พบประวัติ</td></tr>';
   const MAXC = 200;
   $('historyCards').innerHTML = (list.length ? list.slice(0, MAXC).map(h => {
-    const g = histGroup(h.type), badge = g === 'in' ? 'b-in' : g === 'out' ? 'b-out' : 'b-adj';
-    const col = g === 'in' ? 'text-emerald-600' : g === 'out' ? 'text-rose-600' : 'text-amber-600';
+    const g = histGroup(h.type), badge = g === 'in' ? 'b-in' : g === 'out' ? 'b-out' : g === 'ret' ? 'b-ret' : 'b-adj';
+    const col = g === 'in' ? 'text-emerald-600' : g === 'out' ? 'text-rose-600' : g === 'ret' ? 'text-teal-600' : 'text-amber-600';
     const q = g === 'adj' ? (h.type === 'ปรับเพิ่ม' ? '+' : '−') + num(h.quantity) : num(h.quantity);
     return `<div class="mcard" style="padding:.7rem .9rem"><div class="flex items-center justify-between"><span class="badge ${badge}">${esc(h.type)}</span><span class="font-mono text-xs text-slate-500">${thDate(h.date)}</span></div>
       <div class="flex items-start justify-between gap-3 mt-1.5"><div class="min-w-0"><div class="font-semibold leading-snug">${esc(h.name)}</div><div class="text-[11px] text-slate-400">${esc(h.code)}${h.person ? ' · ' + esc(h.person) : ''}</div></div>
@@ -1753,11 +1890,11 @@ function renderMoveReport() {
   if (!repRaw) { $('repResult').innerHTML = ''; return; }
   const f = F.rep;
   const logs = repRaw.logs.filter(l => passes('rep', { code: l.code, name: l.name, unit: l.unit, isLow: !!lowMap[l.code] }) && (!f.ty.size || f.ty.has(tyLabel(l.type))));
-  const map = {}; let tin = 0, tout = 0, tadj = 0;
+  const map = {}; let tin = 0, tout = 0, tret = 0, tadj = 0;
   logs.forEach(l => {
-    const k = l.code || l.name; map[k] = map[k] || { code: l.code, name: l.name, unit: l.unit, inQty: 0, outQty: 0, adjQty: 0 };
+    const k = l.code || l.name; map[k] = map[k] || { code: l.code, name: l.name, unit: l.unit, inQty: 0, outQty: 0, retQty: 0, adjQty: 0 };
     const q = Number(l.quantity) || 0;
-    if (l.type === 'รับเข้า') { map[k].inQty += q; tin += q; } else if (l.type === 'เบิกจ่าย') { map[k].outQty += q; tout += q; } else { const sg = l.type === 'ปรับเพิ่ม' ? q : -q; map[k].adjQty += sg; tadj += sg; }
+    if (l.type === 'รับเข้า') { map[k].inQty += q; tin += q; } else if (l.type === 'เบิกจ่าย') { map[k].outQty += q; tout += q; } else if (l.type === 'คืนเบิก') { map[k].retQty += q; tret += q; } else { const sg = l.type === 'ปรับเพิ่ม' ? q : -q; map[k].adjQty += sg; tadj += sg; }
   });
   const sum = Object.values(map);
   const rawMap = {}; (repRaw.summaryList || []).forEach(r => rawMap[r.code || r.name] = r);
@@ -1768,25 +1905,26 @@ function renderMoveReport() {
     x.open = (!f.ty.size && r) ? r.openQty : null;
     x.close = (!f.ty.size && r) ? r.closeQty : null;
   });
-  view = { mode: 'move', logs, sum, tin, tout, tadj, start: repRaw.startDate, end: repRaw.endDate };
+  view = { mode: 'move', logs, sum, tin, tout, tret, tadj, start: repRaw.startDate, end: repRaw.endDate };
   $('repResult').innerHTML = `
     <div class="card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div><h3 class="font-semibold">รายงานความเคลื่อนไหว รับเข้า - เบิกจ่าย</h3><p class="text-xs text-slate-400"><span class="badge b-in mr-1">${esc(periodText(repRaw.startDate, repRaw.endDate))}</span>${thDate(repRaw.startDate)} ถึง ${thDate(repRaw.endDate)} • ตัวกรอง: ${esc(describeF('rep'))}</p></div>${actions}</div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${statBox('จำนวนวัสดุ', num(sum.length), '')}${statBox('รวมรับเข้า', num(tin), 'text-emerald-600')}${statBox('รวมเบิกจ่าย', num(tout), 'text-rose-600')}${statBox('ปรับยอดสุทธิ', (tadj > 0 ? '+' : '') + num(tadj), 'text-amber-600')}</div>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">${statBox('จำนวนวัสดุ', num(sum.length), '')}${statBox('รวมรับเข้า', num(tin), 'text-emerald-600')}${statBox('รวมเบิกจ่าย', num(tout), 'text-rose-600')}${statBox('รวมคืนเบิก', num(tret), 'text-teal-600')}${statBox('ปรับยอดสุทธิ', (tadj > 0 ? '+' : '') + num(tadj), 'text-amber-600')}</div>
     <div class="card p-5"><h4 class="text-sm font-semibold mb-3">สรุปยอดแยกตามวัสดุ</h4>
       <div class="sm:hidden space-y-2.5">${sum.length ? sum.map(i => `<div class="mcard" style="padding:.75rem .9rem"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-mono text-[11px] text-indigo-600">${esc(i.code)}</div><div class="font-semibold leading-snug">${esc(i.name)}</div></div>
         <div class="text-right flex-none text-[10px] text-slate-500">คงเหลือปัจจุบัน<div class="text-lg font-extrabold ${i.low ? 'text-rose-600' : 'text-slate-900'}">${i.bal == null ? '-' : num(i.bal)}</div></div></div>
         <div class="text-sm mt-1.5 text-slate-600">ต้นงวด <b>${i.open == null ? '-' : num(i.open)}</b> → ปลายงวด <b class="${i.close != null && i.close < 0 ? 'text-rose-600' : ''}">${i.close == null ? '-' : num(i.close)}</b> <span class="text-xs text-slate-400">${esc(i.unit)}</span></div>
-        <div class="grid grid-cols-3 gap-2 mt-2 text-center text-xs"><div class="rounded-lg bg-emerald-50 py-1.5"><div class="text-emerald-700 font-bold">${num(i.inQty)}</div><div class="text-[10px] text-slate-500">รับเข้า</div></div><div class="rounded-lg bg-rose-50 py-1.5"><div class="text-rose-700 font-bold">${num(i.outQty)}</div><div class="text-[10px] text-slate-500">เบิกจ่าย</div></div><div class="rounded-lg bg-amber-50 py-1.5"><div class="text-amber-700 font-bold">${i.adjQty > 0 ? '+' : ''}${num(i.adjQty)}</div><div class="text-[10px] text-slate-500">ปรับยอด</div></div></div></div>`).join('') : '<div class="text-center py-8 text-slate-400 text-sm">ไม่พบรายการ</div>'}</div>
+        <div class="grid grid-cols-4 gap-2 mt-2 text-center text-xs"><div class="rounded-lg bg-emerald-50 py-1.5"><div class="text-emerald-700 font-bold">${num(i.inQty)}</div><div class="text-[10px] text-slate-500">รับเข้า</div></div><div class="rounded-lg bg-rose-50 py-1.5"><div class="text-rose-700 font-bold">${num(i.outQty)}</div><div class="text-[10px] text-slate-500">เบิกจ่าย</div></div><div class="rounded-lg bg-teal-50 py-1.5"><div class="text-teal-700 font-bold">${num(i.retQty)}</div><div class="text-[10px] text-slate-500">คืนเบิก</div></div><div class="rounded-lg bg-amber-50 py-1.5"><div class="text-amber-700 font-bold">${i.adjQty > 0 ? '+' : ''}${num(i.adjQty)}</div><div class="text-[10px] text-slate-500">ปรับยอด</div></div></div></div>`).join('') : '<div class="text-center py-8 text-slate-400 text-sm">ไม่พบรายการ</div>'}</div>
       <div class="hidden sm:block overflow-x-auto rounded-xl border border-slate-100"><table class="t w-full text-left text-xs">
-      <thead><tr><th>รหัส</th><th>ชื่อวัสดุ</th><th>หน่วย</th><th class="text-right">ต้นงวด</th><th class="text-right">รับเข้า</th><th class="text-right">เบิกจ่าย</th><th class="text-right">ปรับยอด</th><th class="text-right">ปลายงวด</th><th class="text-right">คงเหลือปัจจุบัน</th></tr></thead>
+      <thead><tr><th>รหัส</th><th>ชื่อวัสดุ</th><th>หน่วย</th><th class="text-right">ต้นงวด</th><th class="text-right">รับเข้า</th><th class="text-right">เบิกจ่าย</th><th class="text-right">คืนเบิก</th><th class="text-right">ปรับยอด</th><th class="text-right">ปลายงวด</th><th class="text-right">คงเหลือปัจจุบัน</th></tr></thead>
       <tbody class="divide-y divide-slate-100">${sum.length ? sum.map(i => `<tr><td class="font-mono text-indigo-600">${esc(i.code)}</td><td class="font-medium">${esc(i.name)}</td><td class="text-slate-500">${esc(i.unit)}</td>
         <td class="text-right font-semibold text-slate-600">${i.open == null ? '-' : num(i.open)}</td>
         <td class="text-right text-emerald-600 font-semibold">${num(i.inQty)}</td>
         <td class="text-right text-rose-600 font-semibold">${num(i.outQty)}</td>
+        <td class="text-right text-teal-600 font-semibold">${num(i.retQty)}</td>
         <td class="text-right font-semibold text-amber-600">${i.adjQty > 0 ? '+' : ''}${num(i.adjQty)}</td>
         <td class="text-right font-bold ${i.close != null && i.close < 0 ? 'text-rose-600' : ''}">${i.close == null ? '-' : num(i.close)}</td>
-        <td class="text-right font-bold ${i.low ? 'text-rose-600' : 'text-slate-900'}">${i.bal == null ? '-' : num(i.bal)}</td></tr>`).join('') : noData(9)}</tbody></table></div></div>`;
+        <td class="text-right font-bold ${i.low ? 'text-rose-600' : 'text-slate-900'}">${i.bal == null ? '-' : num(i.bal)}</td></tr>`).join('') : noData(10)}</tbody></table></div></div>`;
 }
 
 /* ===== เอกสารรายงานทางการ (พิมพ์ / PDF) ===== */
@@ -1805,10 +1943,10 @@ function printReport() {
     body = `<h3>รายละเอียดสต็อกวัสดุ</h3><p style="font-size:8.5pt;color:#475569;margin:0 0 4pt">คงเหลือรวม = ยกมา (คลัง + หน้าร้าน) + รับเข้า − เบิกจ่าย &nbsp;|&nbsp; ควรสั่งเพิ่ม = ขั้นต่ำ − คงเหลือรวม</p><table class="dt">${th(['ลำดับ','รหัส','ชื่อวัสดุ','หน่วย','ยกมา','รับเข้า','เบิกจ่าย','คงเหลือรวม','ขั้นต่ำ','ควรสั่งเพิ่ม','สถานะ'])}<tbody>${
       r.length ? r.map((x, i) => `<tr${x.isLow ? ' class="lowrow"' : ''}><td class="c">${i + 1}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td class="c">${esc(x.unit)}</td><td class="r">${num(x.inWarehouse + x.inFrontStore)}</td><td class="r tk">${num(x.stockIn)}</td><td class="r tl">${num(x.stockOut)}</td><td class="r"><b>${num(x.balance)}</b></td><td class="r">${num(x.minStock)}</td><td class="r">${x.isLow ? num(x.minStock - x.balance) : '-'}</td><td class="c ${x.isLow ? 'tl' : 'tk'}">${x.isNeg ? 'ติดลบ' : x.isLow ? 'ใกล้หมด' : 'ปกติ'}</td></tr>`).join('') : '<tr><td colspan="11" class="c">ไม่มีรายการ</td></tr>'}</tbody></table>`;
   } else {
-    const net = view.tin - view.tout + view.tadj;
-    summary = [['จำนวนวัสดุที่เคลื่อนไหว', view.sum.length], ['รวมรับเข้า', view.tin], ['รวมเบิกจ่าย', view.tout], ['ผลต่างรวม (รับ - เบิก + ปรับ)', net]];
-    body = `<h3>สรุปยอดรับเข้า - เบิกจ่ายแยกตามวัสดุ</h3><table class="dt">${th(['ลำดับ','รหัส','ชื่อวัสดุ','หน่วย','ต้นงวด','รับเข้า','เบิกจ่าย','ปรับยอด','ปลายงวด','คงเหลือปัจจุบัน'])}<tbody>${
-      view.sum.length ? view.sum.map((x, i) => `<tr><td class="c">${i + 1}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td class="c">${esc(x.unit)}</td><td class="r">${x.open == null ? '-' : num(x.open)}</td><td class="r tk">${num(x.inQty)}</td><td class="r tl">${num(x.outQty)}</td><td class="r">${x.adjQty > 0 ? '+' : ''}${num(x.adjQty)}</td><td class="r"><b>${x.close == null ? '-' : num(x.close)}</b></td><td class="r ${x.low ? 'tl' : ''}"><b>${x.bal == null ? '-' : num(x.bal)}</b></td></tr>`).join('') : '<tr><td colspan="10" class="c">ไม่มีรายการ</td></tr>'}</tbody></table>`;
+    const net = view.tin - view.tout + view.tret + view.tadj;
+    summary = [['จำนวนวัสดุที่เคลื่อนไหว', view.sum.length], ['รวมรับเข้า', view.tin], ['รวมเบิกจ่าย', view.tout], ['รวมคืนเบิก', view.tret, 'background:#ccfbf1;color:#0f766e'], ['ผลต่างรวม (รับ - เบิก + คืน + ปรับ)', net, 'background:#fef3c7;color:#b45309']];
+    body = `<h3>สรุปยอดรับเข้า - เบิกจ่ายแยกตามวัสดุ</h3><table class="dt">${th(['ลำดับ','รหัส','ชื่อวัสดุ','หน่วย','ต้นงวด','รับเข้า','เบิกจ่าย','คืนเบิก','ปรับยอด','ปลายงวด','คงเหลือปัจจุบัน'])}<tbody>${
+      view.sum.length ? view.sum.map((x, i) => `<tr><td class="c">${i + 1}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td class="c">${esc(x.unit)}</td><td class="r">${x.open == null ? '-' : num(x.open)}</td><td class="r tk">${num(x.inQty)}</td><td class="r tl">${num(x.outQty)}</td><td class="r">${num(x.retQty)}</td><td class="r">${x.adjQty > 0 ? '+' : ''}${num(x.adjQty)}</td><td class="r"><b>${x.close == null ? '-' : num(x.close)}</b></td><td class="r ${x.low ? 'tl' : ''}"><b>${x.bal == null ? '-' : num(x.bal)}</b></td></tr>`).join('') : '<tr><td colspan="10" class="c">ไม่มีรายการ</td></tr>'}</tbody></table>`;
   }
 
   $('printArea').innerHTML = `<div class="doc"><table class="pg"><thead><tr><td></td></tr></thead><tfoot><tr><td></td></tr></tfoot><tbody><tr><td>
@@ -1820,7 +1958,7 @@ function printReport() {
       <tr><td class="k">เงื่อนไขการกรอง</td><td colspan="2">${esc(describeF('rep'))}</td></tr>
     </table>
     <h3>สรุปภาพรวม</h3>
-    <table class="sum"><tr>${summary.map(s => `<td>${s[0]}<b>${num(s[1])}</b></td>`).join('')}</tr></table>
+    <table class="sum"><tr>${summary.map(s => `<td${s[2] ? ` style="${s[2]}"` : ''}>${s[0]}<b>${num(s[1])}</b></td>`).join('')}</tr></table>
     ${body}
     </td></tr></tbody></table>
     ${docNo ? `<div class="foot"><span>${esc(docNo)}</span></div>` : ''}
@@ -1838,8 +1976,8 @@ function exportCSV() {
     name = `สต็อกคงเหลือ_${ymd(new Date())}`;
   } else {
     if (!view.sum.length) return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลสำหรับส่งออก' });
-    head = ['รหัส','ชื่อวัสดุ','หน่วย','ต้นงวด','รับเข้า','เบิกจ่าย','ปรับยอด','ปลายงวด','คงเหลือปัจจุบัน'];
-    lines = view.sum.map(x => [x.code, x.name, x.unit, x.open == null ? '' : x.open, x.inQty, x.outQty, x.adjQty, x.close == null ? '' : x.close, x.bal == null ? '' : x.bal]);
+    head = ['รหัส','ชื่อวัสดุ','หน่วย','ต้นงวด','รับเข้า','เบิกจ่าย','คืนเบิก','ปรับยอด','ปลายงวด','คงเหลือปัจจุบัน'];
+    lines = view.sum.map(x => [x.code, x.name, x.unit, x.open == null ? '' : x.open, x.inQty, x.outQty, x.retQty, x.adjQty, x.close == null ? '' : x.close, x.bal == null ? '' : x.bal]);
     name = `รายงานเคลื่อนไหว_${view.start}_ถึง_${view.end}`;
   }
   const a = document.createElement('a');
