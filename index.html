@@ -321,7 +321,7 @@
   </aside>
   <div class="flex-1 min-w-0 flex flex-col">
     <div class="hdr sticky top-0 z-40 bg-white/90 backdrop-blur flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 sm:px-6 py-3 border-b border-slate-100">
-      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><h1 id="appTitle" class="apptitle font-bold leading-snug min-w-0">🐱 ระบบจัดการวัสดุสำนักงาน 🐱</h1></div>
+      <div class="t-row min-w-0 w-full sm:w-auto flex items-center gap-3"><img src="logo.png" alt="" class="h-9 sm:h-12 w-auto flex-none" style="object-fit:contain" onerror="this.remove()"><h1 id="appTitle" class="apptitle font-bold leading-snug min-w-0"> ระบบจัดการวัสดุสำนักงาน</h1></div>
       <div id="hdrCtl" class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
         <div class="selw relative flex-none"><span class="absolute left-3.5 top-2.5 text-base leading-none pointer-events-none">🗂️</span>
           <select id="bookSel" onchange="switchBook(this.value)" class="inp !pl-10 !py-2 !w-auto sm:!py-2.5 sm:!w-72"></select></div>
@@ -1011,7 +1011,7 @@ function loadAllData() {
   if (!book) return;
   const b = book;
   $('heroBook').innerText = bookName();
-  document.title = '🐱 ระบบจัดการวัสดุสำนักงาน 🐱 - ' + bookName(); paintTitle();
+  document.title = ' ระบบจัดการวัสดุสำนักงาน  - ' + bookName(); paintTitle();
   
   $('refreshIcon').classList.add('fa-spin');
   google.script.run
