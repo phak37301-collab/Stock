@@ -816,7 +816,11 @@ async function openSettings() {
         <div id="st_lmsg" style="margin-top:6px;font-size:.78rem;color:#64748b">${st.lineLog ? 'ผลส่งล่าสุด: ' + esc(st.lineLog) : ''}</div></div>
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>เปลี่ยนรหัสผ่านแอดมิน</b> <span class="lbl">(เว้นว่างถ้าไม่เปลี่ยน)</span>
         <input id="st_pw1" type="password" class="inp mt-2" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)" autocomplete="new-password">
-        <input id="st_pw2" type="password" class="inp mt-2" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"></div></div>`,
+        <input id="st_pw2" type="password" class="inp mt-2" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"></div>
+      <details style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0" ${(st.history || []).length ? '' : ''}>
+        <summary style="cursor:pointer;font-weight:700">ประวัติการตั้งค่า <span class="lbl">${(st.history || []).length ? '(ล่าสุด ' + esc(st.history[0].t) + ' · ' + st.history.length + ' ครั้ง)' : '(ยังไม่มีประวัติ)'}</span></summary>
+        <div style="margin-top:8px;max-height:220px;overflow:auto;font-size:.78rem">${(st.history || []).length ? st.history.map(h => `<div style="padding:6px 0;border-bottom:1px dashed #e2e8f0"><b style="color:#4f46e5">${esc(h.t)}</b>${(h.c || []).map(x => `<div style="color:#475569;margin-top:2px">• ${esc(x)}</div>`).join('')}</div>`).join('') : '<div class="lbl">บันทึกเมื่อมีการแก้ไขการตั้งค่าครั้งต่อไป (ไม่เก็บ token หรือรหัสผ่านจริง)</div>'}</div>
+      </details></div>`,
     didOpen: () => {
       const msg = t => { $('st_lmsg').textContent = t; };
       $('st_ltest').onclick = async () => {
@@ -1773,8 +1777,8 @@ function buildForm(t) {
     </div>
     <form onsubmit="submitForm(event,'${t}')" class="space-y-4">
       <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs font-medium">วันที่ *</label><input type="text" id="${t}_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium block truncate">${isIn ? 'ผู้รับมอบ' : 'ผู้เบิก'} *</label><input id="${t}_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" placeholder="ชื่อผู้ดำเนินการ / แผนก">${isIn ? '' : `<div class="text-right mt-1 text-[11px]"><button type="button" id="out_chname" class="hidden text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button></div>`}</div>
+        <div><div class="flex items-center justify-between gap-2 h-5"><label class="text-xs font-medium">วันที่ *</label></div><input type="text" id="${t}_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
+        <div><div class="flex items-center justify-between gap-2 h-5"><label class="text-xs font-medium truncate">${isIn ? 'ผู้รับมอบ' : 'ผู้เบิก'} *</label>${isIn ? '' : `<button type="button" id="out_chname" class="hidden text-[11px] text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button>`}</div><input id="${t}_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" placeholder="ชื่อผู้ดำเนินการ / แผนก"></div>
       </div>
       <div><label class="text-xs font-medium">วัสดุ *</label>
         <select id="${t}_sel" required onchange="unitChange('${t}')" class="inp mt-1"><option value="" disabled selected>-- เลือกวัสดุ --</option></select>
@@ -2010,8 +2014,8 @@ function buildRetForm() {
     </div>
     <form onsubmit="submitRet(event)" class="space-y-4">
       <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs font-medium">วันที่คืน *</label><input type="text" id="ret_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium block truncate">ผู้คืน *</label><input id="ret_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"><div class="flex items-center justify-between gap-2 mt-1 text-[11px]"><span class="text-slate-400">ใช้ชื่อเดียวกับที่เบิกไว้</span><button type="button" id="ret_chname" class="hidden text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button></div></div>
+        <div><div class="flex items-center justify-between gap-2 h-5"><label class="text-xs font-medium">วันที่คืน *</label></div><input type="text" id="ret_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
+        <div><div class="flex items-center justify-between gap-2 h-5"><label class="text-xs font-medium truncate">ผู้คืน *</label><button type="button" id="ret_chname" class="hidden text-[11px] text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button></div><input id="ret_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"><div class="mt-1 text-[11px] text-slate-400">ใช้ชื่อเดียวกับที่เบิกไว้</div></div>
       </div>
       <div id="ret_sug"></div>
       <div><label class="text-xs font-medium">รายการที่คืน *</label>
