@@ -377,6 +377,41 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   .chip.on-ret{background:#ccfbf1;border-color:#2dd4bf;color:#0f766e}
   .g-ret{background:linear-gradient(135deg,#2dd4bf,#0d9488);box-shadow:0 10px 24px rgba(13,148,136,.35)}
   .g-ret:hover{filter:brightness(1.07)}
+
+  /* ===== มือถือ (แอดมิน): ปุ่มเบิก/รับเข้า/คืนเบิก เป็นแท่งปุ่มเล็กชิดขอบขวา แยกสี สไลด์เก็บเข้าขอบได้ ===== */
+  .fab-handle{display:none}
+  @media(max-width:639px),(max-height:500px){
+    body .fab-wrap{flex-direction:column;align-items:stretch;gap:6px;right:0;bottom:calc(88px + env(safe-area-inset-bottom,0px));transition:transform .22s ease}
+    body .fab-wrap .fab{width:46px;height:50px;padding:0;gap:1px;flex-direction:column;justify-content:center;border-radius:16px 0 0 16px;box-shadow:-3px 4px 12px rgba(15,23,42,.25)}
+    body .fab-wrap .fab:hover{transform:none}
+    body .fab-wrap .fab .emo{font-size:1.2rem;line-height:1}
+    body .fab-wrap .fab span{display:block;font-size:.55rem;font-weight:700;line-height:1}
+    body .fab-wrap .fab-handle{display:flex;align-items:center;justify-content:center;height:22px;border-radius:12px 0 0 12px;background:rgba(30,27,75,.55);color:#fff;font-size:.7rem}
+    body .fab-wrap .fab-handle i{transition:transform .22s}
+    body .fab-wrap.collapsed{transform:translateX(calc(100% - 14px))}
+    body .fab-wrap.collapsed .fab-handle i{transform:rotate(180deg)}
+    body .fab-wrap.collapsed .fab{box-shadow:-2px 2px 8px rgba(15,23,42,.2)}
+  }
+  @media(min-width:640px) and (max-height:500px){body .fab-wrap{bottom:calc(14px + env(safe-area-inset-bottom,0px))}}
+  /* ===== แสดงชื่อผู้ใช้ให้เห็นชัด ===== */
+  .who-card{display:flex;align-items:center;gap:.85rem;text-align:left;padding:.9rem 1rem;border-radius:18px;color:#fff;background:linear-gradient(135deg,#8b5cf6,#4f46e5);box-shadow:0 10px 24px rgba(79,70,229,.32)}
+  .who-av{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:1.35rem;font-weight:700;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.6)}
+  .who-lbl{font-size:.7rem;opacity:.85;letter-spacing:.02em}
+  .who-nm{font-size:1.15rem;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+  .who-edit{flex:none;margin-left:auto;font-size:.75rem;font-weight:600;padding:.4rem .75rem;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;white-space:nowrap}
+  .who-card.empty{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+  .who-chip{display:inline-flex;align-items:center;gap:.45rem;height:42px;padding:0 .9rem 0 .35rem;border-radius:999px;font-size:.82rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#8b5cf6,#4f46e5);box-shadow:0 4px 12px rgba(79,70,229,.35);white-space:nowrap}
+  .who-chip .who-av{width:30px;height:30px;font-size:.9rem;border-width:1.5px}
+  .who-chip .nm{max-width:7.5rem;overflow:hidden;text-overflow:ellipsis}
+  .who-chip.hidden,.fab-wrap .hidden{display:none!important}
+  @media(max-width:639px){.who-chip{display:none!important}}   /* มือถือ: ชื่อแสดงในการ์ดหน้าแรกอยู่แล้ว ไม่แย่งที่แถบหัวเว็บ */
+  #out_person[readonly],#ret_person[readonly]{background:#eef2ff;border-color:#a5b4fc;color:#3730a3;font-weight:700;cursor:default}
+  /* ===== หมุนจอ: ใช้ความสูงจริงของจอ (--vh) และปิดแอนิเมชันชั่วคราวตอนปรับเลย์เอาต์ ไม่ให้ค้างค่าเดิม ===== */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{min-height:calc(var(--vh,1vh)*100)}
+  .shell{min-height:calc(var(--vh,1vh)*100)}
+  .card .tbl-fill{max-height:calc(var(--vh,1vh)*100 - 380px)}
+  body.no-anim *,body.no-anim *::before,body.no-anim *::after{transition:none!important}
 </style>
 </head>
 <body>
@@ -411,6 +446,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
         <div id="lowChip" class="lowchip"></div>
         <div id="hdrAct" class="hdr-act no-print">
           <button type="button" id="bellBtn" class="icon-btn admin-only" onclick="bellClick()" title="คำขอเบิกที่รออนุมัติ (กดเพื่อเปิดดู / อนุญาตแจ้งเตือนบนเครื่องนี้)" aria-label="แจ้งเตือนคำขอเบิก"><i class="fa-solid fa-bell"></i><b id="bellN" class="bellN"></b></button>
+          <button type="button" id="nameChip" class="who-chip hidden" onclick="askMyName(true)" title="ชื่อที่ใช้เบิก (กดเพื่อเปลี่ยน)" aria-label="ชื่อที่ใช้เบิก"></button>
           <button type="button" id="refreshBtn" onclick="loadAllData()" class="icon-btn" title="รีเฟรชข้อมูล" aria-label="รีเฟรชข้อมูล"><i id="refreshIcon" class="fa-solid fa-arrows-rotate"></i></button>
           <button type="button" id="adminBtn" class="adm-btn" onclick="adminToggle()" title="เข้าสู่ระบบแอดมิน" aria-label="เข้าสู่ระบบแอดมิน"><i id="adminIcon" class="fa-solid fa-lock"></i><span id="adminBtnTxt">เข้าสู่ระบบ</span></button>
         </div>
@@ -419,7 +455,9 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
       
     </div>
     <main class="flex-1 min-w-0 p-4 sm:p-6 pb-28 space-y-5">
+  <div id="lineBanner" class="hidden admin-only rounded-xl px-4 py-3 text-sm font-medium" role="status"></div>
   <section id="userHome" class="card p-8 text-center space-y-4 max-w-xl mx-auto mt-6">
+    <div id="homeWho"></div>
     <div class="text-5xl">📦</div>
     <h2 class="text-lg font-semibold">เบิกวัสดุสำนักงาน</h2>
     <p class="text-sm text-slate-500">กดปุ่มด้านล่างเพื่อส่งคำขอเบิกหรือคำขอคืน แอดมินจะอนุมัติก่อน แล้วระบบจึงปรับสต็อก<br>เลือกชีทที่ต้องการจากช่องด้านบน</p>
@@ -536,7 +574,8 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
 </div>
 
 <!-- Floating action buttons -->
-<div class="fab-wrap no-print">
+<div class="fab-wrap no-print" id="fabWrap">
+  <button type="button" class="fab-handle admin-only" onclick="toggleFab()" aria-label="ซ่อน/แสดงปุ่มลัด" title="ซ่อน/แสดงปุ่มลัด"><i class="fa-solid fa-chevron-right"></i></button>
   <button class="fab g-out" onclick="openTx('out')" title="เบิกของ" aria-label="เบิกของ"><em class="emo">📦</em><span id="fabOutTxt">ขอเบิกของ</span></button>
   <button class="fab g-in admin-only" onclick="openTx('in')" title="รับของเข้าคลัง" aria-label="รับของเข้าคลัง"><em class="emo">🚚</em><span>รับของเข้า</span></button>
   <button class="fab g-ret admin-only" onclick="openRet()" title="คืนเบิก" aria-label="คืนเบิก"><em class="emo">↩️</em><span>คืนเบิก</span></button>
@@ -623,6 +662,7 @@ function applyRole() {
   if (!isAdmin) { reqPrev = null; setBell(0); }
   $('fabOutTxt').innerText = isAdmin ? 'เบิกของ' : 'ขอเบิกของ';
   if (!isAdmin) { try { switchTab('inventory'); } catch (e) {} closeTx(); try { toggleGame(false); } catch (e) {} }
+  paintWho();
   isAdmin ? loadRequests(true) : paintMyReqs();
 }
 async function adminLogin(pw) {
@@ -654,7 +694,7 @@ async function openSettings() {
   if (needAdmin()) return;
   let st; try { st = await api('getSettings'); } catch (e) { return showError(e); }
   let newPw = '';
-  const val = () => ({ notifyEmail: $('st_mail').value.trim(), webUrl: $('st_url').value.trim() });
+  const val = () => ({ notifyEmail: $('st_mail').value.trim(), webUrl: $('st_url').value.trim(), lineToken: $('st_ltok').value.trim(), lineUserId: $('st_luid').value.trim(), alwaysEmail: $('st_always').checked });
   const r = await Swal.fire({
     title: 'ตั้งค่าระบบ', width: 520, showCancelButton: true, showDenyButton: true,
     confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', denyButtonText: 'ส่งอีเมลทดสอบ', confirmButtonColor: '#4f46e5', denyButtonColor: '#64748b',
@@ -663,9 +703,26 @@ async function openSettings() {
       <input id="st_mail" class="inp mt-1" value="${esc(st.notifyEmail)}" placeholder="boss@gmail.com">
       <label class="lbl" style="display:block;margin-top:12px">ลิงก์หน้าเว็บนี้ (แนบไปในอีเมล)</label>
       <input id="st_url" class="inp mt-1" value="${esc(st.webUrl || (location.origin + location.pathname))}">
+      <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:.82rem"><input type="checkbox" id="st_always" ${st.alwaysEmail ? 'checked' : ''}> ส่งอีเมลทุกครั้งด้วย (ปกติส่งเมลเฉพาะเมื่อ LINE ส่งไม่สำเร็จ)</label>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>แจ้งเตือนทาง LINE</b> <span class="lbl">${st.lineConfigured ? '(ตั้งค่าแล้ว · ใช้โควตาเดือนนี้ ' + st.lineUsed + '/' + st.lineLimit + ')' : '(ยังไม่ได้ตั้งค่า)'}</span>
+        <input id="st_ltok" type="password" class="inp mt-2" autocomplete="off" placeholder="${st.lineConfigured ? 'Channel access token (เว้นว่างถ้าไม่เปลี่ยน)' : 'Channel access token'}">
+        <input id="st_luid" class="inp mt-2" autocomplete="off" value="${esc(st.lineUserId)}" placeholder="User ID ของแอดมิน (ขึ้นต้นด้วย U)">
+        <div style="margin-top:8px;display:flex;gap:12px;font-size:.8rem"><button type="button" id="st_ltest" style="color:#4f46e5;font-weight:600">ส่ง LINE ทดสอบ</button>${st.lineConfigured ? '<button type="button" id="st_lclear" style="color:#e11d48">ลบการตั้งค่า LINE</button>' : ''}</div>
+        <div id="st_lmsg" style="margin-top:6px;font-size:.78rem;color:#64748b">${st.lineLog ? 'ผลส่งล่าสุด: ' + esc(st.lineLog) : ''}</div></div>
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>เปลี่ยนรหัสผ่านแอดมิน</b> <span class="lbl">(เว้นว่างถ้าไม่เปลี่ยน)</span>
         <input id="st_pw1" type="password" class="inp mt-2" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)" autocomplete="new-password">
         <input id="st_pw2" type="password" class="inp mt-2" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"></div></div>`,
+    didOpen: () => {
+      const msg = t => { $('st_lmsg').textContent = t; };
+      $('st_ltest').onclick = async () => {
+        msg('กำลังส่ง...');
+        try { await api('saveSettings', val()); msg(await api('sendTestLine')); $('st_ltok').value = ''; } catch (e) { msg('ไม่สำเร็จ: ' + ((e && e.message) || e)); }
+      };
+      const cl = $('st_lclear');
+      if (cl) cl.onclick = async () => {
+        try { await api('saveSettings', Object.assign(val(), { lineToken: '', lineUserId: '', clearLine: true })); $('st_luid').value = ''; msg('ลบการตั้งค่า LINE แล้ว'); } catch (e) { msg('ไม่สำเร็จ: ' + ((e && e.message) || e)); }
+      };
+    },
     preConfirm: async () => {
       const f = val(), p1 = $('st_pw1').value, p2 = $('st_pw2').value;
       if (p1 || p2) {
@@ -707,7 +764,22 @@ async function askMyName(change) {
   return false;
 }
 // เติมชื่อที่จำไว้ในฟอร์มของผู้ใช้ทั่วไป (แอดมินพิมพ์ชื่อคนอื่นได้ตามเดิม)
+function paintWho() {
+  const n = myName(), chip = $('nameChip'), hw = $('homeWho');
+  if (chip) {
+    chip.classList.toggle('hidden', isAdmin || !n);
+    chip.innerHTML = `<span class="who-av">${esc((n || '?').charAt(0).toUpperCase())}</span><span class="nm">${esc(n)}</span>`;
+  }
+  if (hw) hw.innerHTML = isAdmin ? '' : (n
+    ? `<div class="who-card"><div class="who-av">${esc(n.charAt(0).toUpperCase())}</div>
+        <div class="min-w-0"><div class="who-lbl">คุณกำลังเบิก/คืนในชื่อ</div><div class="who-nm">${esc(n)}</div></div>
+        <button type="button" class="who-edit" onclick="askMyName(true)">ไม่ใช่ฉัน?<br>เปลี่ยนชื่อ</button></div>`
+    : `<div class="who-card empty"><div class="who-av">?</div>
+        <div class="min-w-0"><div class="who-lbl">ยังไม่ได้ตั้งชื่อ</div><div class="who-nm">กรุณากรอกชื่อของคุณ</div></div>
+        <button type="button" class="who-edit" onclick="askMyName(false)">กรอกชื่อ</button></div>`);
+}
 function fillMyName() {
+  paintWho();
   const n = myName();
   ['out', 'ret'].forEach(t => {
     const el = $(t + '_person'), b = $(t + '_chname'); if (!el) return;
@@ -1077,10 +1149,18 @@ function loadRequests(quiet) {
     reqData = r.list || []; reqCounts = r.counts || [];
     const total = reqCounts.reduce((s, x) => s + x.count, 0);
     document.querySelectorAll('.rbadge').forEach(e => { e.innerText = total; e.style.display = total ? 'grid' : 'none'; });
-    setBell(total);
+    setBell(total); paintLineBanner(r.line);
     if (reqPrev !== null && total > reqPrev) notifyNew(total - reqPrev);
     reqPrev = total; renderRequests();
   }).withFailureHandler(e => { if (!quiet) showError(e); }).getRequestPanel(b, f);
+}
+function paintLineBanner(l) {
+  const el = $('lineBanner'); if (!el) return;
+  if (!l || !l.near) { el.classList.add('hidden'); return; }
+  el.className = 'admin-only rounded-xl px-4 py-3 text-sm font-medium ' + (l.full ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-800');
+  el.textContent = l.full
+    ? `โควตา LINE เดือนนี้ใช้ไป ${l.used}/${l.limit} ข้อความ ระบบหยุดส่ง LINE แล้ว และส่งแจ้งเตือนทางอีเมลแทนจนถึงสิ้นเดือน`
+    : `โควตา LINE เดือนนี้ใช้ไป ${l.used}/${l.limit} ข้อความ ใกล้หมดแล้ว (ระบบจะสลับไปส่งอีเมลเมื่อถึง ${l.stopAt})`;
 }
 function renderRequests() {
   if (!$('reqBody')) return;
@@ -2306,6 +2386,44 @@ function sendJob(force) {
 }
 
 function showError(err) { Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: (err && err.message) || err }); }
+
+/* ===== ปุ่มลัดชิดขอบขวา (มือถือ): ซ่อน/แสดง จำสถานะไว้ ===== */
+function toggleFab(force) {
+  const w = $('fabWrap'); if (!w) return;
+  const c = typeof force === 'boolean' ? force : !w.classList.contains('collapsed');
+  w.classList.toggle('collapsed', c);
+  try { localStorage.setItem('fabCollapsed', c ? '1' : '0'); } catch (e) {}
+}
+(function () {
+  const w = $('fabWrap'); if (!w) return;
+  let c = false; try { c = localStorage.getItem('fabCollapsed') === '1'; } catch (e) {}
+  w.classList.toggle('collapsed', c);
+  // แตะตอนซ่อนอยู่ = แค่ดึงปุ่มออกมา ไม่กดโดนปุ่มข้างใต้
+  w.addEventListener('click', e => { if (w.classList.contains('collapsed')) { e.preventDefault(); e.stopPropagation(); toggleFab(false); } }, true);
+})();
+
+/* ===== หมุนจอ/ปรับขนาดหน้าต่าง: คำนวณเลย์เอาต์ใหม่ทันทีและซ้ำหลังจอนิ่ง (เบราว์เซอร์มือถือรายงานขนาดใหม่ช้ากว่าเหตุการณ์หมุน) ===== */
+(function () {
+  let t1, t2, t3;
+  function sync() {
+    const vv = window.visualViewport, h = (vv && vv.height) || window.innerHeight;
+    document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
+    document.body.classList.toggle('is-land', window.innerWidth > window.innerHeight);
+    void document.body.offsetHeight;   // บังคับคำนวณเลย์เอาต์ใหม่
+  }
+  function settle() {
+    document.body.classList.add('no-anim'); sync();
+    clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+    t1 = setTimeout(sync, 120); t2 = setTimeout(sync, 350);
+    t3 = setTimeout(() => { sync(); document.body.classList.remove('no-anim'); }, 650);
+  }
+  window.addEventListener('orientationchange', settle);
+  window.addEventListener('resize', () => { clearTimeout(t1); t1 = setTimeout(sync, 60); });
+  if (window.visualViewport) visualViewport.addEventListener('resize', () => { clearTimeout(t2); t2 = setTimeout(sync, 60); });
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', settle);
+  window.addEventListener('pageshow', sync);
+  sync();
+})();
 </script>
 </body>
 </html>
