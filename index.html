@@ -573,15 +573,30 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
 const API_URL = 'https://script.google.com/macros/s/AKfycbzv3OyYJbWWrN1NpTk-PCQhWShNo5LIK1sz28xt3B2YCpqPNn-GERH1AKH3VT1EOYXpcQ/exec';
 (function () {
   if (window.google && google.script && google.script.run) return;
+  // รหัสเครื่อง: สร้างครั้งเดียวเก็บในเบราว์เซอร์นี้ ใช้ให้เซิร์ฟเวอร์นับรหัสผ่านผิด/ล็อกแยกรายเครื่อง
+  function devId() {
+    if (window.__dev) return window.__dev;
+    let d = '';
+    try { d = localStorage.getItem('devId') || ''; } catch (e) {}
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(d)) {
+      d = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : Date.now().toString(36) + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12);
+      try { localStorage.setItem('devId', d); } catch (e) {}
+    }
+    return (window.__dev = d);
+  }
   function mk(ok, fail) {
     return new Proxy({}, { get: function (_, name) {
       if (name === 'withSuccessHandler') return function (f) { return mk(f, fail); };
       if (name === 'withFailureHandler') return function (f) { return mk(ok, f); };
       return function () {
         const args = Array.prototype.slice.call(arguments);
-        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: name, args: args, pw: window.ADMIN_PW || '' }) })
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: name, args: args, pw: window.ADMIN_PW || '', dev: devId() }) })
           .then(function (r) { return r.json(); })
-          .then(function (j) { j.ok ? (ok && ok(j.result)) : (fail && fail(new Error(j.error))); },
+          .then(function (j) {
+            if (j.authLost && window.ADMIN_PW && window.onAuthLost) window.onAuthLost();
+            j.ok ? (ok && ok(j.result)) : (fail && fail(new Error(j.error)));
+          },
                 function (e) { fail && fail(new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่ (' + e.message + ')')); });
       };
     } });
@@ -614,20 +629,26 @@ async function adminLogin(pw) {
   window.ADMIN_PW = pw;
   let r;
   try { r = await api('checkAdmin'); } catch (e) { window.ADMIN_PW = ''; return { err: (e && e.message) || 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้' }; }
-  if (!r || !r.admin) { window.ADMIN_PW = ''; return { bad: true, locked: !!(r && r.locked) }; }
+  if (!r || !r.admin) { window.ADMIN_PW = ''; if (!(r && r.locked)) { try { sessionStorage.removeItem('adm'); } catch (e) {} } return { bad: true, locked: !!(r && r.locked) }; }
   isAdmin = true; try { sessionStorage.setItem('adm', pw); } catch (e) {}
   applyRole();
   if (r.isDefault) setTimeout(() => Swal.fire({ icon: 'warning', title: 'ยังใช้รหัสเริ่มต้นอยู่', text: 'เพื่อความปลอดภัย กรุณาตั้งรหัสผ่านใหม่ตอนนี้', confirmButtonText: 'ตั้งรหัสผ่านใหม่', confirmButtonColor: '#4f46e5' }).then(openSettings), 300);
   return true;
 }
 function adminLogout() { isAdmin = false; window.ADMIN_PW = ''; try { sessionStorage.removeItem('adm'); } catch (e) {} applyRole(); }
+// เซิร์ฟเวอร์แจ้งว่ารหัสที่ถือไว้ใช้ไม่ได้แล้ว (เช่น เปลี่ยนรหัสจากเครื่องอื่น) -> ออกจากโหมดแอดมินเอง ไม่ส่งรหัสเก่าซ้ำ
+window.onAuthLost = function () {
+  if (!window.ADMIN_PW) return;
+  adminLogout();
+  Swal.fire({ icon: 'info', title: 'ออกจากโหมดแอดมินแล้ว', text: 'รหัสผ่านถูกเปลี่ยนหรือใช้ไม่ได้ กรุณาเข้าสู่ระบบใหม่ด้วยรหัสปัจจุบัน' });
+};
 async function adminToggle() {
   if (isAdmin) return adminLogout();
   const r = await Swal.fire({ title: 'เข้าสู่โหมดแอดมิน', input: 'password', inputPlaceholder: 'รหัสผ่านแอดมิน', showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5' });
   if (!r.isConfirmed) return;
   const res = await adminLogin(r.value || '');
   if (res === true) return;
-  Swal.fire({ icon: 'error', title: res.err ? 'เชื่อมต่อไม่ได้' : res.locked ? 'ใส่รหัสผิดหลายครั้งเกินไป' : 'รหัสผ่านไม่ถูกต้อง', text: res.err || (res.locked ? 'ล็อกการเข้าสู่ระบบชั่วคราว 10 นาที' : '') });
+  Swal.fire({ icon: 'error', title: res.err ? 'เชื่อมต่อไม่ได้' : res.locked ? 'ใส่รหัสผิดหลายครั้งเกินไป' : 'รหัสผ่านไม่ถูกต้อง', text: res.err || (res.locked ? 'เครื่องนี้ถูกล็อกการเข้าสู่ระบบชั่วคราว 10 นาที (เครื่องอื่นยังเข้าได้) หากยังเข้าไม่ได้ ให้เจ้าของระบบกดรันฟังก์ชัน unlockAdmin' : '') });
 }
 async function openSettings() {
   if (needAdmin()) return;
@@ -665,6 +686,37 @@ async function openSettings() {
     if (newPw) { window.ADMIN_PW = newPw; try { sessionStorage.setItem('adm', newPw); } catch (e) {} }
     Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', text: r.value.message, timer: 2200, showConfirmButton: false });
   }
+}
+/* ===== จำชื่อผู้ใช้ทั่วไป: กรอกครั้งแรก ครั้งต่อไปเติมในช่องผู้เบิก/ผู้คืนให้เอง (ชื่อจะตรงกันทุกครั้ง) ===== */
+const normName = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+function myName() { try { return normName(localStorage.getItem('myName')); } catch (e) { return normName(window.__myName); } }
+function saveMyName(n) { n = normName(n); window.__myName = n; try { localStorage.setItem('myName', n); } catch (e) {} }
+async function askMyName(change) {
+  const had = !!myName();
+  const r = await Swal.fire({
+    title: change ? 'เปลี่ยนชื่อผู้ใช้' : 'ยินดีต้อนรับ กรุณากรอกชื่อของคุณ',
+    html: '<div style="font-size:.85rem;color:#64748b">ระบบจะจำชื่อนี้ไว้ในเครื่องนี้ และเติมในช่องผู้เบิก/ผู้คืนให้อัตโนมัติ<br>ใช้ชื่อเดิมทุกครั้ง เพื่อให้ระบบนับยอดเบิก-คืนของคุณถูกต้อง</div>',
+    input: 'text', inputValue: myName(), inputPlaceholder: 'เช่น สมชาย ใจดี', inputAttributes: { maxlength: 60, autocomplete: 'off' },
+    allowOutsideClick: had, allowEscapeKey: had, showCancelButton: had, cancelButtonText: 'ยกเลิก',
+    showDenyButton: !had, denyButtonText: 'ฉันเป็นแอดมิน', denyButtonColor: '#64748b',
+    confirmButtonText: 'บันทึกชื่อ', confirmButtonColor: '#4f46e5',
+    inputValidator: v => { const n = normName(v); if (!n) return 'กรุณากรอกชื่อ'; if (n.length > 60) return 'ชื่อยาวเกินไป (ไม่เกิน 60 ตัวอักษร)'; if (/^[=+\-@]/.test(n)) return 'กรุณาพิมพ์ชื่อให้ถูกหลัก ห้ามขึ้นต้นด้วย = + - หรือ @'; }
+  });
+  if (r.isConfirmed) { saveMyName(r.value); fillMyName(); return true; }
+  if (r.isDenied) adminToggle();
+  return false;
+}
+// เติมชื่อที่จำไว้ในฟอร์มของผู้ใช้ทั่วไป (แอดมินพิมพ์ชื่อคนอื่นได้ตามเดิม)
+function fillMyName() {
+  const n = myName();
+  ['out', 'ret'].forEach(t => {
+    const el = $(t + '_person'), b = $(t + '_chname'); if (!el) return;
+    const lock = !isAdmin && !!n;
+    if (lock) el.value = n; else if (el.readOnly) el.value = '';
+    el.readOnly = lock;
+    if (b) b.classList.toggle('hidden', !lock);
+  });
+  if (!isAdmin && $('ret_person')) { try { retPersonChange(); } catch (e) {} }
 }
 const needAdmin = () => { if (!isAdmin) { Swal.fire({ icon: 'info', title: 'สำหรับแอดมินเท่านั้น' }); return true; } return false; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -984,7 +1036,11 @@ function paintLowChip(low, ok) {
     `<button type="button" class="lc low" onclick="goInventory('low')"><i class="fa-solid fa-triangle-exclamation"></i><span class="lt">ใกล้หมด</span> ${num(low)}</button>` +
     `<button type="button" class="lc ok" onclick="goInventory('ok')"><i class="fa-solid fa-circle-check"></i><span class="lt">ปกติ</span> ${num(ok)}</button>`;
 }
-(async function restoreAdmin() { let p = ''; try { p = sessionStorage.getItem('adm') || ''; } catch (e) {} if (p) { const r = await adminLogin(p); if (r !== true) applyRole(); } else applyRole(); })();
+(async function restoreAdmin() {
+  let p = ''; try { p = sessionStorage.getItem('adm') || ''; } catch (e) {}
+  if (p) { const r = await adminLogin(p); if (r !== true) applyRole(); } else applyRole();
+  if (!isAdmin && !myName()) askMyName(false);   // เข้าเว็บครั้งแรก: ขอชื่อไว้ก่อน
+})();
 
 /* ================= คำขอเบิก / อนุมัติ ================= */
 
@@ -1375,7 +1431,7 @@ function buildForm(t) {
     <form onsubmit="submitForm(event,'${t}')" class="space-y-4">
       <div class="grid sm:grid-cols-2 gap-3">
         <div><label class="text-xs font-medium">วันที่ *</label><input type="text" id="${t}_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium">${isIn ? 'ผู้รับมอบ' : 'ผู้เบิก'} *</label><input id="${t}_person" required list="people" autocomplete="off" class="inp mt-1" placeholder="ชื่อผู้ดำเนินการ / แผนก"></div>
+        <div><label class="text-xs font-medium">${isIn ? 'ผู้รับมอบ' : 'ผู้เบิก'} *</label>${isIn ? '' : `<button type="button" id="out_chname" class="hidden text-xs text-indigo-600 ml-2" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button>`}<input id="${t}_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" placeholder="ชื่อผู้ดำเนินการ / แผนก"></div>
       </div>
       <div><label class="text-xs font-medium">วัสดุ *</label>
         <select id="${t}_sel" required onchange="unitChange('${t}')" class="inp mt-1"><option value="" disabled selected>-- เลือกวัสดุ --</option></select>
@@ -1386,7 +1442,7 @@ function buildForm(t) {
       ${isIn ? '' : `<div id="out_cartwrap" class="space-y-2">
         <button type="button" onclick="addCartItem()" class="w-full py-2.5 rounded-xl border-2 border-dashed border-indigo-300 text-indigo-600 text-sm font-semibold hover:bg-indigo-50"><i class="fa-solid fa-plus mr-1"></i>เพิ่มเข้ารายการเบิก</button>
         <div id="out_cart" class="space-y-2"></div></div>`}
-      <div><label class="text-xs font-medium">หมายเหตุ</label><input id="${t}_note" class="inp mt-1" placeholder="ไม่บังคับ"></div>
+      <div><label class="text-xs font-medium">หมายเหตุ</label><input id="${t}_note" maxlength="200" class="inp mt-1" placeholder="ไม่บังคับ"></div>
       <button id="${t}_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold ${isIn ? "g-in" : "g-out"}"><i class="fa-solid fa-check mr-2"></i><span id="${t}_btxt">${isIn ? 'บันทึกรับเข้า' : 'ยืนยันการเบิก'}</span></button>
     </form>
   </div>`;
@@ -1406,6 +1462,7 @@ function openTx(t) {
   $(t + '_bk').innerText = bookName();
   $('panel-in').classList.toggle('hidden', t !== 'in'); $('panel-out').classList.toggle('hidden', t !== 'out');
   if (!$(t + '_date').value) setDate(t + '_date', ymd(new Date()));
+  fillMyName();
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
 }
 function closeTx() { $('modal').classList.add('hidden'); $('panel-job').classList.add('hidden'); $('panel-jobcfg').classList.add('hidden'); $('panel-ret').classList.add('hidden'); document.body.style.overflow = ''; }
@@ -1498,7 +1555,7 @@ function buildMatForm() {
     <form onsubmit="submitMat(event)" class="space-y-4">
       <div class="grid grid-cols-3 gap-3">
         <div><label class="text-xs font-medium">รหัส</label><input id="mat_code" class="inp mt-1 font-mono" autocomplete="off"></div>
-        <div class="col-span-2"><label class="text-xs font-medium">ชื่อวัสดุ *</label><input id="mat_name" required class="inp mt-1" autocomplete="off" placeholder="ชื่อต้องไม่ซ้ำกับของเดิม"></div>
+        <div class="col-span-2"><label class="text-xs font-medium">ชื่อวัสดุ *</label><input id="mat_name" required maxlength="100" class="inp mt-1" autocomplete="off" placeholder="ชื่อต้องไม่ซ้ำกับของเดิม (ห้ามขึ้นต้นด้วย = + - @)"></div>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div><label class="text-xs font-medium">หน่วย *</label><input id="mat_unit" required list="units" class="inp mt-1" autocomplete="off" placeholder="เช่น แผ่น, เส้น"></div>
@@ -1529,6 +1586,8 @@ function openMat(from) {
 function submitMat(e) {
   e.preventDefault();
   const code = $('mat_code').value.trim(), name = $('mat_name').value.trim(), unit = $('mat_unit').value.trim();
+  const bad = [['ชื่อวัสดุ', name], ['รหัสวัสดุ', code], ['หน่วย', unit]].find(x => /^[=+\-@]/.test(x[1]));
+  if (bad) return Swal.fire({ icon: 'warning', title: bad[0] + 'พิมพ์ไม่ถูกหลัก', html: bad[0] + 'ห้ามขึ้นต้นด้วย <b>= + - @</b><br>กรุณาพิมพ์ใหม่ โดยเริ่มด้วยตัวอักษรหรือตัวเลข', confirmButtonText: 'ตกลง', confirmButtonColor: '#4f46e5' });
   const dn = materials.find(m => m.name.trim().toLowerCase() === name.toLowerCase());
   if (dn) return Swal.fire({ icon: 'warning', title: 'มีวัสดุชื่อนี้อยู่แล้ว', text: `[${dn.code}] ${dn.name}` });
   if (code && materials.some(m => m.code.toLowerCase() === code.toLowerCase())) return Swal.fire({ icon: 'warning', title: 'รหัสนี้ถูกใช้แล้ว', text: code });
@@ -1609,13 +1668,13 @@ function buildRetForm() {
     <form onsubmit="submitRet(event)" class="space-y-4">
       <div class="grid sm:grid-cols-2 gap-3">
         <div><label class="text-xs font-medium">วันที่คืน *</label><input type="text" id="ret_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium">ผู้คืน (ชื่อเดียวกับที่เบิกไว้) *</label><input id="ret_person" required list="people" autocomplete="off" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"></div>
+        <div><label class="text-xs font-medium">ผู้คืน (ชื่อเดียวกับที่เบิกไว้) *</label><button type="button" id="ret_chname" class="hidden text-xs text-indigo-600 ml-2" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button><input id="ret_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"></div>
       </div>
       <div id="ret_sug"></div>
       <div><label class="text-xs font-medium">รายการที่คืน *</label>
         <div id="ret_list" class="space-y-2 mt-1"></div>
         <button type="button" onclick="retAdd()" class="mt-2 w-full py-2.5 rounded-xl border-2 border-dashed border-teal-300 text-teal-600 text-sm font-semibold hover:bg-teal-50"><i class="fa-solid fa-plus mr-1"></i>เพิ่มรายการ</button></div>
-      <div><label class="text-xs font-medium">หมายเหตุ</label><input id="ret_note" class="inp mt-1" placeholder="เช่น งานยกเลิก / ใช้ไม่หมด (ไม่บังคับ)"></div>
+      <div><label class="text-xs font-medium">หมายเหตุ</label><input id="ret_note" maxlength="200" class="inp mt-1" placeholder="เช่น งานยกเลิก / ใช้ไม่หมด (ไม่บังคับ)"></div>
       <button id="ret_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold g-ret"><i class="fa-solid fa-rotate-left mr-2"></i><span id="ret_btxt">บันทึกคืนเบิก</span></button>
     </form>
   </div>`;
@@ -1629,6 +1688,7 @@ function openRet() {
   $('ret_btxt').innerText = isAdmin ? 'บันทึกคืนเบิก' : 'ส่งคำขอคืน';
   setDate('ret_date', ymd(new Date()));
   RET = [{ code: '', qty: '' }]; $('ret_person').value = ''; $('ret_note').value = '';
+  fillMyName();
   paintRet(); retSuggest();
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
 }
