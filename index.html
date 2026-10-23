@@ -336,6 +336,24 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   .qty-pill{flex:none;display:inline-flex;align-items:baseline;gap:.25rem;background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;border-radius:999px;padding:.3rem .85rem;font-weight:700;font-size:1.05rem;box-shadow:0 6px 14px rgba(244,63,94,.28)}
   .qty-pill small{font-size:.7rem;font-weight:500;opacity:.9}
   .mini-req{background:#fff;border:1px solid #ece9fb;border-radius:14px;padding:.6rem .75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  /* ===== คำขอของฉัน: การ์ดแนวตั้ง (ชื่อ/ประเภท/สถานะ บนสุด -> รายการเต็มความกว้าง -> วันที่ · เลขที่) ===== */
+  .mreq{display:block;padding:.7rem .85rem;border-radius:16px}
+  .mreq .mr-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  .mreq .mr-items{margin-top:.55rem;display:flex;flex-direction:column;gap:.25rem;font-size:.86rem;color:#1e293b}
+  .mreq .mr-it{display:flex;justify-content:space-between;align-items:baseline;gap:.75rem}
+  .mreq .mr-it.x{opacity:.5;text-decoration:line-through}
+  .mreq .mr-sub{margin-top:.45rem;font-size:.7rem;color:#94a3b8;display:flex;flex-wrap:wrap;gap:.1rem .6rem}
+  .mreq .mr-rs{margin-top:.4rem;font-size:.74rem;color:#b45309;background:#fffbeb;border-radius:8px;padding:.3rem .55rem}
+  .mreq .mr-rs.no{color:#be123c;background:#fff1f2}
+  /* ===== แอดมิน: แก้ยอด/เลือกอนุมัติบางรายการก่อนอนุมัติ ===== */
+  .rq-ed{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:.15rem}
+  .rq-row{display:flex;align-items:center;gap:.4rem}
+  .rq-row input[type=checkbox]{width:1.2rem;height:1.2rem;accent-color:#10b981;cursor:pointer}
+  .rq-row .rq-q{width:5rem;padding:.4rem .5rem;text-align:right;font-weight:700}
+  .rq-row .rq-q.bad{border-color:#fb7185;background:#fff1f2}
+  .rq-row small{color:#64748b;font-size:.7rem}
+  .rq-org{font-size:.65rem;color:#94a3b8}
+  .item-box.off .item-name{opacity:.45;text-decoration:line-through}
 
   /* ===== มือถือ: หัวเว็บกระชับ + ปุ่มเมนู/เกมจรวดย้ายมาซ้ายล่าง ===== */
   @media(max-width:639px){
@@ -870,6 +888,7 @@ function fillMyName() {
     if (b) b.classList.toggle('hidden', !lock);
   });
   if (!isAdmin && $('ret_person')) { try { retPersonChange(); } catch (e) {} }
+  if (!isAdmin && book) { try { paintMyReqs(); } catch (e) {} }
 }
 const needAdmin = () => { if (!isAdmin) { Swal.fire({ icon: 'info', title: 'สำหรับแอดมินเท่านั้น' }); return true; } return false; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1201,6 +1220,7 @@ function paintLowChip(low, ok) {
 /* ================= ประวัติเบิก-คืนของฉัน (ผู้ใช้ทั่วไป ค้นตามชื่อที่กรอกไว้) ================= */
 let MYH = { list: [], f: 'all', shown: 30, name: '', loaded: false, err: '' };
 const myhBadge = st => st === 'ไม่อนุมัติ' ? 'b-low' : st === 'รออนุมัติ' ? 'b-wait' : 'b-ok';
+const myhLabel = st => st === 'เสร็จสิ้น' ? 'อนุมัติแล้ว' : st;
 async function openMyHist() {
   if (isAdmin || !book) return;
   if (!myName()) { const ok = await askMyName(false); if (!ok) return; }
@@ -1225,14 +1245,14 @@ async function myhChangeName() {
 function myhSet(f) { MYH.f = f; MYH.shown = 30; renderMyHist(); }
 function renderMyHist() {
   const L = MYH.list, n = MYH.name;
-  const cnt = { all: L.length, 'เบิก': L.filter(x => x.kind !== 'คืน').length, 'คืน': L.filter(x => x.kind === 'คืน').length, wait: L.filter(x => x.status === 'รออนุมัติ').length };
-  const rows = L.filter(x => MYH.f === 'all' ? true : MYH.f === 'wait' ? x.status === 'รออนุมัติ' : MYH.f === 'คืน' ? x.kind === 'คืน' : x.kind !== 'คืน');
+  const cnt = { all: L.length, 'เบิก': L.filter(x => x.kind !== 'คืน').length, 'คืน': L.filter(x => x.kind === 'คืน').length, wait: L.filter(x => x.status === 'รออนุมัติ').length, ok: L.filter(x => x.status === 'เสร็จสิ้น').length, no: L.filter(x => x.status === 'ไม่อนุมัติ').length };
+  const rows = L.filter(x => MYH.f === 'all' ? true : MYH.f === 'wait' ? x.status === 'รออนุมัติ' : MYH.f === 'ok' ? x.status === 'เสร็จสิ้น' : MYH.f === 'no' ? x.status === 'ไม่อนุมัติ' : MYH.f === 'คืน' ? x.kind === 'คืน' : x.kind !== 'คืน');
   const done = L.filter(x => x.status === 'เสร็จสิ้น');
   const chip = (k, l, on) => `<button type="button" class="chip ${MYH.f === k ? on : ''}" onclick="myhSet('${k}')">${l} <b>${cnt[k]}</b></button>`;
   const card = x => `<div class="mcard" style="padding:.75rem .9rem">
       <div class="flex items-center justify-between gap-2"><span class="badge ${x.kind === 'คืน' ? 'b-ret' : 'b-out'}">${x.kind === 'คืน' ? '↩️ คืน' : '📤 เบิก'}</span><span class="font-mono text-xs text-slate-500">${thDate(x.date)}</span></div>
       <div class="mt-1.5 space-y-0.5 text-sm">${(x.items || []).map(it => `<div class="flex justify-between gap-3"><span class="min-w-0">${esc(it.name)}</span><span class="flex-none"><b class="${x.kind === 'คืน' ? 'text-teal-600' : 'text-rose-600'}">${num(it.qty)}</b> <span class="text-xs text-slate-400">${esc(it.unit)}</span></span></div>`).join('')}</div>
-      <div class="flex items-center justify-between gap-2 mt-2"><span class="badge ${myhBadge(x.status)}">${esc(x.status)}</span>${x.note ? `<span class="text-[11px] text-slate-400 truncate">${esc(x.note)}</span>` : ''}</div>
+      <div class="flex items-center justify-between gap-2 mt-2"><span class="badge ${myhBadge(x.status)}">${esc(myhLabel(x.status))}</span>${x.note ? `<span class="text-[11px] text-slate-400 truncate">${esc(x.note)}</span>` : ''}</div>
       ${x.reason ? `<div class="text-xs text-rose-600 mt-1">เหตุผล: ${esc(x.reason)}</div>` : ''}</div>`;
   let body;
   if (!MYH.loaded) body = '<div class="text-center py-10 text-sm text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดประวัติ...</div>';
@@ -1248,12 +1268,13 @@ function renderMyHist() {
     </div>
     <div class="flex items-center justify-between gap-2 mb-3"><button type="button" onclick="myhChangeName()" class="text-xs text-indigo-600 font-medium"><i class="fa-solid fa-repeat mr-1"></i>ไม่ใช่ฉัน? เปลี่ยนชื่อ</button>
       <button type="button" onclick="loadMyHist();renderMyHist()" class="text-xs text-slate-500"><i class="fa-solid fa-arrows-rotate mr-1"></i>รีเฟรช</button></div>
-    <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-center">
       <div class="rounded-xl bg-rose-50 py-2"><div class="text-lg font-bold text-rose-600">${num(done.filter(x => x.kind !== 'คืน').length)}</div><div class="text-[10px] text-slate-500">เบิกแล้ว (ครั้ง)</div></div>
       <div class="rounded-xl bg-teal-50 py-2"><div class="text-lg font-bold text-teal-600">${num(done.filter(x => x.kind === 'คืน').length)}</div><div class="text-[10px] text-slate-500">คืนแล้ว (ครั้ง)</div></div>
       <div class="rounded-xl bg-amber-50 py-2"><div class="text-lg font-bold text-amber-600">${num(cnt.wait)}</div><div class="text-[10px] text-slate-500">รออนุมัติ</div></div>
+      <div class="rounded-xl bg-emerald-50 py-2"><div class="text-lg font-bold text-emerald-600">${num(cnt.ok)}</div><div class="text-[10px] text-slate-500">อนุมัติแล้ว</div></div>
     </div>
-    <div class="flex flex-wrap gap-2 mb-3">${chip('all', 'ทั้งหมด', 'on')}${chip('เบิก', 'เบิก', 'on-low')}${chip('คืน', 'คืน', 'on-ret')}${chip('wait', 'รออนุมัติ', 'on-adj')}</div>
+    <div class="flex flex-wrap gap-2 mb-3">${chip('all', 'ทั้งหมด', 'on')}${chip('เบิก', 'เบิก', 'on-low')}${chip('คืน', 'คืน', 'on-ret')}${chip('wait', 'รออนุมัติ', 'on-adj')}${chip('ok', 'อนุมัติแล้ว', 'on-ok')}${chip('no', 'ไม่อนุมัติ', 'on-low')}</div>
     ${body}
     <p class="text-[11px] text-slate-400 mt-4 text-center">ประวัติดูจากชื่อที่กรอก ใช้ชื่อเดิมทุกครั้งเพื่อให้ประวัติครบ</p>
   </div>`;
@@ -1262,6 +1283,7 @@ function renderMyHist() {
 /* ===== ตัวช่วยแสดงชื่อผู้เบิก (อวาตาร์ตัวอักษรแรก + สีตามชื่อ) ===== */
 function avColor(n){ const c=[['#8b5cf6','#4f46e5'],['#fb923c','#f43f5e'],['#14b8a6','#0ea5e9'],['#f59e0b','#ef4444'],['#22c55e','#0d9488'],['#ec4899','#8b5cf6']]; let h=0; n=String(n||''); for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; const g=c[h%c.length]; return 'linear-gradient(135deg,'+g[0]+','+g[1]+')'; }
 function avatar(n){ const t=String(n||'?').trim()||'?'; return '<span class="av-name" title="'+esc(t)+'" style="background:'+avColor(t)+'">'+esc(t)+'</span>'; }
+var reqEdits = {};  // แก้ยอดที่ยังไม่กดอนุมัติ: reqEdits[เลขที่คำขอ] = [{ on, qty }] (เก็บไว้ไม่ให้หายตอนรีเฟรชอัตโนมัติ)
 var reqData = [], reqCounts = [], reqFilter = 'รออนุมัติ', reqPrev = null, reqTotal = 0, reqSeq = 0, reqBusy = false;
 function myReqIds() { try { return JSON.parse(localStorage.getItem('myReqs') || '[]'); } catch (e) { return []; } }
 function rememberReq(id) {
@@ -1270,23 +1292,55 @@ function rememberReq(id) {
   paintMyReqs();
 }
 const reqBadge = st => st === 'อนุมัติ' ? 'b-ok' : st === 'ไม่อนุมัติ' ? 'b-low' : 'b-wait';
+const reqLabel = st => st === 'อนุมัติ' ? 'อนุมัติแล้ว' : st;
+function myReqCard(r) {
+  const kind = r.kind === 'คืน', its = (r.items || [{ name: r.name, qty: r.qty, unit: r.unit }]);
+  const rs = r.reason ? `<div class="mr-rs ${r.status === 'ไม่อนุมัติ' ? 'no' : ''}">${r.status === 'ไม่อนุมัติ' ? 'เหตุผล: ' : ''}${esc(r.reason)}</div>` : '';
+  return `<div class="mini-req mreq">
+    <div class="mr-top"><div class="flex items-center gap-2 min-w-0">${avatar(r.person || '?')}<span class="badge ${kind ? 'b-ret' : 'b-out'}">${kind ? '↩️ คืน' : '📤 เบิก'}</span></div><span class="badge ${reqBadge(r.status)} flex-none">${esc(reqLabel(r.status))}</span></div>
+    <div class="mr-items">${its.map(it => (r.status === 'อนุมัติ' && Number(it.qty) === 0)
+      ? `<div class="mr-it x"><span class="min-w-0">${esc(it.name)}</span><span class="flex-none text-xs">ไม่อนุมัติรายการนี้</span></div>`
+      : `<div class="mr-it"><span class="min-w-0">${esc(it.name)}</span><span class="flex-none"><b class="${kind ? 'text-teal-600' : 'text-rose-600'}">${num(it.qty)}</b> <span class="text-xs text-slate-400">${esc(it.unit)}</span></span></div>`).join('')}</div>
+    ${rs}<div class="mr-sub"><span>${esc(r.reqAt)}</span><span>${esc(r.id)}</span></div></div>`;
+}
 function paintMyReqs(manual) {
   const el = $('myReqs'); if (!el || isAdmin || !book) return;
-  const b = book, ids = myReqIds().filter(x => x.book === b).map(x => x.id);
-  if (!ids.length) { el.innerText = 'ยังไม่มีคำขอในชีทนี้'; return; }
+  // มีชื่อแล้ว -> ค้นตามชื่อจากชีท (เห็นเหมือนกันทุกเครื่อง) / ยังไม่มีชื่อ -> ใช้เลขที่คำขอที่จำไว้ในเครื่องนี้
+  const b = book, nm = myName(), ids = myReqIds().filter(x => x.book === b).map(x => x.id);
+  if (!nm && !ids.length) { el.innerText = 'ยังไม่มีคำขอในชีทนี้'; return; }
   const ic = $('myReqIcon'), has = !!el.querySelector('.mini-req');
   if (ic && manual) ic.classList.add('fa-spin');
   if (!has) el.innerHTML = '<div class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i>กำลังโหลดสถานะ...</div>';
-  google.script.run.withSuccessHandler(list => {
+  const call = google.script.run.withSuccessHandler(list => {
     if (ic) ic.classList.remove('fa-spin');
-    if (b !== book || isAdmin) return;
-    el.innerHTML = (list && list.length) ? list.map(r => `<div class="mini-req">
-      <div class="who">${avatar(r.person || '?')}<div class="min-w-0">
-        <div class="text-slate-800">${r.kind === 'คืน' ? 'คืน' : 'เบิก'} ${(r.items || [{ name: r.name, qty: r.qty, unit: r.unit }]).map(it => esc(it.name) + ' <b class="text-rose-600">' + num(it.qty) + '</b> ' + esc(it.unit)).join(', ')}</div>
-        <div class="text-[11px] text-slate-400">${esc(r.reqAt)} · ${esc(r.id)}</div></div></div>
-      <span class="badge ${reqBadge(r.status)} flex-none">${esc(r.status)}</span></div>`).join('') : 'ไม่พบคำขอ';
-  }).withFailureHandler(() => { if (ic) ic.classList.remove('fa-spin'); if (!has) el.innerHTML = '<div class="text-xs text-rose-500">โหลดสถานะไม่สำเร็จ กด "เช็กสถานะ" เพื่อลองใหม่</div>'; }).getRequestStatuses(b, ids);
+    if (b !== book || isAdmin || nm !== myName()) return;
+    el.innerHTML = (list && list.length) ? list.map(myReqCard).join('') : (nm ? 'ยังไม่มีคำขอในชีทนี้ของชื่อ “' + esc(nm) + '”' : 'ไม่พบคำขอ');
+  }).withFailureHandler(() => { if (ic) ic.classList.remove('fa-spin'); if (!has) el.innerHTML = '<div class="text-xs text-rose-500">โหลดสถานะไม่สำเร็จ กด "เช็กสถานะ" เพื่อลองใหม่</div>'; });
+  if (nm) call.getMyRequests(b, nm); else call.getRequestStatuses(b, ids);
 }
+function rqGet(r) {
+  let e = reqEdits[r.id];
+  if (!e || e.length !== r.items.length) e = reqEdits[r.id] = r.items.map(it => ({ on: true, qty: it.qty }));
+  return e;
+}
+function rqWarn(r, it, e) {
+  if (!e.on) return '';
+  const q = Number(e.qty);
+  if (r.kind === 'คืน') return (it.withdrawn != null && q > it.withdrawn) ? ' <b class="text-amber-600">(คืนเกินที่เบิกไว้)</b>' : '';
+  return (it.balance != null && q > it.balance) ? ' <b class="text-rose-600">(เกินยอดคงเหลือ)</b>' : '';
+}
+function rqSet(id, i, field, v) {
+  const r = reqData.find(x => x.id === id); if (!r) return;
+  const e = rqGet(r)[i], it = r.items[i];
+  if (field === 'on') e.on = !!v; else e.qty = v;
+  const row = document.querySelector(`[data-rq="${CSS.escape(id)}"][data-i="${i}"]`);
+  if (row) {
+    row.classList.toggle('off', !e.on);
+    const q = row.querySelector('.rq-q'); if (q) { q.disabled = !e.on; q.classList.toggle('bad', e.on && (!(Number(e.qty) >= 0) || Number(e.qty) > it.qty)); }
+    const w = row.querySelector('.rq-w'); if (w) w.innerHTML = rqWarn(r, it, e);
+  }
+}
+const rqEditing = () => { const a = document.activeElement; return !!(a && a.closest && a.closest('.rq-ed')); };
 function setReqFilter(k) { reqFilter = k; paintReqChips(); loadRequests(); }
 // แสดงโครงการ์ดหมุนๆ ระหว่างรอข้อมูลจากเซิร์ฟเวอร์
 function showReqLoading() {
@@ -1316,7 +1370,7 @@ function loadRequests(quiet) {
     document.querySelectorAll('.rbadge').forEach(e => { e.innerText = total; e.style.display = total ? 'grid' : 'none'; });
     setBell(total); paintLineBanner(r.line);
     if (reqPrev !== null && total > reqPrev) notifyNew(total - reqPrev);
-    reqPrev = total; renderRequests();
+    reqPrev = total; if (!(quiet && rqEditing())) renderRequests();   // กำลังแก้ยอดอยู่ ไม่วาดใหม่ทับ
   }).withFailureHandler(e => { if (tk !== reqSeq) return; stop(); if (!quiet || reqBusy) showReqError(e); }).getRequestPanel(b, f);
 }
 function paintLineBanner(l) {
@@ -1343,7 +1397,9 @@ function renderRequests() {
       <div class="flex items-center justify-between gap-2">
         <div class="who">${avatar(r.person)}<div class="min-w-0"><div class="who-sub">${r.kind === 'คืน' ? '<b class="text-teal-600">↩️ ขอคืน</b> · ' : ''}${esc(r.id)} · ส่งเมื่อ ${esc(r.reqAt)}</div></div></div>
         <span class="badge ${reqBadge(r.status)} flex-none">${esc(r.status)}</span></div>
-      ${r.items.map(it => `<div class="item-box"><div class="item-name"><span class="text-slate-400 text-xs font-medium block">${r.kind === 'คืน' ? 'ขอคืน' : 'ขอเบิก'}</span>${esc(it.name)}<span class="block text-[11px] font-normal text-slate-400">${r.kind === 'คืน' ? (it.withdrawn == null ? '' : esc(r.person) + ' เบิกไว้สุทธิ ' + num(it.withdrawn) + ' ' + esc(it.unit) + (it.qty > it.withdrawn ? ' <b class="text-amber-600">(คืนเกินที่เบิกไว้)</b>' : '')) : 'คงเหลือ ' + (it.balance == null ? '-' : num(it.balance)) + ' ' + esc(it.unit) + (it.balance != null && it.qty > it.balance ? ' <b class="text-rose-600">(เกินยอดคงเหลือ)</b>' : '')}</span></div><span class="qty-pill">${num(it.qty)}<small>${esc(it.unit)}</small></span></div>`).join('')}
+      ${r.items.map((it, ix) => { const ed = pend ? rqGet(r)[ix] : null; return `<div class="item-box ${ed && !ed.on ? 'off' : ''}" data-rq="${esc(r.id)}" data-i="${ix}"><div class="item-name"><span class="text-slate-400 text-xs font-medium block">${r.kind === 'คืน' ? 'ขอคืน' : 'ขอเบิก'}</span>${esc(it.name)}<span class="block text-[11px] font-normal text-slate-400">${r.kind === 'คืน' ? (it.withdrawn == null ? '' : esc(r.person) + ' เบิกไว้สุทธิ ' + num(it.withdrawn) + ' ' + esc(it.unit) + (!ed && it.qty > it.withdrawn ? ' <b class="text-amber-600">(คืนเกินที่เบิกไว้)</b>' : '')) : 'คงเหลือ ' + (it.balance == null ? '-' : num(it.balance)) + ' ' + esc(it.unit) + (!ed && it.balance != null && it.qty > it.balance ? ' <b class="text-rose-600">(เกินยอดคงเหลือ)</b>' : '')}<span class="rq-w">${ed ? rqWarn(r, it, ed) : ''}</span></span></div>${ed
+        ? `<div class="rq-ed"><div class="rq-row"><label title="ติ๊กออก = ไม่อนุมัติรายการนี้"><input type="checkbox" ${ed.on ? 'checked' : ''} onchange="rqSet('${esc(r.id)}',${ix},'on',this.checked)"></label><input type="number" inputmode="decimal" class="inp rq-q" min="0" max="${it.qty}" step="any" value="${esc(ed.qty)}" ${ed.on ? '' : 'disabled'} oninput="rqSet('${esc(r.id)}',${ix},'qty',this.value)"><small>${esc(it.unit)}</small></div><div class="rq-org">ขอ ${num(it.qty)}</div></div>`
+        : (r.status === 'อนุมัติ' && Number(it.qty) === 0 ? `<span class="badge b-low flex-none">ไม่อนุมัติรายการนี้</span>` : `<span class="qty-pill">${num(it.qty)}<small>${esc(it.unit)}</small></span>`)}</div>`; }).join('')}
       <div class="mt-2 text-xs text-slate-500">${r.items.length} รายการ · ${r.kind === 'คืน' ? 'วันที่คืน' : 'วันที่เบิก'} ${thDate(r.txDate)}${r.note ? ' · หมายเหตุ: ' + esc(r.note) : ''}</div>
       ${pend ? `<div class="mt-3 flex gap-2"><button onclick="decideReq('${esc(r.id)}','approve')" class="flex-1 py-2 rounded-xl text-white text-sm font-semibold bg-emerald-500 hover:bg-emerald-600"><i class="fa-solid fa-check mr-1"></i>อนุมัติ</button>
         <button onclick="decideReq('${esc(r.id)}','reject')" class="flex-1 py-2 rounded-xl text-sm font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100"><i class="fa-solid fa-xmark mr-1"></i>ไม่อนุมัติ</button></div>`
@@ -1352,7 +1408,22 @@ function renderRequests() {
 }
 async function decideReq(id, decision, force) {
   const r0 = reqData.find(x => x.id === id); if (!r0) return;
-  const what = `<b>${esc(r0.person)}</b> ขอ${r0.kind === 'คืน' ? 'คืน' : 'เบิก'} ${r0.items.length} รายการ<div style="text-align:left;margin-top:8px;font-size:.9rem">` + r0.items.map(it => `• ${esc(it.name)} <b>${num(it.qty)}</b> ${esc(it.unit)}`).join('<br>') + '</div>';
+  // อนุมัติ: ใช้ยอดที่แอดมินแก้ไว้ในการ์ด (ติ๊กออก/ใส่ 0 = ไม่อนุมัติรายการนั้น, เกินที่ขอไม่ได้)
+  let edits = null;
+  if (decision === 'approve') {
+    const ed = rqGet(r0);
+    edits = r0.items.map((it, i) => ({ code: it.code, qty: ed[i].on ? Number(ed[i].qty) : 0 }));
+    const bad = r0.items.findIndex((it, i) => (ed[i].on && String(ed[i].qty).trim() === '') || !(edits[i].qty >= 0) || edits[i].qty > it.qty + 1e-9);
+    if (bad >= 0) return Swal.fire({ icon: 'warning', title: 'จำนวนไม่ถูกต้อง', text: `“${r0.items[bad].name}” ต้องเป็นตัวเลขตั้งแต่ 0 ถึง ${r0.items[bad].qty} (อนุมัติเกินที่ขอไม่ได้)` });
+    if (!edits.some(e => e.qty > 0)) return Swal.fire({ icon: 'warning', title: 'ยังไม่ได้เลือกรายการที่จะอนุมัติ', text: 'ถ้าไม่ต้องการอนุมัติเลย ให้กด "ไม่อนุมัติ"' });
+  }
+  const line = (it, i) => {
+    if (!edits) return `• ${esc(it.name)} <b>${num(it.qty)}</b> ${esc(it.unit)}`;
+    const q = edits[i].qty;
+    if (q === 0) return `<s style="opacity:.55">• ${esc(it.name)} ${num(it.qty)} ${esc(it.unit)}</s> <b style="color:#e11d48">ไม่อนุมัติ</b>`;
+    return `• ${esc(it.name)} <b>${num(q)}</b> ${esc(it.unit)}` + (q !== it.qty ? ` <span style="color:#d97706">(ขอ ${num(it.qty)})</span>` : '');
+  };
+  const what = `<b>${esc(r0.person)}</b> ขอ${r0.kind === 'คืน' ? 'คืน' : 'เบิก'} ${r0.items.length} รายการ<div style="text-align:left;margin-top:8px;font-size:.9rem">` + r0.items.map(line).join('<br>') + '</div>';
   let reason = '';
   if (decision === 'reject') {
     const r = await Swal.fire({ title: 'ไม่อนุมัติคำขอนี้?', html: what, input: 'text', inputPlaceholder: 'เหตุผล (ไม่บังคับ)', showCancelButton: true, confirmButtonText: 'ไม่อนุมัติ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#f43f5e' });
@@ -1364,9 +1435,10 @@ async function decideReq(id, decision, force) {
   Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
   google.script.run.withSuccessHandler(res => {
     if (res.needConfirm) return Swal.fire({ icon: 'warning', title: res.kind === 'คืน' ? 'คืนมากกว่าที่เบิกไว้' : 'เบิกเกินยอดคงเหลือ', html: (res.over || [res]).map(o => res.kind === 'คืน' ? `<b>${esc(o.name)}</b><br>เบิกไปสุทธิ ${num(o.withdrawn)} ${esc(o.unit)} แต่ขอคืน ${num(o.qty)}` : `<b>${esc(o.name)}</b><br>คงเหลือ ${num(o.balance)} ${esc(o.unit)} แต่ขอเบิก ${num(o.qty)}`).join('<br><br>') + '<br><br>' + (res.kind === 'คืน' ? 'ต้องการอนุมัติรับคืนต่อหรือไม่?' : 'ยอดจะติดลบ ต้องการอนุมัติต่อหรือไม่?'), showCancelButton: true, confirmButtonText: 'อนุมัติต่อ', cancelButtonText: 'กลับ', confirmButtonColor: '#f43f5e' }).then(x => { if (x.isConfirmed) decideReq(id, 'approve', true); });
+    delete reqEdits[id];
     Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 2200, showConfirmButton: false });
     loadAllData();
-  }).withFailureHandler(showError).decideRequest({ book: book, id: id, decision: decision, reason: reason, force: !!force });
+  }).withFailureHandler(showError).decideRequest({ book: book, id: id, decision: decision, reason: reason, force: !!force, edits: edits || undefined });
 }
 /* ===== แจ้งเตือนคำขอเบิกใหม่ (แอดมิน) =====
    กระดิ่งบนหัวเว็บ + เลขหน้าแท็บ + แจ้งเตือนของเบราว์เซอร์ (เมื่ออนุญาต) + ป๊อปอัปมุมจอ */
