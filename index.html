@@ -771,7 +771,7 @@ async function openSettings() {
   Swal.fire({ title: 'กำลังโหลดการตั้งค่า...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
   let st; try { st = await api('getSettings'); } catch (e) { Swal.close(); return showError(e); }
   let newPw = '';
-  const val = () => ({ notifyEmail: $('st_mail').value.trim(), webUrl: $('st_url').value.trim(), lineToken: $('st_ltok').value.trim(), lineUserId: $('st_luid').value.trim(), alwaysEmail: $('st_always').checked });
+  const val = () => ({ notifyEmail: $('st_mail').value.trim(), webUrl: $('st_url').value.trim(), lineToken: $('st_ltok').value.trim(), lineUserId: $('st_luid').value.trim(), alwaysEmail: $('st_always').checked, lineEnabled: $('st_lon').checked, lineBatchSec: $('st_lbatch').value });
   const r = await Swal.fire({
     title: 'ตั้งค่าระบบ', width: 520, showCancelButton: true, showDenyButton: true,
     showLoaderOnConfirm: true, showLoaderOnDeny: true, allowOutsideClick: () => !Swal.isLoading(), allowEscapeKey: () => !Swal.isLoading(),
@@ -783,6 +783,10 @@ async function openSettings() {
       <input id="st_url" class="inp mt-1" value="${esc(st.webUrl || (location.origin + location.pathname))}">
       <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:.82rem"><input type="checkbox" id="st_always" ${st.alwaysEmail ? 'checked' : ''}> ส่งอีเมลทุกครั้งด้วย (ปกติส่งเมลเฉพาะเมื่อ LINE ส่งไม่สำเร็จ)</label>
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>แจ้งเตือนทาง LINE</b> <span class="lbl">${st.lineConfigured ? '(ตั้งค่าแล้ว · ใช้โควตาเดือนนี้ ' + st.lineUsed + '/' + st.lineLimit + ')' : '(ยังไม่ได้ตั้งค่า)'}</span>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.82rem"><input type="checkbox" id="st_lon" ${st.lineEnabled ? 'checked' : ''}> ส่งแจ้งเตือนทาง LINE <span class="lbl">(ถ้าปิด ระบบจะส่งอีเมลแทน)</span></label>
+        <label class="lbl" style="display:block;margin-top:8px">รวมคำขอที่เข้ามาใกล้กันเป็นการ์ด LINE เดียว (ประหยัดโควตา)</label>
+        <select id="st_lbatch" class="inp mt-1">${(() => { const o = [[0, 'ไม่รวม ส่งทันทีทุกคำขอ'], [30, 'ภายใน 30 วินาที'], [60, 'ภายใน 1 นาที'], [120, 'ภายใน 2 นาที'], [300, 'ภายใน 5 นาที']]; const cur = Number(st.lineBatchSec); if (!o.some(x => x[0] === cur)) o.push([cur, 'ภายใน ' + cur + ' วินาที']); return o.map(x => `<option value="${x[0]}"${x[0] === cur ? ' selected' : ''}>${x[1]}</option>`).join(''); })()}</select>
+        <div class="lbl" style="margin-top:4px">คำขอแรกส่งทันที คำขอที่เข้ามาต่อภายในช่วงนี้จะรวมเป็นการ์ดเดียว (นับเป็น 1 ข้อความ)${st.lineQueued ? ' · ตอนนี้รอส่งอยู่ ' + st.lineQueued + ' คำขอ' : ''}</div>
         <input id="st_ltok" type="password" class="inp mt-2" autocomplete="off" placeholder="${st.lineConfigured ? 'Channel access token (เว้นว่างถ้าไม่เปลี่ยน)' : 'Channel access token'}">
         <input id="st_luid" class="inp mt-2" autocomplete="off" value="${esc(st.lineUserId)}" placeholder="User ID ของแอดมิน (ขึ้นต้นด้วย U)">
         <div style="margin-top:8px;display:flex;gap:12px;font-size:.8rem"><button type="button" id="st_ltest" style="color:#4f46e5;font-weight:600">ส่ง LINE ทดสอบ</button>${st.lineConfigured ? '<button type="button" id="st_lclear" style="color:#e11d48">ลบการตั้งค่า LINE</button>' : ''}</div>
@@ -1752,7 +1756,7 @@ function buildForm(t) {
     <form onsubmit="submitForm(event,'${t}')" class="space-y-4">
       <div class="grid sm:grid-cols-2 gap-3">
         <div><label class="text-xs font-medium">วันที่ *</label><input type="text" id="${t}_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium">${isIn ? 'ผู้รับมอบ' : 'ผู้เบิก'} *</label>${isIn ? '' : `<button type="button" id="out_chname" class="hidden text-xs text-indigo-600 ml-2" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button>`}<input id="${t}_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" placeholder="ชื่อผู้ดำเนินการ / แผนก"></div>
+        <div><label class="text-xs font-medium block truncate">${isIn ? 'ผู้รับมอบ' : 'ผู้เบิก'} *</label><input id="${t}_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" placeholder="ชื่อผู้ดำเนินการ / แผนก">${isIn ? '' : `<div class="text-right mt-1 text-[11px]"><button type="button" id="out_chname" class="hidden text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button></div>`}</div>
       </div>
       <div><label class="text-xs font-medium">วัสดุ *</label>
         <select id="${t}_sel" required onchange="unitChange('${t}')" class="inp mt-1"><option value="" disabled selected>-- เลือกวัสดุ --</option></select>
@@ -1989,7 +1993,7 @@ function buildRetForm() {
     <form onsubmit="submitRet(event)" class="space-y-4">
       <div class="grid sm:grid-cols-2 gap-3">
         <div><label class="text-xs font-medium">วันที่คืน *</label><input type="text" id="ret_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium">ผู้คืน (ชื่อเดียวกับที่เบิกไว้) *</label><button type="button" id="ret_chname" class="hidden text-xs text-indigo-600 ml-2" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button><input id="ret_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"></div>
+        <div><label class="text-xs font-medium block truncate">ผู้คืน *</label><input id="ret_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"><div class="flex items-center justify-between gap-2 mt-1 text-[11px]"><span class="text-slate-400">ใช้ชื่อเดียวกับที่เบิกไว้</span><button type="button" id="ret_chname" class="hidden text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button></div></div>
       </div>
       <div id="ret_sug"></div>
       <div><label class="text-xs font-medium">รายการที่คืน *</label>
