@@ -290,6 +290,15 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   .bn .rbadge{top:0;right:calc(50% - 26px)}
   .b-wait{background:#fef3c7;color:#b45309}
   .rcard{border-left:4px solid #fbbf24}.rcard.ok{border-left-color:#34d399}.rcard.no{border-left-color:#fb7185}
+  /* ===== สถานะกำลังโหลด (แผงคำขอ) ===== */
+  @keyframes skelMove{100%{transform:translateX(100%)}}
+  .skel{position:relative;overflow:hidden;background:#eceaf8;border-radius:10px}
+  .skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:skelMove 1.2s infinite}
+  .req-load{display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.82rem;color:#6366f1;font-weight:600;padding:.35rem 0}
+  #reqChips.is-busy{pointer-events:none;opacity:.55}
+  #reqBody[aria-busy="true"]{pointer-events:none}
+  .req-refresh{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid #e7e4fa;background:#fff;color:#6366f1;cursor:pointer}
+  @media (prefers-reduced-motion:reduce){.skel::after{animation:none}}
 
   /* ---------- ปุ่มด้านขวาของหัวเว็บ: กระดิ่งแจ้งเตือน / รีเฟรช / เข้าสู่ระบบ-ออกจากระบบ ---------- */
   .hdr-act{display:flex;align-items:center;gap:.55rem;flex:none}
@@ -464,7 +473,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <div class="flex flex-wrap items-center justify-center gap-3">
       <button onclick="openTx('out')" class="g-out text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-box-open mr-2"></i>ขอเบิกของ</button>
       <button onclick="openRet()" class="g-ret text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-rotate-left mr-2"></i>ขอคืนของ</button></div>
-    <div class="text-left pt-4 border-t border-slate-100"><div class="flex items-center justify-between"><h3 class="text-sm font-semibold">คำขอของฉัน</h3><button onclick="paintMyReqs()" class="text-xs text-indigo-600 font-medium"><i class="fa-solid fa-arrows-rotate mr-1"></i>เช็กสถานะ</button></div>
+    <div class="text-left pt-4 border-t border-slate-100"><div class="flex items-center justify-between"><h3 class="text-sm font-semibold">คำขอของฉัน</h3><button onclick="paintMyReqs(true)" class="text-xs text-indigo-600 font-medium"><i id="myReqIcon" class="fa-solid fa-arrows-rotate mr-1"></i>เช็กสถานะ</button></div>
       <div id="myReqs" class="mt-2 space-y-2 text-sm text-slate-400">ยังไม่มีคำขอ</div></div>
   </section>
 
@@ -472,7 +481,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <div class="card p-5">
       <div class="flex items-center justify-between flex-wrap gap-2">
         <div><h2 class="font-semibold text-sm">คำขอเบิก / คืนวัสดุ</h2><p class="text-xs text-slate-400">เมื่ออนุมัติ ระบบจะตัดสต็อกและบันทึกลงแท็บ “เบิก” ให้อัตโนมัติ</p></div>
-        <div id="reqChips" class="flex gap-2 flex-wrap"></div>
+        <div class="flex items-center gap-2 flex-wrap"><div id="reqChips" class="flex gap-2 flex-wrap"></div><button type="button" class="req-refresh" onclick="loadRequests()" title="รีเฟรชคำขอ" aria-label="รีเฟรชคำขอ"><i id="reqRefreshIcon" class="fa-solid fa-arrows-rotate"></i></button></div>
       </div>
       <div id="reqOther" class="mt-3 flex gap-2 flex-wrap"></div>
     </div>
@@ -665,6 +674,11 @@ function applyRole() {
   paintWho();
   isAdmin ? loadRequests(true) : paintMyReqs();
 }
+function setAdminBusy(on) {
+  const i = $('adminIcon'), b = $('adminBtn');
+  i.className = on ? 'fa-solid fa-spinner fa-spin' : 'fa-solid ' + (isAdmin ? 'fa-lock-open' : 'fa-lock');
+  b.disabled = on;
+}
 async function adminLogin(pw) {
   window.ADMIN_PW = pw;
   let r;
@@ -684,19 +698,31 @@ window.onAuthLost = function () {
 };
 async function adminToggle() {
   if (isAdmin) return adminLogout();
-  const r = await Swal.fire({ title: 'เข้าสู่โหมดแอดมิน', input: 'password', inputPlaceholder: 'รหัสผ่านแอดมิน', showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5' });
-  if (!r.isConfirmed) return;
-  const res = await adminLogin(r.value || '');
-  if (res === true) return;
-  Swal.fire({ icon: 'error', title: res.err ? 'เชื่อมต่อไม่ได้' : res.locked ? 'ใส่รหัสผิดหลายครั้งเกินไป' : 'รหัสผ่านไม่ถูกต้อง', text: res.err || (res.locked ? 'เครื่องนี้ถูกล็อกการเข้าสู่ระบบชั่วคราว 10 นาที (เครื่องอื่นยังเข้าได้) หากยังเข้าไม่ได้ ให้เจ้าของระบบกดรันฟังก์ชัน unlockAdmin' : '') });
+  await Swal.fire({
+    title: 'เข้าสู่โหมดแอดมิน', input: 'password', inputPlaceholder: 'รหัสผ่านแอดมิน',
+    showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5',
+    showLoaderOnConfirm: true, allowOutsideClick: () => !Swal.isLoading(), allowEscapeKey: () => !Swal.isLoading(),
+    // กด "เข้าสู่ระบบ" แล้วปุ่มจะหมุน (กำลังตรวจรหัส) ถ้ารหัสผิดจะแจ้งในกล่องเดิมให้พิมพ์ใหม่ได้เลย
+    preConfirm: async pw => {
+      if (!pw) { Swal.showValidationMessage('กรุณากรอกรหัสผ่าน'); return false; }
+      const res = await adminLogin(pw);
+      if (res === true) return true;
+      Swal.showValidationMessage(res.err ? 'เชื่อมต่อไม่ได้: ' + res.err
+        : res.locked ? 'ใส่รหัสผิดหลายครั้งเกินไป เครื่องนี้ถูกล็อกการเข้าสู่ระบบชั่วคราว 10 นาที (เครื่องอื่นยังเข้าได้) หากยังเข้าไม่ได้ ให้เจ้าของระบบกดรันฟังก์ชัน unlockAdmin'
+        : 'รหัสผ่านไม่ถูกต้อง');
+      return false;
+    }
+  });
 }
 async function openSettings() {
   if (needAdmin()) return;
-  let st; try { st = await api('getSettings'); } catch (e) { return showError(e); }
+  Swal.fire({ title: 'กำลังโหลดการตั้งค่า...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+  let st; try { st = await api('getSettings'); } catch (e) { Swal.close(); return showError(e); }
   let newPw = '';
   const val = () => ({ notifyEmail: $('st_mail').value.trim(), webUrl: $('st_url').value.trim(), lineToken: $('st_ltok').value.trim(), lineUserId: $('st_luid').value.trim(), alwaysEmail: $('st_always').checked });
   const r = await Swal.fire({
     title: 'ตั้งค่าระบบ', width: 520, showCancelButton: true, showDenyButton: true,
+    showLoaderOnConfirm: true, showLoaderOnDeny: true, allowOutsideClick: () => !Swal.isLoading(), allowEscapeKey: () => !Swal.isLoading(),
     confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', denyButtonText: 'ส่งอีเมลทดสอบ', confirmButtonColor: '#4f46e5', denyButtonColor: '#64748b',
     html: `<div style="text-align:left;font-size:.85rem">
       <label class="lbl">อีเมลรับแจ้งเมื่อมีคำขอเบิก (หลายอีเมลคั่นด้วย , )</label>
@@ -1099,6 +1125,7 @@ function switchBook(k) {
   $('historyFilterSelect').value = ''; $('historySubtitle').innerText = 'แสดงรายการทั้งหมด';
   paintMatList('inv'); paintMatList('rep'); paintAll(); renderSide(); fillAdjSel();
   loadAllData();
+  if (document.body.dataset.page === 'requests') loadRequests();
   if (mode === 'move') fetchMove();
 }
 
@@ -1110,7 +1137,7 @@ function paintLowChip(low, ok) {
 }
 (async function restoreAdmin() {
   let p = ''; try { p = sessionStorage.getItem('adm') || ''; } catch (e) {}
-  if (p) { const r = await adminLogin(p); if (r !== true) applyRole(); } else applyRole();
+  if (p) { setAdminBusy(true); const r = await adminLogin(p); setAdminBusy(false); if (r !== true) applyRole(); } else applyRole();
   if (!isAdmin && !myName()) askMyName(false);   // เข้าเว็บครั้งแรก: ขอชื่อไว้ก่อน
 })();
 
@@ -1119,7 +1146,7 @@ function paintLowChip(low, ok) {
 /* ===== ตัวช่วยแสดงชื่อผู้เบิก (อวาตาร์ตัวอักษรแรก + สีตามชื่อ) ===== */
 function avColor(n){ const c=[['#8b5cf6','#4f46e5'],['#fb923c','#f43f5e'],['#14b8a6','#0ea5e9'],['#f59e0b','#ef4444'],['#22c55e','#0d9488'],['#ec4899','#8b5cf6']]; let h=0; n=String(n||''); for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; const g=c[h%c.length]; return 'linear-gradient(135deg,'+g[0]+','+g[1]+')'; }
 function avatar(n){ const t=String(n||'?').trim()||'?'; return '<span class="av-name" title="'+esc(t)+'" style="background:'+avColor(t)+'">'+esc(t)+'</span>'; }
-var reqData = [], reqCounts = [], reqFilter = 'รออนุมัติ', reqPrev = null, reqTotal = 0;
+var reqData = [], reqCounts = [], reqFilter = 'รออนุมัติ', reqPrev = null, reqTotal = 0, reqSeq = 0, reqBusy = false;
 function myReqIds() { try { return JSON.parse(localStorage.getItem('myReqs') || '[]'); } catch (e) { return []; } }
 function rememberReq(id) {
   const a = myReqIds().filter(x => x.id !== id); a.unshift({ id: id, book: book });
@@ -1127,24 +1154,46 @@ function rememberReq(id) {
   paintMyReqs();
 }
 const reqBadge = st => st === 'อนุมัติ' ? 'b-ok' : st === 'ไม่อนุมัติ' ? 'b-low' : 'b-wait';
-function paintMyReqs() {
+function paintMyReqs(manual) {
   const el = $('myReqs'); if (!el || isAdmin || !book) return;
   const b = book, ids = myReqIds().filter(x => x.book === b).map(x => x.id);
   if (!ids.length) { el.innerText = 'ยังไม่มีคำขอในชีทนี้'; return; }
+  const ic = $('myReqIcon'), has = !!el.querySelector('.mini-req');
+  if (ic && manual) ic.classList.add('fa-spin');
+  if (!has) el.innerHTML = '<div class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i>กำลังโหลดสถานะ...</div>';
   google.script.run.withSuccessHandler(list => {
+    if (ic) ic.classList.remove('fa-spin');
     if (b !== book || isAdmin) return;
     el.innerHTML = (list && list.length) ? list.map(r => `<div class="mini-req">
       <div class="who">${avatar(r.person || '?')}<div class="min-w-0">
         <div class="text-slate-800">${r.kind === 'คืน' ? 'คืน' : 'เบิก'} ${(r.items || [{ name: r.name, qty: r.qty, unit: r.unit }]).map(it => esc(it.name) + ' <b class="text-rose-600">' + num(it.qty) + '</b> ' + esc(it.unit)).join(', ')}</div>
         <div class="text-[11px] text-slate-400">${esc(r.reqAt)} · ${esc(r.id)}</div></div></div>
       <span class="badge ${reqBadge(r.status)} flex-none">${esc(r.status)}</span></div>`).join('') : 'ไม่พบคำขอ';
-  }).withFailureHandler(() => {}).getRequestStatuses(b, ids);
+  }).withFailureHandler(() => { if (ic) ic.classList.remove('fa-spin'); if (!has) el.innerHTML = '<div class="text-xs text-rose-500">โหลดสถานะไม่สำเร็จ กด "เช็กสถานะ" เพื่อลองใหม่</div>'; }).getRequestStatuses(b, ids);
 }
-function setReqFilter(k) { reqFilter = k; loadRequests(); }
+function setReqFilter(k) { reqFilter = k; paintReqChips(); loadRequests(); }
+// แสดงโครงการ์ดหมุนๆ ระหว่างรอข้อมูลจากเซิร์ฟเวอร์
+function showReqLoading() {
+  if (!$('reqBody')) return;
+  reqBusy = true; $('reqBody').setAttribute('aria-busy', 'true'); $('reqChips').classList.add('is-busy');
+  $('reqBody').innerHTML = '<div class="req-load" role="status"><i class="fa-solid fa-spinner fa-spin"></i>กำลังโหลดคำขอ...</div>'
+    + [0, 1].map(() => '<div class="card p-4"><div class="flex items-center gap-3"><div class="skel" style="width:96px;height:26px;border-radius:999px"></div><div class="skel" style="width:150px;height:12px"></div></div><div class="skel mt-3" style="height:56px;border-radius:14px"></div><div class="skel mt-3" style="width:55%;height:12px"></div></div>').join('');
+}
+function showReqError(e) {
+  if (!$('reqBody')) return;
+  reqBusy = false; $('reqBody').removeAttribute('aria-busy'); $('reqChips').classList.remove('is-busy');
+  $('reqBody').innerHTML = '<div class="card p-6 text-center text-sm"><div class="text-rose-600 font-semibold">โหลดคำขอไม่สำเร็จ</div><div class="text-slate-400 mt-1">' + esc((e && e.message) || e || 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้') + '</div><button type="button" class="chip on mt-3" onclick="loadRequests()"><i class="fa-solid fa-arrows-rotate mr-1"></i>ลองอีกครั้ง</button></div>';
+}
+// quiet = โพลล์เงียบๆ เบื้องหลัง (ไม่กระพริบหน้าจอ) / ไม่ใส่ = ผู้ใช้สั่งเอง ให้แสดงสถานะกำลังโหลด
 function loadRequests(quiet) {
   if (!isAdmin || !book) return;
-  const b = book, f = reqFilter;
+  const b = book, f = reqFilter, tk = ++reqSeq, ic = $('reqRefreshIcon');
+  if (!quiet) showReqLoading();
+  if (ic) ic.classList.add('fa-spin');
+  const stop = () => { if (ic) ic.classList.remove('fa-spin'); };
   google.script.run.withSuccessHandler(r => {
+    if (tk !== reqSeq) return;      // มีคำสั่งใหม่กว่าแล้ว (เช่น กดเปลี่ยนแท็บรัวๆ) ทิ้งผลเก่า
+    stop();
     if (b !== book || !isAdmin) return;
     reqData = r.list || []; reqCounts = r.counts || [];
     const total = reqCounts.reduce((s, x) => s + x.count, 0);
@@ -1152,7 +1201,7 @@ function loadRequests(quiet) {
     setBell(total); paintLineBanner(r.line);
     if (reqPrev !== null && total > reqPrev) notifyNew(total - reqPrev);
     reqPrev = total; renderRequests();
-  }).withFailureHandler(e => { if (!quiet) showError(e); }).getRequestPanel(b, f);
+  }).withFailureHandler(e => { if (tk !== reqSeq) return; stop(); if (!quiet || reqBusy) showReqError(e); }).getRequestPanel(b, f);
 }
 function paintLineBanner(l) {
   const el = $('lineBanner'); if (!el) return;
@@ -1162,10 +1211,14 @@ function paintLineBanner(l) {
     ? `โควตา LINE เดือนนี้ใช้ไป ${l.used}/${l.limit} ข้อความ ระบบหยุดส่ง LINE แล้ว และส่งแจ้งเตือนทางอีเมลแทนจนถึงสิ้นเดือน`
     : `โควตา LINE เดือนนี้ใช้ไป ${l.used}/${l.limit} ข้อความ ใกล้หมดแล้ว (ระบบจะสลับไปส่งอีเมลเมื่อถึง ${l.stopAt})`;
 }
-function renderRequests() {
-  if (!$('reqBody')) return;
+function paintReqChips() {
+  if (!$('reqChips')) return;
   $('reqChips').innerHTML = [['รออนุมัติ', 'รออนุมัติ', 'on'], ['อนุมัติ', 'อนุมัติแล้ว', 'on-ok'], ['ไม่อนุมัติ', 'ไม่อนุมัติ', 'on-low'], ['all', 'ทั้งหมด', 'on']]
     .map(c => `<button class="chip ${reqFilter === c[0] ? c[2] : ''}" onclick="setReqFilter('${c[0]}')">${c[1]}</button>`).join('');
+}
+function renderRequests() {
+  if (!$('reqBody')) return;
+  paintReqChips(); reqBusy = false; $('reqBody').removeAttribute('aria-busy'); $('reqChips').classList.remove('is-busy');
   $('reqOther').innerHTML = reqCounts.filter(x => x.key !== book && x.count > 0)
     .map(x => `<button class="chip on-low" onclick="$('bookSel').value='${esc(x.key)}';switchBook('${esc(x.key)}')">ชีท “${esc(x.name)}” มีคำขอรออนุมัติ ${x.count} รายการ — กดเพื่อสลับ</button>`).join('');
   $('reqBody').innerHTML = reqData.length ? reqData.map(r => {
