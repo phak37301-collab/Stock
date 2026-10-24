@@ -1977,6 +1977,7 @@ function retRowHint(i) {
 }
 function paintRet() {
   const el = $('ret_list'); if (!el) return;
+  if (!isAdmin) return retbPaint();
   el.innerHTML = RET.map((r, i) => `<div class="mini-req" style="display:block">
     <div class="flex items-center gap-2"><select class="inp flex-1 min-w-0" onchange="retSet(${i},'code',this.value)">${retOpts(r.code)}</select>
       <input type="number" min="0" step="any" class="inp !w-24 text-center" placeholder="จำนวน" value="${esc(r.qty)}" oninput="retSet(${i},'qty',this.value)" aria-label="จำนวนที่คืน">
@@ -1986,7 +1987,9 @@ function paintRet() {
 function retSet(i, k, v) { RET[i][k] = v; const h = $('ret_h' + i); if (h) h.innerHTML = retRowHint(i); }
 function retAdd() { RET.push({ code: '', qty: '' }); paintRet(); }
 function retDel(i) { RET.splice(i, 1); if (!RET.length) RET.push({ code: '', qty: '' }); paintRet(); }
-function retPersonChange() { retSuggest(); RET.forEach((r, i) => { const h = $('ret_h' + i); if (h) h.innerHTML = retRowHint(i); }); }
+function retPersonChange() {
+  if (!isAdmin && $('panel-ret') && !$('panel-ret').classList.contains('hidden')) { clearTimeout(window.__retbT); window.__retbT = setTimeout(() => { const n = normName(($('ret_person') || {}).value); if (n !== RETB.name) retbLoad(); }, 400); }
+  retSuggest(); RET.forEach((r, i) => { const h = $('ret_h' + i); if (h) h.innerHTML = retRowHint(i); }); }
 // ทางลัด: วัสดุที่คนนี้เบิกไว้ใน 30 วันล่าสุด กดแล้วเพิ่มเป็นรายการคืนได้เลย
 function retSuggest() {
   if (!isAdmin) { const b0 = $('ret_sug'); if (b0) b0.innerHTML = ''; return; }
@@ -2004,6 +2007,67 @@ function retPick(code) {
   if (empty >= 0) RET[empty].code = code; else RET.push({ code: code, qty: '' });
   paintRet();
 }
+/* ----- ผู้ใช้ทั่วไป: ขอคืนได้เฉพาะของที่เบิกไว้ในชื่อตัวเอง (อ้างอิงใบเบิกเดิม) -----
+ * ดึงประวัติของชื่อนั้นจาก getMyHistory แล้วคำนวณ "คืนได้" ต่อวัสดุ = เบิกแล้ว(เสร็จสิ้น) - คืนแล้ว - คำขอคืนที่ยังรออนุมัติ
+ * ส่งคำขอพร้อมหมายเหตุ [อ้างอิงใบเบิก ...] ให้แอดมินตรวจกับเอกสารเบิกได้ทันที */
+let RETB = { name: '\u0000', loaded: true, err: '', list: [] };
+function retbBuild(L) {
+  const m = new Map();
+  const get = it => {
+    let o = m.get(it.name);
+    if (!o) { const mat = materials.find(x => x.name === it.name); o = { name: it.name, code: mat ? mat.code : '', unit: it.unit || (mat ? mat.unit : ''), withdrawn: 0, returned: 0, docs: [], q: '' }; m.set(it.name, o); }
+    return o;
+  };
+  L.forEach(x => (x.items || []).forEach(it => {
+    const q = Number(it.qty) || 0; if (q <= 0) return;
+    if (x.kind !== 'คืน') { if (x.status === 'เสร็จสิ้น') { const o = get(it); o.withdrawn += q; o.docs.push({ id: x.id || '', date: x.date, qty: q }); } }
+    else if (x.status === 'เสร็จสิ้น' || x.status === 'รออนุมัติ') get(it).returned += q;
+  }));
+  return [...m.values()].map(o => { o.left = Math.round((o.withdrawn - o.returned) * 1e6) / 1e6; return o; })
+    .filter(o => o.left > 0 && o.code).sort((a, b) => a.name.localeCompare(b.name, 'th'));
+}
+function retbLoad() {
+  const n = normName(($('ret_person') || {}).value), b = book;
+  RETB = { name: n, loaded: !n, err: '', list: [] };
+  retbPaint(); if (!n) return;
+  google.script.run
+    .withSuccessHandler(r => { if (b !== book || RETB.name !== n) return; RETB.list = retbBuild((r && r.list) || []); RETB.loaded = true; retbPaint(); })
+    .withFailureHandler(e => { if (b !== book || RETB.name !== n) return; RETB.err = (e && e.message) || String(e || 'โหลดไม่สำเร็จ'); RETB.loaded = true; retbPaint(); })
+    .getMyHistory(b, n);
+}
+function retbDocLabel(d) { return (d.id ? d.id + ' · ' : '') + thDate(d.date) + ' ×' + num(d.qty); }
+function retbPaint() {
+  const el = $('ret_list'); if (!el) return;
+  const box = (cls, html) => { el.innerHTML = `<div class="rounded-xl ${cls} text-sm p-3 leading-relaxed">${html}</div>`; };
+  if (!RETB.loaded) { el.innerHTML = '<div class="text-center py-6 text-sm text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังดึงรายการที่คุณเบิกไว้...</div>'; return; }
+  if (RETB.err) return box('bg-rose-50 text-rose-700', `โหลดรายการที่เบิกไว้ไม่สำเร็จ: ${esc(RETB.err)} <button type="button" class="chip on ml-1" onclick="retbLoad()">ลองอีกครั้ง</button>`);
+  if (!RETB.name) return box('bg-amber-50 text-amber-800', 'กรอกชื่อผู้คืนก่อน ระบบจะแสดงของที่ชื่อนี้เบิกไว้');
+  if (!RETB.list.length) return box('bg-amber-50 text-amber-800', `ไม่พบรายการที่ “${esc(RETB.name)}” เบิกไว้และยังคืนได้<div class="text-xs mt-1 opacity-80">คืนได้เฉพาะของที่เบิกผ่านระบบในชื่อนี้ (ที่แอดมินอนุมัติแล้ว) ถ้าเบิกด้วยชื่ออื่น ให้กด “ไม่ใช่ฉัน? เปลี่ยนชื่อ” ด้านบน</div>`);
+  el.innerHTML = RETB.list.map((o, i) => `<div class="mini-req" style="display:block">
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0"><div class="font-semibold text-sm leading-snug">${esc(o.name)}</div>
+        <div class="text-[11px] text-slate-400">เบิกไว้ ${num(o.withdrawn)}${o.returned ? ' · คืน/รอคืนแล้ว ' + num(o.returned) : ''} · <b class="text-teal-600">คืนได้ ${num(o.left)} ${esc(o.unit)}</b></div></div>
+      <div class="flex-none flex items-center gap-2"><input type="number" inputmode="decimal" min="0" max="${o.left}" step="any" class="inp !w-24 text-center" placeholder="0" value="${esc(o.q)}" oninput="retbSet(${i},this.value)" aria-label="จำนวนที่คืน ${esc(o.name)}">
+        <button type="button" class="text-[11px] text-teal-600 font-semibold whitespace-nowrap" onclick="retbAll(${i})">ทั้งหมด</button></div></div>
+    <div class="text-[10px] text-slate-400 mt-1">อ้างอิงใบเบิก: ${o.docs.slice(-3).reverse().map(d => esc(retbDocLabel(d))).join(' · ')}${o.docs.length > 3 ? ' …' : ''}</div>
+    <div id="retb_w${i}" class="text-[11px] text-amber-600 font-semibold"></div></div>`).join('');
+}
+function retbSet(i, v) {
+  const o = RETB.list[i]; if (!o) return; o.q = v;
+  const w = $('retb_w' + i); if (w) w.textContent = Number(v) > o.left + 1e-9 ? 'คืนได้สูงสุด ' + num(o.left) + ' ' + o.unit : '';
+}
+function retbAll(i) { const o = RETB.list[i]; if (!o) return; o.q = o.left; retbPaint(); }
+function sendRetPublic() {
+  if (!RETB.loaded || RETB.err) return Swal.fire({ icon: 'info', title: 'ยังโหลดรายการที่เบิกไว้ไม่เสร็จ', text: 'รอสักครู่ หรือกด "ลองอีกครั้ง"' });
+  const picked = RETB.list.filter(o => Number(o.q) > 0);
+  if (!picked.length) return Swal.fire({ icon: 'info', title: 'ยังไม่ได้ใส่จำนวนที่คืน', text: 'ใส่จำนวนในรายการที่ต้องการคืน' });
+  const bad = picked.find(o => Number(o.q) > o.left + 1e-9);
+  if (bad) return Swal.fire({ icon: 'warning', title: 'คืนเกินที่เบิกไว้', text: bad.name + ': คืนได้สูงสุด ' + num(bad.left) + ' ' + bad.unit });
+  const refs = [...new Set(picked.flatMap(o => o.docs.map(d => d.id || thDate(d.date))))].slice(-6);
+  const un = ($('ret_note').value || '').trim();
+  const note = ('[อ้างอิงใบเบิก ' + refs.join(', ') + ']' + (un ? ' ' + un : '')).slice(0, 200);
+  sendRetReq(picked.map(o => ({ code: o.code, qty: Number(o.q) })), note);
+}
 function buildRetForm() {
   $('panel-ret').innerHTML = `
   <div class="card p-6 border-t-4 border-teal-400 rounded-b-none sm:rounded-b-2xl">
@@ -2018,9 +2082,9 @@ function buildRetForm() {
         <div><div class="flex items-center justify-between gap-2 h-5"><label class="text-xs font-medium truncate">ผู้คืน *</label><button type="button" id="ret_chname" class="hidden text-[11px] text-indigo-600 font-medium whitespace-nowrap" onclick="askMyName(true)">ไม่ใช่ฉัน? เปลี่ยนชื่อ</button></div><input id="ret_person" required list="people" autocomplete="off" maxlength="60" class="inp mt-1" oninput="retPersonChange()" placeholder="ชื่อผู้ที่นำของมาคืน"><div class="mt-1 text-[11px] text-slate-400">ใช้ชื่อเดียวกับที่เบิกไว้</div></div>
       </div>
       <div id="ret_sug"></div>
-      <div><label class="text-xs font-medium">รายการที่คืน *</label>
+      <div><label id="ret_lbl" class="text-xs font-medium">รายการที่คืน *</label>
         <div id="ret_list" class="space-y-2 mt-1"></div>
-        <button type="button" onclick="retAdd()" class="mt-2 w-full py-2.5 rounded-xl border-2 border-dashed border-teal-300 text-teal-600 text-sm font-semibold hover:bg-teal-50"><i class="fa-solid fa-plus mr-1"></i>เพิ่มรายการ</button></div>
+        <button type="button" id="ret_add" onclick="retAdd()" class="mt-2 w-full py-2.5 rounded-xl border-2 border-dashed border-teal-300 text-teal-600 text-sm font-semibold hover:bg-teal-50"><i class="fa-solid fa-plus mr-1"></i>เพิ่มรายการ</button></div>
       <div><label class="text-xs font-medium">หมายเหตุ</label><input id="ret_note" maxlength="200" class="inp mt-1" placeholder="เช่น งานยกเลิก / ใช้ไม่หมด (ไม่บังคับ)"></div>
       <button id="ret_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold g-ret"><i class="fa-solid fa-rotate-left mr-2"></i><span id="ret_btxt">บันทึกคืนเบิก</span></button>
     </form>
@@ -2035,13 +2099,17 @@ function openRet() {
   $('ret_btxt').innerText = isAdmin ? 'บันทึกคืนเบิก' : 'ส่งคำขอคืน';
   setDate('ret_date', ymd(new Date()));
   RET = [{ code: '', qty: '' }]; $('ret_person').value = ''; $('ret_note').value = '';
+  $('ret_lbl').innerText = isAdmin ? 'รายการที่คืน *' : 'เลือกของที่จะคืน (จากที่คุณเบิกไว้) *';
+  $('ret_add').classList.toggle('hidden', !isAdmin);
+  RETB = { name: '\u0000', loaded: true, err: '', list: [] };
   fillMyName();
   paintRet(); retSuggest();
+  if (!isAdmin) retbLoad();
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
 }
 function submitRet(e) { e.preventDefault(); sendRet(false); }
 // ผู้ใช้ทั่วไป: ส่งคำขอคืน (ยังไม่เพิ่มสต็อก จนกว่าแอดมินจะอนุมัติ)
-function sendRetReq(items) {
+function sendRetReq(items, note) {
   const btn = $('ret_btn'), label = btn.innerHTML;
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังส่งคำขอ...';
   const done = () => { btn.disabled = false; btn.innerHTML = label; };
@@ -2049,11 +2117,12 @@ function sendRetReq(items) {
     done(); closeTx();
     if (r.id) rememberReq(r.id);
     Swal.fire({ icon: 'success', title: 'ส่งคำขอคืนแล้ว', text: r.message, timer: 4500, showConfirmButton: true, confirmButtonText: 'ตกลง' });
-    RET = [{ code: '', qty: '' }]; $('ret_note').value = ''; paintRet(); loadAllData();
+    RET = [{ code: '', qty: '' }]; $('ret_note').value = ''; RETB = { name: '\u0000', loaded: true, err: '', list: [] }; loadAllData();
   }).withFailureHandler(err => { done(); showError(err); })
-  .submitReturnRequest({ book: book, txDate: $('ret_date').value, personName: $('ret_person').value, note: $('ret_note').value, items: items });
+  .submitReturnRequest({ book: book, txDate: $('ret_date').value, personName: $('ret_person').value, note: note != null ? note : $('ret_note').value, items: items });
 }
 function sendRet(force) {
+  if (!isAdmin) return sendRetPublic();
   const items = RET.filter(r => r.code && Number(r.qty) > 0).map(r => ({ code: r.code, qty: Number(r.qty) }));
   if (!items.length) return Swal.fire({ icon: 'info', title: 'ยังไม่มีรายการคืน', text: 'เลือกวัสดุและใส่จำนวนที่คืน' });
   if (!isAdmin) return sendRetReq(items);
