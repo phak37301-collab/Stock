@@ -1972,7 +1972,7 @@ function buildForm(t) {
         <select id="${t}_sel" required onchange="unitChange('${t}')" class="inp mt-1"><option value="" disabled selected>-- เลือกวัสดุ --</option></select>
         <div class="text-right mt-1 admin-only"><button type="button" onclick="openMat('${t}')" class="text-xs text-indigo-600 font-medium"><i class="fa-solid fa-circle-plus mr-1"></i>ไม่พบวัสดุ? เพิ่มวัสดุใหม่</button></div>
         <label class="text-xs font-medium block ${isIn ? 'mt-3' : 'mt-2'}">จำนวน *</label>
-        <div class="flex gap-2 mt-1"><div class="relative flex-1"><input type="number" id="${t}_qty" min="0.01" step="any" required class="inp pr-16" placeholder="0">
+        <div class="flex gap-2 mt-1"><div class="relative flex-1"><input type="number" id="${t}_qty" min="0" step="any" required class="inp pr-16" placeholder="0">
           <span id="${t}_unit" class="absolute right-3 top-2.5 text-xs text-slate-400">หน่วย</span></div>
           ${isIn ? '' : `<button type="button" id="out_addbtn" onclick="addCartItem()" class="add-btn"><i class="fa-solid fa-plus mr-1"></i>เพิ่ม</button>`}</div></div>
       ${isIn ? '' : `<div id="out_cartwrap"><div id="out_cart"></div></div>`}
@@ -2972,4 +2972,3 @@ function toggleFab(force) {
 </script>
 </body>
 </html>
-  
