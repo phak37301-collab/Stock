@@ -793,13 +793,16 @@ async function openSettings() {
   if (needAdmin()) return;
   Swal.fire({ title: 'กำลังโหลดการตั้งค่า...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
   let st; try { st = await api('getSettings'); } catch (e) { Swal.close(); return showError(e); }
-  let newPw = '';
+  let newPw = '', initSnap = '', discard = false;
   const val = () => ({ notifyEmail: $('st_mail').value.trim(), webUrl: $('st_url').value.trim(), lineToken: $('st_ltok').value.trim(), lineUserId: $('st_luid').value.trim(), alwaysEmail: $('st_always').checked, lineEnabled: $('st_lon').checked, lineBatchSec: $('st_lbatch').value });
   const r = await Swal.fire({
     title: 'ตั้งค่าระบบ', width: 520, showCancelButton: true, showDenyButton: true,
-    showLoaderOnConfirm: true, showLoaderOnDeny: true, allowOutsideClick: () => !Swal.isLoading(), allowEscapeKey: () => !Swal.isLoading(),
+    showLoaderOnConfirm: true, showLoaderOnDeny: true, allowOutsideClick: false, allowEscapeKey: false,
     confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', denyButtonText: 'ส่งอีเมลทดสอบ', confirmButtonColor: '#4f46e5', denyButtonColor: '#64748b',
     html: `<div style="text-align:left;font-size:.85rem">
+      <div style="background:#eef2ff;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:.78rem;color:#3730a3;line-height:1.6"><b>ค่าที่บันทึกไว้ในระบบตอนนี้</b> (ทุกเครื่องเห็นเหมือนกัน)<br>
+        อีเมลรับแจ้ง: ${esc(st.notifyEmail || '(ยังไม่ได้ตั้ง)')}<br>
+        ส่งอีเมลทุกครั้งด้วย: <b>${st.alwaysEmail ? 'เปิด' : 'ปิด'}</b> · ส่ง LINE: <b>${st.lineEnabled ? 'เปิด' : 'ปิด'}</b> · LINE ${st.lineConfigured ? 'ตั้งค่าแล้ว' : 'ยังไม่ได้ตั้งค่า'} · รวมการ์ด ${esc(st.lineBatchSec)} วินาที</div>
       <label class="lbl">อีเมลรับแจ้งเมื่อมีคำขอเบิก (หลายอีเมลคั่นด้วย , )</label>
       <input id="st_mail" class="inp mt-1" value="${esc(st.notifyEmail)}" placeholder="boss@gmail.com">
       <label class="lbl" style="display:block;margin-top:12px">ลิงก์หน้าเว็บนี้ (แนบไปในอีเมล)</label>
@@ -817,11 +820,19 @@ async function openSettings() {
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>เปลี่ยนรหัสผ่านแอดมิน</b> <span class="lbl">(เว้นว่างถ้าไม่เปลี่ยน)</span>
         <input id="st_pw1" type="password" class="inp mt-2" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)" autocomplete="new-password">
         <input id="st_pw2" type="password" class="inp mt-2" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"></div>
-      <details style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0" ${(st.history || []).length ? '' : ''}>
+      <details open style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0">
         <summary style="cursor:pointer;font-weight:700">ประวัติการตั้งค่า <span class="lbl">${(st.history || []).length ? '(ล่าสุด ' + esc(st.history[0].t) + ' · ' + st.history.length + ' ครั้ง)' : '(ยังไม่มีประวัติ)'}</span></summary>
         <div style="margin-top:8px;max-height:220px;overflow:auto;font-size:.78rem">${(st.history || []).length ? st.history.map(h => `<div style="padding:6px 0;border-bottom:1px dashed #e2e8f0"><b style="color:#4f46e5">${esc(h.t)}</b>${(h.c || []).map(x => `<div style="color:#475569;margin-top:2px">• ${esc(x)}</div>`).join('')}</div>`).join('') : '<div class="lbl">บันทึกเมื่อมีการแก้ไขการตั้งค่าครั้งต่อไป (ไม่เก็บ token หรือรหัสผ่านจริง)</div>'}</div>
       </details></div>`,
     didOpen: () => {
+      initSnap = JSON.stringify(val());
+      const dirty = () => !discard && (JSON.stringify(val()) !== initSnap || $('st_pw1').value || $('st_pw2').value || $('st_ltok').value);
+      // กันปิดหน้าต่างทิ้งโดยไม่ได้บันทึก (ปุ่ม "ปิด")
+      Swal.getPopup().addEventListener('click', ev => {
+        if (!ev.target.closest || !ev.target.closest('.swal2-cancel') || !dirty()) return;
+        ev.stopPropagation(); ev.preventDefault();
+        if (confirm('มีการแก้ไขที่ยังไม่ได้บันทึก ต้องการปิดโดยไม่บันทึกหรือไม่?')) { discard = true; Swal.clickCancel(); }
+      }, true);
       const msg = t => { $('st_lmsg').textContent = t; };
       $('st_ltest').onclick = async () => {
         msg('กำลังส่ง...');
@@ -839,7 +850,14 @@ async function openSettings() {
         if (p1 !== p2) { Swal.showValidationMessage('รหัสผ่านทั้งสองช่องไม่ตรงกัน'); return false; }
         f.newPassword = p1;
       }
-      try { const res = await api('saveSettings', f); newPw = f.newPassword || ''; return res; }
+      try {
+        const res = await api('saveSettings', f); newPw = f.newPassword || '';
+        // อ่านกลับจากเซิร์ฟเวอร์เพื่อยืนยันว่าบันทึกจริง
+        const chk = await api('getSettings');
+        if (!!chk.alwaysEmail !== !!f.alwaysEmail || !!chk.lineEnabled !== !!f.lineEnabled) throw new Error('บันทึกแล้วแต่ค่าในระบบไม่ตรงกับที่ตั้ง กรุณาลองบันทึกอีกครั้ง');
+        res.message += '\nส่งอีเมลทุกครั้ง: ' + (chk.alwaysEmail ? 'เปิด' : 'ปิด') + ' · ส่ง LINE: ' + (chk.lineEnabled ? 'เปิด' : 'ปิด');
+        return res;
+      }
       catch (e) { Swal.showValidationMessage((e && e.message) || e); return false; }
     },
     preDeny: async () => {
@@ -850,7 +868,7 @@ async function openSettings() {
   });
   if (r.isConfirmed && r.value) {
     if (newPw) { window.ADMIN_PW = newPw; try { sessionStorage.setItem('adm', newPw); } catch (e) {} }
-    Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', text: r.value.message, timer: 2200, showConfirmButton: false });
+    Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', html: esc(r.value.message).replace(/\n/g, '<br>'), timer: 3500, showConfirmButton: true, confirmButtonText: 'ตกลง' });
   }
 }
 /* ===== จำชื่อผู้ใช้ทั่วไป: กรอกครั้งแรก ครั้งต่อไปเติมในช่องผู้เบิก/ผู้คืนให้เอง (ชื่อจะตรงกันทุกครั้ง) ===== */
