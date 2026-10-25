@@ -944,10 +944,15 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzv3OyYJbWWrN1NpTk-PCQh
       if (name === 'withSuccessHandler') return function (f) { return mk(f, fail); };
       if (name === 'withFailureHandler') return function (f) { return mk(ok, f); };
       return function () {
-        const args = Array.prototype.slice.call(arguments);
+        const args = Array.prototype.slice.call(arguments), t0 = (window.performance && performance.now) ? performance.now() : Date.now();
         fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: name, args: args, pw: window.ADMIN_PW || '', dev: devId() }) })
           .then(function (r) { return r.json(); })
           .then(function (j) {
+            try {   // จับเวลารวมเครือข่ายของแต่ละคำสั่ง (ดูได้ที่เมนูตั้งค่า > ดูความเร็วระบบ)
+              const rt = ((window.performance && performance.now) ? performance.now() : Date.now()) - t0, P = (window.__perf = window.__perf || {});
+              const p = P[name] || (P[name] = { n: 0, t: 0, max: 0 });
+              p.n++; p.t += rt; if (rt > p.max) p.max = rt;
+            } catch (e) {}
             if (j.authLost && window.ADMIN_PW && window.onAuthLost) window.onAuthLost();
             j.ok ? (ok && ok(j.result)) : (fail && fail(new Error(j.error)));
           },
@@ -992,10 +997,12 @@ async function adminLogin(pw) {
   if (!r || !r.admin) { window.ADMIN_PW = ''; if (!(r && r.locked)) { try { sessionStorage.removeItem('adm'); } catch (e) {} } return { bad: true, locked: !!(r && r.locked) }; }
   isAdmin = true; try { sessionStorage.setItem('adm', pw); } catch (e) {}
   applyRole();
+  if (lastAllAdm === false) loadAllData();   // ข้อมูลที่โหลดไว้ก่อนล็อกอินเสร็จเป็นแบบผู้ใช้ทั่วไป (ไม่มีประวัติ) -> โหลดใหม่แบบแอดมิน
   if (r.isDefault) setTimeout(() => Swal.fire({ icon: 'warning', title: 'ยังใช้รหัสเริ่มต้นอยู่', text: 'เพื่อความปลอดภัย กรุณาตั้งรหัสผ่านใหม่ตอนนี้', confirmButtonText: 'ตั้งรหัสผ่านใหม่', confirmButtonColor: '#4f46e5' }).then(openSettings), 300);
   return true;
 }
-function adminLogout() { isAdmin = false; window.ADMIN_PW = ''; try { sessionStorage.removeItem('adm'); } catch (e) {} applyRole(); }
+function clearAdminCache() { try { Object.keys(localStorage).filter(k => k.indexOf('allcA_') === 0).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
+function adminLogout() { isAdmin = false; window.ADMIN_PW = ''; try { sessionStorage.removeItem('adm'); } catch (e) {} clearAdminCache(); applyRole(); }
 // เซิร์ฟเวอร์แจ้งว่ารหัสที่ถือไว้ใช้ไม่ได้แล้ว (เช่น เปลี่ยนรหัสจากเครื่องอื่น) -> ออกจากโหมดแอดมินเอง ไม่ส่งรหัสเก่าซ้ำ
 window.onAuthLost = function () {
   if (!window.ADMIN_PW) return;
@@ -1051,6 +1058,9 @@ async function openSettings() {
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>เปลี่ยนรหัสผ่านแอดมิน</b> <span class="lbl">(เว้นว่างถ้าไม่เปลี่ยน)</span>
         <input id="st_pw1" type="password" class="inp mt-2" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)" autocomplete="new-password">
         <input id="st_pw2" type="password" class="inp mt-2" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"></div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0"><b>ความเร็วระบบ</b> <span class="lbl">(เวลาที่ใช้ของแต่ละคำสั่ง)</span>
+        <div style="margin-top:6px;display:flex;gap:12px;font-size:.8rem"><button type="button" id="st_perf" style="color:#4f46e5;font-weight:600">ดูความเร็ว</button><button type="button" id="st_perfreset" style="color:#64748b">เริ่มนับใหม่</button></div>
+        <div id="st_perfout" style="margin-top:6px;font-size:.72rem;color:#334155;overflow-x:auto"></div></div>
       <details open style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0">
         <summary style="cursor:pointer;font-weight:700">ประวัติการตั้งค่า <span class="lbl">${(st.history || []).length ? '(ล่าสุด ' + esc(st.history[0].t) + ' · ' + st.history.length + ' ครั้ง)' : '(ยังไม่มีประวัติ)'}</span></summary>
         <div style="margin-top:8px;max-height:220px;overflow:auto;font-size:.78rem">${(st.history || []).length ? st.history.map(h => `<div style="padding:6px 0;border-bottom:1px dashed #e2e8f0"><b style="color:#4f46e5">${esc(h.t)}</b>${(h.c || []).map(x => `<div style="color:#475569;margin-top:2px">• ${esc(x)}</div>`).join('')}</div>`).join('') : '<div class="lbl">บันทึกเมื่อมีการแก้ไขการตั้งค่าครั้งต่อไป (ไม่เก็บ token หรือรหัสผ่านจริง)</div>'}</div>
@@ -1065,6 +1075,15 @@ async function openSettings() {
         if (confirm('มีการแก้ไขที่ยังไม่ได้บันทึก ต้องการปิดโดยไม่บันทึกหรือไม่?')) { discard = true; Swal.clickCancel(); }
       }, true);
       const msg = t => { $('st_lmsg').textContent = t; };
+      const perf = async reset => {
+        const out = $('st_perfout'); out.textContent = 'กำลังโหลด...';
+        try {
+          const p = await api('getPerf', !!reset), c = window.__perf || {};
+          const rows = (p.rows || []).map(r => { const k = c[r.fn]; return `<tr><td>${esc(r.fn)}</td><td style="text-align:right">${r.n}</td><td style="text-align:right">${r.avg}</td><td style="text-align:right">${r.max}</td><td style="text-align:right">${k ? Math.round(k.t / k.n) : '-'}</td></tr>`; }).join('');
+          out.innerHTML = rows ? `<table style="width:100%;border-collapse:collapse"><tr style="color:#64748b"><th style="text-align:left">คำสั่ง</th><th>ครั้ง</th><th>เซิร์ฟเวอร์เฉลี่ย (ms)</th><th>สูงสุด</th><th>เครื่องนี้รวมเครือข่าย (ms)</th></tr>${rows}</table><div style="margin-top:4px;color:#94a3b8">นับตั้งแต่ ${p.since ? new Date(p.since).toLocaleString('th-TH') : '-'} · คำสั่งที่เฉลี่ยช้าและถูกเรียกบ่อยอยู่บนสุด</div>` : 'ยังไม่มีข้อมูล ลองใช้งานสักพักแล้วกดดูใหม่';
+        } catch (e) { out.textContent = 'ไม่สำเร็จ: ' + ((e && e.message) || e); }
+      };
+      $('st_perf').onclick = () => perf(false); $('st_perfreset').onclick = () => perf(true);
       $('st_ltest').onclick = async () => {
         msg('กำลังส่ง...');
         try { await api('saveSettings', val()); msg(await api('sendTestLine')); $('st_ltok').value = ''; } catch (e) { msg('ไม่สำเร็จ: ' + ((e && e.message) || e)); }
@@ -1192,7 +1211,7 @@ const statusBadge = low => low
   ? '<span class="badge b-low"><i class="fa-solid fa-triangle-exclamation"></i>ใกล้หมด</span>'
   : '<span class="badge b-ok"><i class="fa-solid fa-check"></i>ปกติ</span>';
 
-let book = '';
+let book = '', bootBook = '', lastAllAdm;
 let stock = [], materials = [], repRaw = null, view = null, mode = 'stock', lowMap = {};
 const newF = () => ({ st: new Set(), un: new Set(), mt: new Set(), ty: new Set(), q: '' });
 const F = { inv: newF(), rep: newF() };
@@ -1209,6 +1228,9 @@ window.onload = () => {
   paintAll(); catInit(); rktInit();
   $('heroDate').innerText = beDate(ymd(new Date()));
   { const h = new Date().getHours(); $('heroHi').innerText = h < 12 ? '☀️ สวัสดีตอนเช้า' : h < 17 ? '🌤️ สวัสดีตอนบ่าย' : '🌙 สวัสดีตอนเย็น'; }
+  // ไม่ต้องรอรายชื่อชีทก่อน: ใช้ชีทที่เลือกไว้ครั้งก่อน โหลดข้อมูลขนานกับ getBooks (ลดการรอ 1 รอบเครือข่าย) และโชว์ข้อมูลที่จำไว้ทันที
+  bootBook = ''; try { bootBook = localStorage.getItem('stockBook') || ''; } catch (e) {}
+  if (bootBook) { book = bootBook; paintCached(); loadAllData(); }
   google.script.run.withSuccessHandler(initBooks).withFailureHandler(showError).getBooks();
 };
 
@@ -1797,7 +1819,13 @@ function initBooks(list) {
   let saved = ''; try { saved = localStorage.getItem('stockBook') || ''; } catch (e) {}
   book = list.some(b => b.key === saved) ? saved : (list[0] && list[0].key) || '';
   $('bookSel').value = book;
-  loadAllData();
+  const was = bootBook; bootBook = '';
+  if (was && book === was) {            // โหลดขนานไปแล้วด้วยชีทเดียวกัน แค่ใส่ชื่อชีทให้ครบ
+    $('heroBook').innerText = bookName();
+    document.title = ' ระบบจัดการวัสดุสำนักงาน  - ' + bookName(); paintTitle();
+    return;
+  }
+  was ? switchBook(book) : loadAllData();   // ชีทที่จำไว้ถูกลบไปแล้ว -> ล้างของเดิมแล้วโหลดชีทที่ถูกต้อง
 }
 function switchBook(k) {
   book = k; try { localStorage.setItem('stockBook', k); } catch (e) {}
@@ -1968,6 +1996,7 @@ function showReqError(e) {
 function loadRequests(quiet) {
   if (!isAdmin || !book) return;
   const b = book, f = reqFilter, tk = ++reqSeq, ic = $('reqRefreshIcon');
+  window.__reqT = Date.now();
   if (!quiet) showReqLoading();
   if (ic) ic.classList.add('fa-spin');
   const stop = () => { if (ic) ic.classList.remove('fa-spin'); };
@@ -2098,9 +2127,40 @@ function switchTab(t) {
   if (t === 'count') renderCount();
 }
 
+// แคชข้อมูลหน้าแรกในเครื่อง: เปิดเว็บแล้วโชว์ของครั้งก่อนทันที แล้วอัปเดตเป็นข้อมูลล่าสุดเบื้องหลัง
+// แอดมินเก็บแยกคีย์ (allcA_) เพราะมีประวัติเบิก-คืนของคน จะถูกลบเมื่อออกจากระบบแอดมิน
+const allCacheKey = (b, adm) => (adm ? 'allcA_' : 'allc_') + b;
+function saveAllCache(b, all, adm) {
+  try {
+    const o = { t: Date.now(), dash: all.dash, materials: all.materials };
+    if (adm) o.history = all.history || [];
+    let js = JSON.stringify(o);
+    if (js.length > 1500000) { delete o.history; o.noHist = 1; js = JSON.stringify(o); }   // ประวัติใหญ่เกินไปไม่เก็บ (จะไม่ใช้โชว์ล่วงหน้า)
+    localStorage.setItem(allCacheKey(b, adm), js);
+  } catch (e) {}
+}
+function paintCached() {
+  if (!book) return;
+  let adm = false; try { adm = !!sessionStorage.getItem('adm'); } catch (e) {}
+  let o = null; try { o = JSON.parse(localStorage.getItem(allCacheKey(book, adm)) || 'null'); } catch (e) {}
+  if (!o || !o.dash || !o.materials || (adm && o.noHist) || Date.now() - o.t > 7 * 864e5) return;
+  try { applyAll({ dash: o.dash, materials: o.materials, history: o.history || [] }, true); } catch (e) {}
+}
+function applyAll(all, cached) {
+  const r = all.dash, hf = $('historyFilterSelect').value;
+  populateMaterials(all.materials); $('historyFilterSelect').value = hf;
+  histAll = all.history || []; applyHistFilter(); fillPeople();
+  stock = r.items; lowMap = {}; stock.forEach(i => lowMap[i.code] = i.isLow);
+  $('stat-total').innerText = r.totalItems; $('stat-normal').innerText = r.normalStockCount; $('stat-low').innerText = r.lowStockCount; paintLowChip(r.lowStockCount, r.normalStockCount);
+  paintMatList('inv'); paintMatList('rep'); paintAll(); renderInventory(); renderReport(); renderSide(); fillAdjSel(); renderCount(); fillUnits();
+  if (cached) return;
+  if (isAdmin) { if (Date.now() - (window.__reqT || 0) > 4000) loadRequests(true); } else paintMyReqs();   // ถ้าเพิ่งโหลดคำขอไปเมื่อกี้ (ขนานตอนเปิดหน้า) ไม่ต้องโหลดซ้ำ
+  $('refreshIcon').classList.remove('fa-spin');
+  if (pendingSel) { const ps = pendingSel; pendingSel = null; $(ps.t + '_sel').value = ps.code; unitChange(ps.t); openTx(ps.t); }
+}
 function loadAllData() {
   if (!book) return;
-  const b = book;
+  const b = book, adm = !!window.ADMIN_PW;
   $('heroBook').innerText = bookName();
   document.title = ' ระบบจัดการวัสดุสำนักงาน  - ' + bookName(); paintTitle();
   
@@ -2108,15 +2168,9 @@ function loadAllData() {
   google.script.run
     .withSuccessHandler(all => {
       if (b !== book) return;
-      const r = all.dash, hf = $('historyFilterSelect').value;
-      populateMaterials(all.materials); $('historyFilterSelect').value = hf;
-      histAll = all.history || []; applyHistFilter(); fillPeople();
-      stock = r.items; lowMap = {}; stock.forEach(i => lowMap[i.code] = i.isLow);
-      $('stat-total').innerText = r.totalItems; $('stat-normal').innerText = r.normalStockCount; $('stat-low').innerText = r.lowStockCount; paintLowChip(r.lowStockCount, r.normalStockCount);
-      paintMatList('inv'); paintMatList('rep'); paintAll(); renderInventory(); renderReport(); renderSide(); fillAdjSel(); renderCount(); fillUnits();
-      isAdmin ? loadRequests(true) : paintMyReqs();
-      $('refreshIcon').classList.remove('fa-spin');
-      if (pendingSel) { const ps = pendingSel; pendingSel = null; $(ps.t + '_sel').value = ps.code; unitChange(ps.t); openTx(ps.t); }
+      lastAllAdm = adm;
+      applyAll(all, false);
+      saveAllCache(b, all, adm);
     })
     .withFailureHandler(e => { $('refreshIcon').classList.remove('fa-spin'); showError(e); })
     .getAllData(b);
