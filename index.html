@@ -677,6 +677,20 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   .rc .rslots button{padding:2px 9px;font-size:.68rem;background:rgba(255,255,255,.14)}
   .rc .rslots button.on{background:#7c3aed}
   @media(prefers-reduced-motion:reduce){.rbn{animation-duration:.01s}}
+
+.rdm{font-weight:800;font-size:.95em;color:#fff;-webkit-text-stroke:.6px #1b1020;text-shadow:0 1px 0 #1b1020,0 0 4px rgba(0,0,0,.6)}
+.rdm.c{font-size:1.45em;color:#ffcf3f;-webkit-text-stroke:1px #7a1d0e;text-shadow:0 2px 0 #7a1d0e,0 0 10px rgba(255,120,30,.8);animation:rcrit .8s forwards}
+.rdm.c::before{content:'';position:absolute;inset:-35% -30%;z-index:-1;background:radial-gradient(circle,rgba(255,200,80,.5),transparent 62%);border-radius:50%}
+.rdm.sk{font-size:1.2em;color:#9be7ff;-webkit-text-stroke:.8px #0b3a5c}
+@keyframes rcrit{0%{transform:scale(.5)}18%{transform:scale(1.25)}35%{transform:scale(1)}100%{transform:translateY(-52px);opacity:0}}
+#rpgPanel:not(.bagOn) .rcol-r{display:none}
+#rpgPanel:not(.bagOn) .rwrap{display:block}
+#rpgPanel:not(.bagOn) .rsc{--h:clamp(300px,56vh,620px)}
+.rtg{grid-template-columns:repeat(4,1fr)}
+.rtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rtabs button{padding:8px 4px;border-radius:12px;background:rgba(255,255,255,.1);color:#cbd5e1;font-weight:700;font-size:.78rem}.rtabs button.on{background:rgba(167,139,250,.3);color:#fff}
+.rcol-r[data-t=eq] #rSk,.rcol-r[data-t=eq] #rBossL,.rcol-r[data-t=sk] #rEqS,.rcol-r[data-t=sk] #rBag,.rcol-r[data-t=sk] #rBossL,.rcol-r[data-t=bs] #rEqS,.rcol-r[data-t=bs] #rBag,.rcol-r[data-t=bs] #rSk{display:none}
+.skslots{display:flex;gap:8px}.skslots button{flex:1;padding:8px;border-radius:14px;background:rgba(255,255,255,.08);border:2px solid transparent;color:#fff}.skslots button.on{border-color:#a78bfa;background:rgba(167,139,250,.2)}.skslots i{font-style:normal;font-size:1.6rem;display:block}.skslots small{font-size:.65rem;opacity:.8}
+.skbag{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:7px}.skbag .sk{padding:8px 4px;border-radius:14px;background:rgba(255,255,255,.08);color:#fff;display:grid;gap:2px;justify-items:center;border:2px solid transparent}.skbag .sk i{font-style:normal;font-size:1.7rem}.skbag .sk b{font-size:.72rem}.skbag .sk small{font-size:.62rem;opacity:.75}.skbag .sk.eq{border-color:#4ade80}.skbag .sk.lock{opacity:.45}
 </style>
 </head>
 <body>
@@ -1440,7 +1454,7 @@ function rPaint() {
 }
 function rDmgNum(d, crit) {
   const sc = $('rSc'); if (!sc || sc.querySelectorAll('.rdm').length > 10) return;
-  const e = document.createElement('div'); e.className = 'rdm' + (crit ? ' c' : ''); e.textContent = rF(d) + (crit ? '!' : '');
+  const e = document.createElement('div'); e.className = 'rdm' + (crit === 2 ? ' sk' : crit ? ' c' : ''); e.textContent = rF(d) + (crit === true ? '!' : '');
   e.style.left = (52 + Math.random() * 26) + '%'; e.style.top = (34 + Math.random() * 22) + '%'; sc.appendChild(e); setTimeout(() => e.remove(), 800);
   const E = $('rEn'), H = $('rHr'); if (E) { E.classList.remove('hit'); void E.offsetWidth; E.classList.add('hit'); } if (H) { H.classList.remove('atk'); void H.offsetWidth; H.classList.add('atk'); }
 }
@@ -1591,12 +1605,12 @@ function rLoot(e) {   // วัสดุจากมอนสเตอร์ + �
   if (b) { const n = Math.random() < .4 ? 2 : 1; m.c += n; t.push('💎' + n); if (Math.random() < .55) t.push(rScroll()); }
   if (t.length && rMsg) rMsg('ได้ ' + t.join(' '));
 }
-function rSkHtml() {
+function rSkRows() {
   const m = R.mt;
-  let h = `<div class="rhd"><b>📖 สกิล</b><small>🦴${m.b} 🔶${m.s} 💎${m.c}</small></div><div class="rln">ช่องที่ใช้: ${R.sk.e.map((id, k) => (k + 1) + '.' + RSD[id].i).join('  ')} · บอสดรอปตำราสกิล หรือคราฟเองด้วยวัสดุจากมอนสเตอร์</div>`;
+  let h = '';
   Object.keys(RSD).forEach(id => {
     const d = RSD[id], lv = R.sk.l[id], c = rCost(id, lv || 0), sc = `${c.b},${c.s},${c.c},${c.g}`;
-    if (lv) h += `<div class="rc" style="--c:#a78bfa"><span class="ri-ic">${d.i}</span><div><b>${d.n} Lv.${lv}</b><small>${d.d} · คูลดาวน์ ${d.cd} วิ</small><span class="rslots">${[0, 1, 2].map(k => `<button class="${R.sk.e[k] === id ? 'on' : ''}" onclick="rUiSlot(${k},'${id}')">ช่อง${k + 1}</button>`).join('')}</span></div>${lv >= 5 ? '<span class="rmax">MAX</span>' : `<button class="s" data-sc="${sc}" ${rCan(c) ? '' : 'disabled'} onclick="rUiSkUp('${id}')">⬆ ${rCostTxt(c)}</button>`}</div>`;
+    if (lv) h += `<div class="rc" style="--c:#a78bfa"><span class="ri-ic">${d.i}</span><div><b>${d.n} Lv.${lv}</b><small>${d.d} · คูลดาวน์ ${d.cd} วิ</small></div>${lv >= 5 ? '<span class="rmax">MAX</span>' : `<button class="s" data-sc="${sc}" ${rCan(c) ? '' : 'disabled'} onclick="rUiSkUp('${id}')">⬆ ${rCostTxt(c)}</button>`}</div>`;
     else h += `<div class="rc" style="--c:#475569"><span class="ri-ic">🔒</span><div><b>${d.n}</b><small>${d.d}</small></div><button data-sc="${sc}" ${rCan(c) ? '' : 'disabled'} onclick="rUiCraft('${id}')">🔨 ${rCostTxt(c)}</button></div>`;
   });
   return h;
@@ -1607,7 +1621,7 @@ function rUiSkUp(id) { const lv = R.sk.l[id], c = rCost(id, lv); if (!lv || lv >
 function rSkill(k) {
   const now = rNow(); if (rCd[k] > now) return false; const id = R.sk.e[k], d = RSD[id], lv = R.sk.l[id] || 1, pm = 1 + .3 * (lv - 1);
   rCd[k] = now + d.cd * 1000; const S = rStats();
-  if (d.t === 'a' || d.t === 'f') { const x = S.atk * d.m * pm * S.cd; rFx && rFx(x, true); rHp -= x; if (d.t === 'f') { rSlow = now + 10000; if (rMsg) rMsg('❄️ ศัตรูโจมตีช้าลง'); } }
+  if (d.t === 'a' || d.t === 'f') { const x = S.atk * d.m * pm * S.cd; rFx && rFx(x, 2); rHp -= x; if (d.t === 'f') { rSlow = now + 10000; if (rMsg) rMsg('❄️ ศัตรูโจมตีช้าลง'); } }
   else if (d.t === 'r') { rRage = now + 8000; if (rMsg) rMsg('🔥 คลั่ง! ดาเมจ x1.8 นาน 8 วิ'); }
   else if (d.t === 'g') { rGuard = now + 8000; if (rMsg) rMsg('🛡️ ป้อมเหล็ก! ลดดาเมจที่รับ'); }
   else { rHero = Math.min(S.hp, rHero + S.hp * (.5 + .05 * (lv - 1))); if (rMsg) rMsg('💚 ฟื้นฟู HP'); }
@@ -1635,7 +1649,7 @@ function rEvx(k, a) {
 
 /* ---------- 3D ---------- */
 let K = null;
-const gb = (w, h, d) => new THREE.BoxGeometry(w, h, d), gc = (a, b, h, n) => new THREE.CylinderGeometry(a, b, h, n || 8), gs = r => new THREE.SphereGeometry(r, 10, 8), gk = (r, h, n) => new THREE.ConeGeometry(r, h, n || 6);
+const gb = (w, h, d) => new THREE.BoxGeometry(w, h, d), gc = (a, b, h, n) => new THREE.CylinderGeometry(a, b, h, Math.max(n || 8, 14)), gs = r => new THREE.SphereGeometry(r, 24, 16), gk = (r, h, n) => new THREE.ConeGeometry(r, h, n || 6);
 const kRC = r => parseInt(RR[Math.max(0, r)][1].slice(1), 16);
 function kLoad() {
   if (K) return kRun(); if (document.getElementById('k3s')) return;
@@ -1649,9 +1663,9 @@ function kInit() {
   try { r = new T.WebGLRenderer({ antialias: true }); } catch (e) { return; }
   r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); r.domElement.className = 'k3'; box.insertBefore(r.domElement, box.firstChild); box.classList.add('k3on');
   const sc = new T.Scene(), cam = new T.PerspectiveCamera(36, 1, .1, 90); sc.fog = new T.Fog(0x9ad0e8, 14, 46);
-  sc.add(new T.HemisphereLight(0xfff1d6, 0x445566, .95)); const sun = new T.DirectionalLight(0xffe2b0, .85); sun.position.set(-4, 8, 6); sc.add(sun);
+  sc.add(new T.HemisphereLight(0xfff1d6, 0x445566, .95)); const sun = new T.DirectionalLight(0xffe2b0, .85); sun.position.set(-4, 8, 6); sc.add(sun); const rim = new T.DirectionalLight(0x9cc8ff, .7); rim.position.set(4, 3, -6); sc.add(rim);
   K = { T, r, sc, cam, clock: new T.Clock(), sig: '', combo: 0, shake: 0, show: 0, view: false, pt: [], t: 0, mk: '', mon: null, dead: [], bio: -1, mv: 0, spd: 0, flash: 0, lk: R.k, healT: 0, cp: new T.Vector3(0, 2.2, 9), cl: new T.Vector3(0, 1.3, 0), raf: 0, w: 0, h: 0 };
-  K.M = (c, o) => new T.MeshStandardMaterial(Object.assign({ color: c, roughness: .65, metalness: .15, flatShading: true }, o || {}));
+  K.M = (c, o) => new T.MeshStandardMaterial(Object.assign({ color: c, roughness: .5, metalness: .15, flatShading: false }, o || {}));
   K.B = (g, m, x, y, z, p) => { const o = new T.Mesh(g, m); o.position.set(x || 0, y || 0, z || 0); if (p) p.add(o); return o; };
   K.G = (p, x, y, z) => { const o = new T.Group(); o.position.set(x || 0, y || 0, z || 0); if (p) p.add(o); return o; };
   kEnv(); kHeroBuild(); kPool(); kApply(); K.show = 0; kRun();
@@ -1670,16 +1684,16 @@ function kEnv() {
 }
 function kHeroBuild() {
   const T = K.T, { M, B, G } = K, H = K.H = {}, g = H.g = G(K.sc);
-  const cloth = M(0x35435f), skin = M(0xe3b595, { metalness: 0 }), steel = K.armM = M(0x8d98aa, { metalness: .7, roughness: .4 }), boot = M(0x2a2420);
+  const cloth = M(0x2f5fa8), skin = M(0xe3b595, { metalness: 0 }), steel = K.armM = M(0x8d98aa, { metalness: .7, roughness: .4 }), boot = M(0x2a2420);
   const sh = B(new T.CircleGeometry(.65, 16), new T.MeshBasicMaterial({ color: 0, transparent: true, opacity: .32 }), 0, .02, 0, g); sh.rotation.x = -Math.PI / 2;
-  const hips = H.hips = G(g, 0, .98); B(gb(.46, .2, .3), cloth, 0, 0, 0, hips);
-  const tor = H.tor = G(hips, 0, .1); B(gb(.52, .6, .34), cloth, 0, .32, 0, tor); B(gb(.56, .08, .36), M(0x4a3524), 0, .02, 0, tor);
-  const hd = H.hd = G(tor, 0, .78); B(gc(.07, .08, .1, 6), skin, 0, .02, 0, hd); B(gs(.18), skin, 0, .16, 0, hd);
-  [1, -1].forEach(s => B(gb(.03, .04, .04), M(0x111111), .16, .18, s * .07, hd));
+  const hips = H.hips = G(g, 0, .98); B(gs(1), cloth, 0, 0, 0, hips).scale.set(.26, .15, .19);
+  const tor = H.tor = G(hips, 0, .1); B(gs(1), cloth, 0, .32, 0, tor).scale.set(.29, .34, .21); B(gc(.3, .3, .08, 16), M(0x4a3524), 0, .02, 0, tor).scale.set(1, 1, .75);
+  const hd = H.hd = G(tor, 0, .78); B(gc(.07, .08, .1, 6), skin, 0, .02, 0, hd); B(gs(.2), skin, 0, .17, 0, hd); B(new T.TorusGeometry(.13, .045, 8, 18), M(0xc0392b), 0, -.02, 0, hd).rotation.x = Math.PI / 2;
+  [1, -1].forEach(s => B(gs(.028), M(0x111111), .17, .18, s * .075, hd));
   const limb = (p, x, y, z, l1, l2, r, m, em) => { const s = G(p, x, y, z); B(gc(r, r * .85, l1, 7), m, 0, -l1 / 2, 0, s); const e = G(s, 0, -l1); B(gs(r * .9), m, 0, 0, 0, e); B(gc(r * .85, r * .7, l2, 7), m, 0, -l2 / 2, 0, e); const h = G(e, 0, -l2); B(gs(r * .8), em, 0, 0, 0, h); return { s, e, h }; };
   H.aR = limb(tor, 0, .58, .33, .34, .32, .075, steel, skin); H.aL = limb(tor, 0, .58, -.33, .34, .32, .075, steel, skin);
   H.lR = limb(hips, 0, -.08, .14, .46, .44, .1, steel, boot); H.lL = limb(hips, 0, -.08, -.14, .46, .44, .1, steel, boot);
-  [H.lR, H.lL].forEach(l => B(gb(.32, .1, .2), boot, .08, -.04, 0, l.h));
+  [H.lR, H.lL].forEach(l => B(gs(1), boot, .08, -.03, 0, l.h).scale.set(.17, .07, .1));
   H.wp = G(H.aR.h); H.gW = G(H.wp); H.gS = G(H.aL.e, 0, -.2, -.14); H.gH = G(hd, 0, .16, 0); H.gA = G(tor); H.gC = G(tor); H.cape = G(tor, -.2, .62, 0); H.orb = G(g, 0, 1.25, 0);
   H.ring = B(new T.RingGeometry(.7, .95, 32), new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .5, side: T.DoubleSide, blending: T.AdditiveBlending, depthWrite: false }), 0, .04, 0, g); H.ring.rotation.x = -Math.PI / 2; H.ring.visible = false;
   H.dome = B(new T.SphereGeometry(1.3, 16, 12), new T.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: .2, blending: T.AdditiveBlending, depthWrite: false }), 0, 1.1, 0, g); H.dome.visible = false;
@@ -1782,8 +1796,43 @@ function kSkImp(id) {
 }
 
 /* ----- มอนสเตอร์ (ลักษณะโลว์โพลี: ราปเตอร์ / สัตว์สี่ขา / ไวเวิร์นบอส) ----- */
+/* ----- บอสแต่ละตัวมีทรงเฉพาะ: 0 ราชาหนู 1 มังกรเพลิง 2 เร็กซ์ 3 เคานต์ 4 โครงกระดูก 5 คราเคน 6 ปีศาจ 7 มังกรสองหัว ----- */
+function kBoss(n, c) {
+  const { o, root, S, leg, tail, head, B, G, T, bm, dm, lm, pm, M } = c;
+  const gold = M(0xfbbf24, { metalness: .8, roughness: .3 }), glow = new T.MeshBasicMaterial({ color: 0xff5a2a }), bone = M(0xe9e2cf, { roughness: .8 }), dark = M(0x1b1020), steel = M(0x9aa6b8, { metalness: .8, roughness: .35 });
+  const wm = new T.MeshStandardMaterial({ color: dm.color, side: T.DoubleSide, roughness: .9 }); o.mats.push(wm);
+  const wing = (z, y, k) => { const w = G(root, -.2, y, z), sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(-.6 * k, 1.6 * k); sh.lineTo(-1.5 * k, 1.3 * k); sh.lineTo(-1.9 * k, .1 * k); sh.lineTo(-1 * k, .4 * k); sh.lineTo(-.8 * k, -.5 * k); sh.lineTo(0, -.2 * k); B(new T.ShapeGeometry(sh), wm, 0, 0, 0, w); o.wings.push(w); };
+  const hum = (y, r, m) => { const h = o.head = G(root, .1, y, 0); B(gs(r), m, 0, 0, 0, h); [1, -1].forEach(s => B(gs(r * .2), glow, r * .85, r * .15, s * r * .38, h)); return h; };
+  if (n === 0) {            // ราชาหนู: ตัวอ้วน หูใหญ่ มงกุฎทอง หางเรียวยาว
+    S(bm, 0, 1.2, 0, 1.0, .85, .75); S(lm, .2, 1.05, 0, .8, .55, .6); const h = head(1.1, 1.65, .75, .5, .5);
+    [1, -1].forEach(s => S(lm, .95, 2.25, s * .36, .3, .32, .07)); B(gc(.22, .22, .1, 16), gold, .12, .27, 0, h);
+    for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283; B(gk(.09, .3, 5), gold, .12 + Math.cos(a) * .12, .38, Math.sin(a) * .18, h); }
+    leg(.1, .8, .3, .8, .14); leg(.1, .8, -.3, .8, .14); tail(-.9, .95, 7, .5, .1);
+  } else if (n === 2) {     // เร็กซ์ทมิฬ: หัวใหญ่ แขนจิ๋ว ขาหนา
+    S(bm, 0, 2.0, 0, 1.25, .95, .8); S(lm, .2, 1.8, 0, 1.0, .6, .7); B(gc(.3, .4, .7, 10), bm, 1.1, 2.5, 0, root).rotation.z = -.9; head(1.7, 3.0, 1.25, .6, .75);
+    [1, -1].forEach(s => B(gc(.04, .06, .5, 8), bm, .9, 1.5, s * .45, root).rotation.z = .6); leg(.1, 1.5, .5, 1.5, .28); leg(.1, 1.5, -.5, 1.5, .28); tail(-1.2, 2.0, 5, .7, .5);
+    for (let i = 0; i < 6; i++) B(gk(.1, .3, 5), pm, -.7 + i * .3, 2.85 - i * .08, 0, root);
+  } else if (n === 3) {     // เคานต์เลือด: ผ้าคลุมแดง ปีกค้างคาว เขี้ยว
+    B(gk(1.1, 2.8, 14), M(0x6b0f24, { side: T.DoubleSide }), -.25, 1.55, 0, root); S(dark, 0, 2.2, 0, .45, .7, .34);
+    const h = hum(3.1, .32, M(0xe8dcdc)); [1, -1].forEach(s => { B(gk(.04, .14, 5), bone, .3, -.14, s * .07, h).rotation.z = Math.PI; B(gc(.07, .05, 1.1, 10), dark, .35, 2.1, s * .5, root).rotation.x = s * .5; wing(s * .5, 2.6, 1.2); });
+    leg(0, 1.2, .2, 1.2, .12); leg(0, 1.2, -.2, 1.2, .12);
+  } else if (n === 4) {     // จอมโครงกระดูก: กะโหลก ซี่โครง ดาบเหล็ก
+    const h = hum(3.0, .34, bone); B(gb(.3, .16, .3), bone, .12, -.26, 0, h); B(gc(.06, .06, 1.6, 10), bone, 0, 2.0, 0, root);
+    for (let i = 0; i < 5; i++) { const r = B(new T.TorusGeometry(.42 - i * .03, .035, 8, 18), bone, 0, 2.6 - i * .22, 0, root); r.rotation.x = Math.PI / 2; r.scale.set(1, .7, 1); }
+    S(bone, 0, 1.3, 0, .35, .15, .25); leg(0, 1.3, .2, 1.3, .07); leg(0, 1.3, -.2, 1.3, .07);
+    [1, -1].forEach(s => B(gc(.05, .04, 1.2, 8), bone, .3, 2.3, s * .45, root).rotation.z = -.5); B(gb(1.8, .12, .05), steel, 1.1, 2.3, .55, root).rotation.z = .9;
+  } else if (n === 5) {     // คราเคนลึก: หัวโดม ตาโต หนวดแปดเส้น
+    S(bm, 0, 2.2, 0, 1.2, 1.5, 1.1); S(lm, .3, 1.9, 0, .9, 1.0, 1.0); o.head = G(root, 0, 2.9, 0);
+    [1, -1].forEach(s => { B(gs(.22), new T.MeshBasicMaterial({ color: 0xfff2a8 }), .95, 2.4, s * .45, root); B(gs(.1), dark, 1.12, 2.4, s * .45, root); });
+    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; leg(Math.cos(a) * .7, 1.2, Math.sin(a) * .7, 1.8, .2); }
+  } else {                  // ปีศาจราตรี: เขาโค้ง แขนใหญ่ ปีกคู่
+    S(bm, 0, 2.1, 0, .7, 1.0, .5); S(lm, .15, 2.0, 0, .5, .8, .45); const h = hum(3.3, .34, bm);
+    [1, -1].forEach(s => { const hn = B(gk(.1, .7, 8), bone, 0, .35, s * .22, h); hn.rotation.x = s * .5; hn.rotation.z = -.3; B(gc(.14, .1, 1.3, 10), bm, .3, 2.3, s * .75, root).rotation.x = s * .4; S(dm, .5, 1.7, s * 1.0, .2, .2, .2); wing(s * .45, 2.7, 1.5); });
+    leg(0, 1.3, .3, 1.3, .18); leg(0, 1.3, -.3, 1.3, .18); tail(-.4, 1.3, 5, .5, .2);
+  }
+}
 function kMonBuild(en) {
-  const T = K.T, { M, B, G } = K, bi = Math.floor(R.st / 5) - 1, idx = en.b ? bi : (R.st - 1) % 10, kind = en.b ? 2 : idx % 2;
+  const T = K.T, { M, B, G } = K, bi = Math.floor(R.st / 5) - 1, bn = ((bi % 8) + 8) % 8, idx = en.b ? bi : (R.st - 1) % 10, kind = en.b ? 2 : idx % 2;
   const hue = en.b ? [0, .76, .33, .08, .55, .46, .92, .13][((bi % 8) + 8) % 8] : (idx * .093 + .05) % 1, hs = (l, s) => new T.Color().setHSL(hue, s || .45, l).getHex();
   const bm = M(hs(en.b ? .3 : .38), { roughness: .85, metalness: .05 }), dm = M(hs(.2, .5)), lm = M(hs(.6, .3)), pm = M(0xe9e2cf), eye = new T.MeshBasicMaterial({ color: en.b ? 0xff3a22 : 0xffd633 });
   const root = G(), o = { g: G(K.sc), root, legs: [], tail: [], wings: [], mats: [bm, dm, lm], b: en.b, t: Math.random() * 6, hit: 0, at: 0, atk: 0, sc: en.b ? 1.25 : 1, x: 0, fx: 0, fw: 1, hp: 1 };
@@ -1800,14 +1849,15 @@ function kMonBuild(en) {
     S(bm, 0, .85, 0, .85, .5, .42); S(lm, .1, .72, 0, .7, .3, .36); head(.95, 1.0, .5, .3, .34);
     [1, -1].forEach(s => B(gk(.07, .22, 4), dm, .95, 1.22, s * .12, root)); leg(.5, .7, .2, .7, .09); leg(.5, .7, -.2, .7, .09); leg(-.5, .7, .2, .7, .09); leg(-.5, .7, -.2, .7, .09); tail(-.8, .95, 3, .3, .14);
     for (let i = 0; i < 6; i++) B(gk(.06, .2, 4), dm, -.45 + i * .17, 1.3, 0, root);
-  } else {
+  } else if (bn === 1 || bn === 7) {
     S(bm, 0, 1.7, 0, 1.3, .8, .7); S(lm, .15, 1.5, 0, 1.1, .6, .62); B(gc(.22, .3, .8, 7), bm, 1.0, 2.0, 0, root).rotation.z = -.7; B(gc(.17, .22, .8, 7), bm, 1.45, 2.55, 0, root).rotation.z = -.35;
     const hd = head(1.8, 2.95, .95, .44, .52); [1, -1].forEach(s => B(gk(.07, .55, 5), pm, .1, .3, s * .2, hd).rotation.z = 1.1);
     leg(.1, 1.3, .5, 1.3, .2); leg(.1, 1.3, -.5, 1.3, .2); tail(-1.2, 1.7, 5, .65, .4);
     for (let i = 0; i < 7; i++) B(gk(.1, .35, 4), pm, -.9 + i * .38, 2.35 - Math.abs(i - 2) * .15, 0, root);
     const wm = new T.MeshStandardMaterial({ color: hs(.25, .5), side: T.DoubleSide, roughness: .9, flatShading: true }); o.mats.push(wm);
     [1, -1].forEach(s => { const w = G(root, -.1, 2.3, s * .5), sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(-.8, 2); sh.lineTo(-1.8, 1.6); sh.lineTo(-2.2, .2); sh.lineTo(-1.2, .5); sh.lineTo(-1, -.6); sh.lineTo(0, -.2); B(new T.ShapeGeometry(sh), wm, 0, 0, 0, w); B(gc(.05, .07, 2.1, 5), dm, -.4, 1, 0, w).rotation.z = .4; o.wings.push(w); });
-  }
+    if (bn === 7) { const h1 = o.head; head(2.2, 3.9, .85, .4, .46); o.head.position.z = .55; h1.position.z = -.55; }
+  } else { kBoss(bn, { o, root, S, leg, tail, head, B, G, T, bm, dm, lm, pm, M }); }
   const bs = B(new T.CircleGeometry(en.b ? 2.2 : 1, 16), new T.MeshBasicMaterial({ color: 0, transparent: true, opacity: .3 }), 0, .02, 0, o.g); bs.rotation.x = -Math.PI / 2;
   return o;
 }
@@ -1907,9 +1957,9 @@ function rpgBuild() {
             <div class="rbar"><i id="rHp"></i></div><div class="rtimer"><i id="rTb"></i></div><div class="rhero"><span id="rHr">🧙‍♂️</span></div><div class="ren" id="rEn"></div><div class="rhb"><i id="rHH"></i></div></div>
           <div class="rtx" id="rNm"></div><div class="rtx s" id="rLv"></div><div class="rtx xs" id="rLog">ตัวละครต่อสู้เอง — จัดชุดและอัพเกรดของให้แรงขึ้น</div>
           <div class="rsk">${RSK.map((s, k) => `<button id="rS${k}" onclick="rUiSkill(${k})"><span id="rSi${k}">${s[0]}</span><small id="rSn${k}">${s[1]}</small></button>`).join('')}</div>
-          <div class="rtg"><button id="rAutoSk" onclick="rUiAutoSk()"></button><button id="rAutoGo" onclick="rUiAuto()"></button><button id="rView" onclick="kToggleView()">🔍 ดูชุด</button></div>
+          <div class="rtg"><button id="rAutoSk" onclick="rUiAutoSk()"></button><button id="rAutoGo" onclick="rUiAuto()"></button><button id="rView" onclick="kToggleView()">🔍 ดูชุด</button><button id="rBagBtn" onclick="rUiBag()">🎒 กระเป๋า</button></div>
         </div></div>
-        <div class="rcol-r"><div class="rsec"><div class="rhd"><b>🧙 ชุดที่สวมใส่</b><small>อัพได้เฉพาะของ</small></div><div id="rEq"></div></div><div class="rsec" id="rSk"></div><div class="rsec" id="rBag"></div><div class="rsec" id="rBossL"></div></div>
+        <div class="rcol-r" data-t="eq"><div class="rtabs"><button data-t="eq" class="on" onclick="rUiTab('eq')">🎒 ของ</button><button data-t="sk" onclick="rUiTab('sk')">📖 สกิล</button><button data-t="bs" onclick="rUiTab('bs')">👑 บอส</button></div><div class="rsec" id="rEqS"><div class="rhd"><b>🧙 ชุดที่สวมใส่</b><small>อัพได้เฉพาะของ</small></div><div id="rEq"></div></div><div class="rsec" id="rSk"></div><div class="rsec" id="rBag"></div><div class="rsec" id="rBossL"></div></div>
       </div></section>
       <section class="rpage" id="rPg_track"><div class="rtrk"><div id="rTrack"></div></div></section>
     </div>
@@ -1928,6 +1978,14 @@ function rpgBuild() {
   document.addEventListener('visibilitychange', () => { if (document.hidden) rSave(); });
   window.addEventListener('pagehide', rSave);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && rOpen && !document.querySelector('.swal2-container')) rpgToggle(false); });
+}
+let rSel = 0;
+function rSkSel(k) { rSel = k; rLists(); }
+function rUiBag() { const p = $('rpgPanel'); p.classList.toggle('bagOn'); $('rBagBtn').classList.toggle('on', p.classList.contains('bagOn')); rLists(); }
+function rUiTab(t) { const c = document.querySelector('#rpgPanel .rcol-r'); c.dataset.t = t; c.querySelectorAll('.rtabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); }
+function rSkHtml() {
+  const m = R.mt;
+  return `<div class="rhd"><b>🎒 กระเป๋าสกิล</b><small>🦴${m.b} 🔶${m.s} 💎${m.c}</small></div><div class="skslots">${R.sk.e.map((id, k) => `<button class="${k === rSel ? 'on' : ''}" onclick="rSkSel(${k})"><i>${RSD[id].i}</i><small>ช่อง ${k + 1}</small></button>`).join('')}</div><div class="rln">แตะช่อง แล้วแตะสกิลในกระเป๋าเพื่อสวมใส่</div><div class="skbag">${Object.keys(RSD).map(id => { const d = RSD[id], lv = R.sk.l[id]; return lv ? `<button class="sk ${R.sk.e.includes(id) ? 'eq' : ''}" onclick="rUiSlot(rSel,'${id}')"><i>${d.i}</i><b>${d.n}</b><small>Lv.${lv} · ${d.cd} วิ</small></button>` : `<button class="sk lock" disabled><i>🔒</i><b>${d.n}</b><small>ยังไม่มี</small></button>`; }).join('')}</div><div class="rhd"><b>🔨 คราฟ / อัพเกรดสกิล</b></div>` + rSkRows();
 }
 rpgBuild();
 
