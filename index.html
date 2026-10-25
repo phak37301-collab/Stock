@@ -1283,7 +1283,7 @@ const RK = 'stockRpgV3', RK_OLD = 'stockRpgV2';
 const RCFG = { hpA: 24, hpP: 1.5, hpG: 1.075, bossHp: 5, atkA: 1, atkB: .6, pwG: 1.02, lvAtk: 1.1, xpK: .8, perStage: 5, bossEvery: 5, bossTime: 45, bag: 40, maxEnh: 15, enh: .12, offCap: 8 * 3600, offEff: .5, hpRegen: .02, as: 1.25 };
 const RR = [['ธรรมดา', '#94a3b8', 1], ['ดี', '#4ade80', 1.5], ['หายาก', '#60a5fa', 2.4], ['มหากาพย์', '#c084fc', 4], ['ตำนาน', '#fbbf24', 7]];
 const RN = { w: ['ดาบอัศวิน', 'ขวานศึก', 'ค้อนศึก', 'หอกอัศวิน', 'ดาบใหญ่', 'กระบี่'], a: ['เกราะหนัง', 'เกราะเหล็ก', 'เกราะพร้อมผ้าคลุม', 'เกราะอัศวิน'], h: ['หมวกหนัง', 'หมวกเหล็ก', 'หมวกอัศวิน', 'หมวกเขามังกร'], s: ['โล่ไม้', 'โล่เหล็ก', 'โล่อัศวิน', 'โล่มังกร'], c: ['แหวน', 'เครื่องราง', 'สร้อย'] };
-const RI = { w: '⚔️', a: '🛡️', h: '🪖', s: '🔰', c: '💍' }, RT = { w: 'อาวุธ', a: 'เกราะ', h: 'หมวก', s: 'โล่', c: 'เครื่องราง' }, RD = { w: 'เพิ่มดาเมจโจมตี', a: 'เพิ่ม HP และลดดาเมจที่โดน', h: 'เพิ่ม HP และลดดาเมจ (หมวก)', s: 'เพิ่ม HP และลดดาเมจ (โล่)', c: 'เพิ่มคริติคอลและดาเมจคริ' };
+const RI = { w: '⚔️', a: '🛡️', h: '🪖', s: '🔰', c: '💍' }, RT = { w: 'อาวุธ', a: 'เกราะ', h: 'หมวก', s: 'โล่', c: 'เครื่องราง' }, RD = { w: 'เพิ่มดาเมจโจมตี', a: 'เพิ่ม HP และลดดาเมจที่โดน', h: 'เพิ่ม ATK และ HP เล็กน้อย (หมวก)', s: 'เพิ่ม ATK และ HP เล็กน้อย (โล่)', c: 'เพิ่มคริติคอลและดาเมจคริ' };
 const REN = ['🐀', '🦇', '🐺', '🕷️', '🧟', '👻', '🐍', '🦂', '🐗', '🧌'], RBE = ['👹', '🐉', '🦖', '🧛', '💀', '🦑', '👿', '🐲'];
 const RBN = ['ราชาหนู', 'มังกรเพลิง', 'เร็กซ์ทมิฬ', 'เคานต์เลือด', 'จอมโครงกระดูก', 'คราเคนลึก', 'ปีศาจราตรี', 'มังกรสุดท้าย'];
 const RSK = [['💥', 'ฟันสุดแรง', 10], ['🔥', 'คลั่ง', 35], ['💚', 'ฟื้นฟู', 25]];   // [ไอคอน, ชื่อ, คูลดาวน์(วิ)]
@@ -1331,8 +1331,8 @@ const rEff = i => i ? i.pw * (1 + RCFG.enh * (i.lv || 0)) : 0;
 const rEC = i => Math.ceil(i.pw * 2.2 * Math.pow((i.lv || 0) + 1, 1.35));   // ราคาอัพเกรดเป็นเลเวลถัดไป
 function rStats(eq, lv) {
   eq = eq || R.eq; lv = lv || R.lv;
-  const L = lv - 1, w = rEff(eq.w), a = rEff(eq.a) + .7 * rEff(eq.h) + .8 * rEff(eq.s), c = rEff(eq.c);
-  const atk = 5 + L * RCFG.lvAtk + w, raw = .05 + c / 800, crit = Math.min(1, raw), cd = 2 + c / 300 + Math.max(0, raw - 1), hp = 60 + L * 12 + a * 6, dr = Math.min(.6, a / (a + 120));
+  const L = lv - 1, w = rEff(eq.w), a = rEff(eq.a) + .3 * rEff(eq.h) + .3 * rEff(eq.s), c = rEff(eq.c);
+  const atk = 5 + L * RCFG.lvAtk + w + .5 * rEff(eq.h) + .4 * rEff(eq.s), raw = .05 + c / 800, crit = Math.min(1, raw), cd = 2 + c / 300 + Math.max(0, raw - 1), hp = 60 + L * 12 + a * 6, dr = Math.min(.6, a / (a + 120));
   const dps = atk * RCFG.as * (1 + crit * (cd - 1));
   return { atk, as: RCFG.as, crit, raw, cd, dps, hp, dr, ehp: hp / (1 - dr), cp: Math.round(Math.sqrt(dps * hp / (1 - dr))) };
 }
@@ -1355,7 +1355,7 @@ function rRoll(s, boss, rnd) {
   rnd = rnd || Math.random;
   let x = rnd() * (boss ? .5 : 1), r = x < .02 ? 4 : x < .1 ? 3 : x < .3 ? 2 : x < .6 ? 1 : 0;
   if (boss) r = Math.max(r, 2 + (rnd() < .35 ? 1 : 0));
-  const t = RSL[rnd() * RSL.length | 0], nm = RN[t], base = (t === 'w' ? 4 + s * 2.4 : 3 + s * 2.0) * Math.pow(RCFG.pwG, s);
+  const wr = rnd(), t = wr < .34 ? 'w' : wr < .6 ? 'c' : wr < .75 ? 'a' : wr < .88 ? 'h' : 's', nm = RN[t], base = (t === 'w' ? 4 + s * 2.4 : 3 + s * 2.0) * Math.pow(RCFG.pwG, s);
   return { id: R.id++, t, r, lv: 0, pw: Math.max(1, Math.ceil(base * RR[r][2] * (.85 + rnd() * .3))), n: nm[rnd() * nm.length | 0], st: s };
 }
 // รับของ: ลงถุง / ถุงเต็มขายอัตโนมัติ (ของที่ดีกว่าที่สวมอยู่ยังคงเข้าถุงเสมอโดยไล่ขายชิ้นที่แย่สุดแทน)
@@ -1430,7 +1430,7 @@ const rPct = (a, b) => (b > 0 ? (a / b - 1) * 100 : 0);
 const rWinTxt = l => ['เสี่ยงมาก', 'ยาก', 'พอไหว', 'สบาย'][l], rWinCol = l => ['#f43f5e', '#fb923c', '#facc15', '#4ade80'][l];
 
 // สรุปคุณสมบัติของของชิ้นหนึ่ง
-function rEffTxt(i) { const e = rEff(i); if (i.t === 'w') return 'ATK +' + rF(e); if (i.t === 'c') return 'คริ +' + (e / 8).toFixed(1) + '% · ดาเมจคริ +' + (e / 300).toFixed(2) + 'x'; const x = e * RW[i.t]; return 'HP +' + rF(x * 6) + ' · ลดดาเมจ ~' + Math.round(Math.min(.6, x / (x + 120)) * 100) + '%'; }
+function rEffTxt(i) { const e = rEff(i); if (i.t === 'w') return 'ATK +' + rF(e); if (i.t === 'c') return 'คริ +' + (e / 8).toFixed(1) + '% · ดาเมจคริ +' + (e / 300).toFixed(2) + 'x'; const x = e * RW[i.t]; return (RA[i.t] ? 'ATK +' + rF(e * RA[i.t]) + ' · ' : '') + 'HP +' + rF(x * 6) + ' · ลดดาเมจ ~' + Math.round(Math.min(.6, x / (x + 120)) * 100) + '%'; }
 function rIcon(i) { return `<span class="ri-ic" style="--c:${RR[i.r][1]}">${RI[i.t]}</span>`; }
 
 /* ---------- ส่วนที่ขยับทุกจังหวะ (ไม่วาดรายการใหม่ เพื่อไม่ให้ปุ่มที่กำลังกดหาย) ---------- */
@@ -1572,7 +1572,7 @@ function rTick() {
   if (rOpen) { rPaint(); if (rPage === 'track' && ++rTrackN % 8 === 0) rTrack(); if (rPage === 'play' && ++rListT % 20 === 0) rBadge(); }
 }
 /* ================= อัพเกรด RPG: อุปกรณ์ 5 ช่อง · สกิลดรอป/คราฟ · 3D อัศวิน (three.js) ================= */
-const RSL = ['w', 'a', 'h', 's', 'c'], RW = { a: 1, h: .7, s: .8 };
+const RSL = ['w', 'a', 'h', 's', 'c'], RW = { a: 1, h: .3, s: .3 }, RA = { h: .5, s: .4 };
 const RMN = ['จักกี้ป่า', 'หมาป่าเขี้ยวเหล็ก', 'ราปเตอร์หนาม', 'หมูป่าหินผา', 'งูเหลือมยักษ์', 'หมาป่าหิมะ', 'เสือเขี้ยวดาบ', 'ลิซาร์ดพิษ', 'หมีภูผา', 'ราปเตอร์เงา'];
 // ไอคอน, ชื่อ, คูลดาวน์, ชนิด (a โจมตี f น้ำแข็ง r คลั่ง h ฟื้นฟู g ป้องกัน), ตัวคูณดาเมจ, สูตรคราฟ (b กระดูก s เกล็ด c แกน g ทอง)
 const RSD = {
@@ -1687,13 +1687,13 @@ function kHeroBuild() {
   const T = K.T, { M, B, G } = K, H = K.H = {}, g = H.g = G(K.sc);
   const cloth = M(0x2f5fa8), skin = M(0xe3b595, { metalness: 0 }), steel = K.armM = M(0x8d98aa, { metalness: .7, roughness: .4 }), boot = M(0x2a2420);
   const sh = B(new T.CircleGeometry(.65, 16), new T.MeshBasicMaterial({ color: 0, transparent: true, opacity: .32 }), 0, .02, 0, g); sh.rotation.x = -Math.PI / 2;
-  const hips = H.hips = G(g, 0, .98); B(gs(1), cloth, 0, 0, 0, hips).scale.set(.26, .15, .19);
+  const hips = H.hips = G(g, 0, .68); B(gs(1), cloth, 0, 0, 0, hips).scale.set(.26, .15, .19);
   const tor = H.tor = G(hips, 0, .1); B(gs(1), cloth, 0, .32, 0, tor).scale.set(.29, .34, .21); B(gc(.3, .3, .08, 16), M(0x4a3524), 0, .02, 0, tor).scale.set(1, 1, .75);
-  const hd = H.hd = G(tor, 0, .78); B(gc(.07, .08, .1, 6), skin, 0, .02, 0, hd); B(gs(.2), skin, 0, .17, 0, hd); B(new T.TorusGeometry(.13, .045, 8, 18), M(0xc0392b), 0, -.02, 0, hd).rotation.x = Math.PI / 2;
-  [1, -1].forEach(s => B(gs(.028), M(0x111111), .17, .18, s * .075, hd));
+  const hd = H.hd = G(tor, 0, .66); hd.scale.setScalar(1.6); B(gc(.07, .08, .1, 6), skin, 0, .02, 0, hd); B(gs(.2), skin, 0, .17, 0, hd); B(new T.TorusGeometry(.13, .045, 8, 18), M(0xc0392b), 0, -.02, 0, hd).rotation.x = Math.PI / 2;
+  [1, -1].forEach(s => { B(gs(.05), M(0x111111), .175, .18, s * .085, hd); B(gs(.016), M(0xffffff), .22, .21, s * .085, hd); B(gs(.035), M(0xff8fa3), .17, .1, s * .13, hd).scale.set(.5, .6, .8); });
   const limb = (p, x, y, z, l1, l2, r, m, em) => { const s = G(p, x, y, z); B(gc(r, r * .85, l1, 7), m, 0, -l1 / 2, 0, s); const e = G(s, 0, -l1); B(gs(r * .9), m, 0, 0, 0, e); B(gc(r * .85, r * .7, l2, 7), m, 0, -l2 / 2, 0, e); const h = G(e, 0, -l2); B(gs(r * .8), em, 0, 0, 0, h); return { s, e, h }; };
-  H.aR = limb(tor, 0, .58, .33, .34, .32, .075, steel, skin); H.aL = limb(tor, 0, .58, -.33, .34, .32, .075, steel, skin);
-  H.lR = limb(hips, 0, -.08, .14, .46, .44, .1, steel, boot); H.lL = limb(hips, 0, -.08, -.14, .46, .44, .1, steel, boot);
+  H.aR = limb(tor, 0, .58, .33, .24, .22, .08, steel, skin); H.aL = limb(tor, 0, .58, -.33, .24, .22, .08, steel, skin);
+  H.lR = limb(hips, 0, -.08, .14, .3, .28, .11, steel, boot); H.lL = limb(hips, 0, -.08, -.14, .3, .28, .11, steel, boot);
   [H.lR, H.lL].forEach(l => B(gs(1), boot, .08, -.03, 0, l.h).scale.set(.17, .07, .1));
   H.wp = G(H.aR.h); H.gW = G(H.wp); H.gS = G(H.aL.e, 0, -.2, -.14); H.gH = G(hd, 0, .16, 0); H.gA = G(tor); H.gC = G(tor); H.cape = G(tor, -.2, .62, 0); H.orb = G(g, 0, 1.25, 0);
   H.ring = B(new T.RingGeometry(.7, .95, 32), new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .5, side: T.DoubleSide, blending: T.AdditiveBlending, depthWrite: false }), 0, .04, 0, g); H.ring.rotation.x = -Math.PI / 2; H.ring.visible = false;
@@ -1803,7 +1803,7 @@ function kBoss(n, c) {
   const gold = M(0xfbbf24, { metalness: .8, roughness: .3 }), glow = new T.MeshBasicMaterial({ color: 0xff5a2a }), bone = M(0xe9e2cf, { roughness: .8 }), dark = M(0x1b1020), steel = M(0x9aa6b8, { metalness: .8, roughness: .35 });
   const wm = new T.MeshStandardMaterial({ color: dm.color, side: T.DoubleSide, roughness: .9 }); o.mats.push(wm);
   const wing = (z, y, k) => { const w = G(root, -.2, y, z), sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(-.6 * k, 1.6 * k); sh.lineTo(-1.5 * k, 1.3 * k); sh.lineTo(-1.9 * k, .1 * k); sh.lineTo(-1 * k, .4 * k); sh.lineTo(-.8 * k, -.5 * k); sh.lineTo(0, -.2 * k); B(new T.ShapeGeometry(sh), wm, 0, 0, 0, w); o.wings.push(w); };
-  const hum = (y, r, m) => { const h = o.head = G(root, .1, y, 0); B(gs(r), m, 0, 0, 0, h); [1, -1].forEach(s => B(gs(r * .2), glow, r * .85, r * .15, s * r * .38, h)); return h; };
+  const hum = (y, r, m) => { const h = o.head = G(root, .1, y, 0); h.scale.setScalar(1.35); B(gs(r), m, 0, 0, 0, h); [1, -1].forEach(s => B(gs(r * .2), glow, r * .85, r * .15, s * r * .38, h)); return h; };
   if (n === 0) {            // ราชาหนู: ตัวอ้วน หูใหญ่ มงกุฎทอง หางเรียวยาว
     S(bm, 0, 1.2, 0, 1.0, .85, .75); S(lm, .2, 1.05, 0, .8, .55, .6); const h = head(1.1, 1.65, .75, .5, .5);
     [1, -1].forEach(s => S(lm, .95, 2.25, s * .36, .3, .32, .07)); B(gc(.22, .22, .1, 16), gold, .12, .27, 0, h);
@@ -1835,13 +1835,13 @@ function kBoss(n, c) {
 function kMonBuild(en) {
   const T = K.T, { M, B, G } = K, bi = Math.floor(R.st / 5) - 1, bn = ((bi % 8) + 8) % 8, idx = en.b ? bi : (R.st - 1) % 10, kind = en.b ? 2 : idx % 2;
   const hue = en.b ? [0, .76, .33, .08, .55, .46, .92, .13][((bi % 8) + 8) % 8] : (idx * .093 + .05) % 1, hs = (l, s) => new T.Color().setHSL(hue, s || .45, l).getHex();
-  const bm = M(hs(en.b ? .3 : .38), { roughness: .85, metalness: .05 }), dm = M(hs(.2, .5)), lm = M(hs(.6, .3)), pm = M(0xe9e2cf), eye = new T.MeshBasicMaterial({ color: en.b ? 0xff3a22 : 0xffd633 });
+  const bm = M(hs(en.b ? .36 : .6, en.b ? .45 : .6), { roughness: .85, metalness: .05 }), dm = M(hs(.4, .5)), lm = M(hs(.82, .4)), pm = M(0xe9e2cf), eye = new T.MeshBasicMaterial({ color: en.b ? 0xff3a22 : 0xffd633 });
   const root = G(), o = { g: G(K.sc), root, legs: [], tail: [], wings: [], mats: [bm, dm, lm], b: en.b, t: Math.random() * 6, hit: 0, at: 0, atk: 0, sc: en.b ? 1.25 : 1, x: 0, fx: 0, fw: 1, hp: 1 };
   o.g.add(root); root.rotation.y = Math.PI;
   const S = (m, x, y, z, sx, sy, sz, p) => { const s = B(gs(1), m, x, y, z, p || root); s.scale.set(sx, sy, sz); return s; };
   const leg = (x, y, z, L, r) => { const l = G(root, x, y, z); B(gc(r, r * .7, L, 6), bm, 0, -L / 2, 0, l); B(gb(r * 2.6, r * .7, r * 2), dm, r * .7, -L, 0, l); o.legs.push(l); };
   const tail = (x, y, n, len, r0) => { let p = G(root, x, y, 0); for (let i = 0; i < n; i++) { B(gk(r0 * (1 - i / (n + 1)), len * 1.15, 6), bm, -len / 2, 0, 0, p).rotation.z = Math.PI / 2; o.tail.push(p); p = G(p, -len, 0, 0); } };
-  const head = (x, y, w, h, d) => { const hd = o.head = G(root, x, y, 0); B(gb(w, h, d), bm, w * .25, 0, 0, hd); B(gb(w * .6, h * .55, d * .8), lm, w * .6, -h * .1, 0, hd); o.jaw = G(hd, w * .15, -h * .45, 0); B(gb(w * .75, h * .22, d * .75), dm, w * .35, 0, 0, o.jaw); [1, -1].forEach(s => { B(gs(h * .17), eye, w * .3, h * .22, s * d * .5, hd); B(gk(h * .09, h * .3, 4), pm, w * .65, -h * .38, s * d * .28, hd).rotation.z = Math.PI; }); return hd; };
+  const head = (x, y, w, h, d) => { const hd = o.head = G(root, x, y, 0); hd.scale.setScalar(1.35); B(gb(w, h, d), bm, w * .25, 0, 0, hd); B(gb(w * .6, h * .55, d * .8), lm, w * .6, -h * .1, 0, hd); o.jaw = G(hd, w * .15, -h * .45, 0); B(gb(w * .75, h * .22, d * .75), dm, w * .35, 0, 0, o.jaw); [1, -1].forEach(s => { B(gs(h * .27), eye, w * .3, h * .22, s * d * .5, hd); B(gk(h * .06, h * .18, 6), pm, w * .65, -h * .38, s * d * .28, hd).rotation.z = Math.PI; }); return hd; };
   if (kind === 0) {
     S(bm, 0, 1.05, 0, .75, .5, .42); S(lm, .12, .92, 0, .6, .36, .38); B(gc(.1, .16, .6, 6), bm, .55, 1.35, 0, root).rotation.z = -.6;
     head(.85, 1.62, .55, .27, .3); leg(.05, .85, .27, .8, .12); leg(.05, .85, -.27, .8, .12); tail(-.6, 1.05, 4, .5, .22);
@@ -1916,7 +1916,7 @@ function kUpdate(dt) {
   if (sh) tp = KIDLE.slice(), tp[2] += sin * .02;
   tp[0] -= H.hurt * .5; tp[2] -= H.hurt * .4; H.hurt = Math.max(0, H.hurt - dt * 4);
   const kk = Math.min(1, dt * (st === 'atk' || st === 'skill' ? 26 : 14)), c = H.cur; for (let i = 0; i < 11; i++) c[i] += (tp[i] - c[i]) * kk;
-  H.hips.position.y = .98 + c[10] + (st === 'die' ? -.2 * Math.min(1, p * 3) : 0); H.tor.rotation.set(0, c[1], -c[2]); H.hd.rotation.z = -c[2] * .4;
+  H.hips.position.y = .68 + c[10] + (st === 'die' ? -.2 * Math.min(1, p * 3) : 0); H.tor.rotation.set(0, c[1], -c[2]); H.hd.rotation.z = -c[2] * .4;
   H.aR.s.rotation.z = c[3]; H.aR.e.rotation.z = c[4]; H.wp.rotation.z = -Math.PI / 2 + c[5]; H.aL.s.rotation.z = c[6]; H.aL.e.rotation.z = c[7];
   [[H.lR, c[8]], [H.lL, c[9]]].forEach(q => { q[0].s.rotation.z = q[1]; q[0].e.rotation.z = -(.12 + Math.max(0, -q[1]) * 1.4 + Math.max(0, q[1]) * .3); });
   const ry = (st === 'idle' && !mv && !sh ? -.4 : 0) + H.spin * Math.PI * 2; H.ry += (ry - H.ry) * Math.min(1, dt * (H.spin ? 40 : 8)); H.g.rotation.y = H.ry;
