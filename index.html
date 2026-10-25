@@ -600,22 +600,64 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   @media (prefers-reduced-motion:reduce){.psv,.psv *,.pcloud,.pfx,.pstar{animation:none!important}}
 
 
-  /* ===== เกม RPG ไอเดิล (ปุ่ม ⚔️) ===== */
-  .gframe.rpg{background:linear-gradient(#1e1b4b,#0f172a);overflow-y:auto;color:#fff;font-size:.8rem}
-  .rsc{position:relative;margin:4px 12px;height:178px;flex:none;border-radius:20px;overflow:hidden;cursor:pointer;touch-action:manipulation;background:radial-gradient(circle at 78% 22%,#fde68a 0 5%,transparent 6%),linear-gradient(#312e81,#1e3a8a 64%,#166534 64%)}
-  .ren{position:absolute;left:58%;bottom:30px;font-size:70px;line-height:1;transition:transform .08s}.ren.b{font-size:92px;filter:drop-shadow(0 0 12px #f43f5e)}.ren.hit{transform:scale(.88)}
-  .rhero{position:absolute;left:10%;bottom:30px;font-size:42px;line-height:1}
-  .rbar{position:absolute;left:12px;right:12px;top:30px;height:12px;border-radius:9px;background:rgba(0,0,0,.45);overflow:hidden}.rbar i{display:block;height:100%;background:linear-gradient(90deg,#f43f5e,#fb923c);transition:width .12s}
-  .rtop{position:absolute;left:8px;right:8px;top:4px;display:flex;align-items:center;justify-content:space-between;font-weight:700;text-shadow:0 1px 3px #000}
-  .rtop button{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff}
-  .rdm{position:absolute;font-weight:800;color:#fde047;text-shadow:0 1px 3px #000;pointer-events:none;animation:rfl .8s forwards}.rdm.c{color:#fb7185;font-size:1.2em}
-  @keyframes rfl{to{transform:translateY(-46px);opacity:0}}
-  .rbody{padding:2px 12px 14px;display:grid;gap:7px;align-content:start}
-  .rc{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:14px;padding:7px 9px;border-left:4px solid var(--c,#94a3b8)}.rc>div{flex:1;min-width:0}.rc small{opacity:.7;display:block}
-  .rc button,.rbt{padding:6px 10px;border-radius:10px;background:#6366f1;color:#fff;font-weight:600;white-space:nowrap}.rc button.s{background:rgba(255,255,255,.18)}.rc button:disabled{opacity:.35}
-  .rst{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}.rst div{background:rgba(255,255,255,.08);border-radius:12px;padding:6px 2px}.rst b{display:block;font-size:.95rem}
-  .rhb{position:absolute;left:8%;bottom:20px;width:22%;height:7px;border-radius:6px;background:rgba(0,0,0,.5);overflow:hidden}.rhb i{display:block;height:100%;background:#4ade80;transition:width .2s}
-  .rsk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 12px 2px}.rsk button{padding:6px 0;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:1.1rem;display:flex;flex-direction:column;align-items:center}.rsk small{font-size:.62rem}.rsk button:disabled{opacity:.45}
+  /* ===== เกม RPG ไอเดิล: เต็มจอ มี 2 หน้า (เล่น / ติดตาม) ===== */
+  #rpgPanel.gpanel{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;bottom:0!important;transform:none;transition:none;display:none;z-index:95}
+  #rpgPanel.gpanel.open{display:block}
+  body.rpg-on{overflow:hidden}body.rpg-on .gtab,body.rpg-on .mtab{display:none!important}
+  .rfs{position:relative;height:100%;display:flex;flex-direction:column;color:#fff;font-size:.85rem;background:radial-gradient(ellipse at 50% 120%,#4338ca 0%,#1e1b4b 42%,#0b1020 100%)}
+  .rtopbar{flex:none;display:flex;align-items:center;gap:.5rem;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 8px}
+  .rtopbar>b{font-size:1rem;margin-right:auto}
+  .rpill{background:rgba(255,255,255,.12);border-radius:999px;padding:.25rem .65rem;font-size:.78rem;font-weight:700;white-space:nowrap}.rpill i{font-style:normal}
+  .rmain{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 12px 14px;-webkit-overflow-scrolling:touch}
+  .rpage{display:none}.rpage.on{display:block}
+  .rwrap,.rtrk{max-width:1180px;margin:0 auto}
+  .rstick{position:sticky;top:0;z-index:6;background:linear-gradient(#0e1330 85%,rgba(14,19,48,0));padding-bottom:6px}
+  .rsc{--h:clamp(150px,27vh,240px);position:relative;height:var(--h);border-radius:20px;overflow:hidden;background:radial-gradient(circle at 80% 24%,#fde68a 0 5%,transparent 5.5%),linear-gradient(#27306e 0%,#3b2f7a 52%,#1d5a3a 52%,#14482e 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+  .ren{position:absolute;left:58%;bottom:17%;font-size:calc(var(--h)*.4);line-height:1;transition:transform .08s}.ren.b{font-size:calc(var(--h)*.54);filter:drop-shadow(0 0 14px #f43f5e)}.ren.hit{transform:translateX(5px) scale(.94)}.ren.spawn{animation:rspawn .35s ease-out}
+  @keyframes rspawn{from{opacity:0;transform:translateX(30px) scale(.7)}to{opacity:1;transform:none}}
+  .rhero{position:absolute;left:11%;bottom:17%;font-size:calc(var(--h)*.27);line-height:1}.rhero span{display:inline-block;transition:transform .1s}.rhero span.atk{animation:ratk .22s ease-out}
+  @keyframes ratk{40%{transform:translateX(18px) rotate(8deg)}}
+  .rbar{position:absolute;left:12px;right:12px;top:40px;height:12px;border-radius:9px;background:rgba(0,0,0,.45);overflow:hidden}.rbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#f43f5e,#fb923c);transition:width .15s}
+  .rtimer{position:absolute;left:12px;right:12px;top:55px;height:5px;border-radius:5px;background:rgba(0,0,0,.4);overflow:hidden;display:none}.rtimer i{display:block;height:100%;background:#fbbf24;transition:width .25s linear}
+  .rtop{position:absolute;left:8px;right:8px;top:5px;display:flex;align-items:center;justify-content:space-between;text-align:center;font-weight:700;text-shadow:0 1px 3px #000;line-height:1.25}
+  .rtop small{font-weight:600;letter-spacing:.1em;opacity:.85}
+  .rtop button{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff}
+  .rhb{position:absolute;left:9%;bottom:10%;width:24%;height:7px;border-radius:6px;background:rgba(0,0,0,.5);overflow:hidden}.rhb i{display:block;height:100%;background:#4ade80;transition:width .2s}
+  .rdm{position:absolute;font-weight:800;color:#fde047;text-shadow:0 1px 3px #000;pointer-events:none;animation:rfl .8s forwards}.rdm.c{color:#fb7185;font-size:1.25em}
+  @keyframes rfl{to{transform:translateY(-44px);opacity:0}}
+  .rtx{text-align:center;padding:5px 6px 0;font-weight:600}.rtx.s{font-size:.76rem;opacity:.85;font-weight:400;padding-top:1px}.rtx.xs{font-size:.72rem;opacity:.7;font-weight:400;min-height:1.2em}
+  .rsk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-top:5px}
+  .rsk button{padding:6px 0;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:1.15rem;display:flex;flex-direction:column;align-items:center;line-height:1.2}.rsk button small{font-size:.62rem;opacity:.85}.rsk button:disabled{opacity:.45}
+  .rtg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-top:6px}
+  .rtg button{padding:7px 4px;border-radius:12px;background:rgba(255,255,255,.1);color:#cbd5e1;font-size:.74rem;font-weight:700}.rtg button.on{background:rgba(74,222,128,.2);color:#bbf7d0}
+  .rsec{margin-top:12px;display:grid;gap:7px;align-content:start}
+  .rhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.9rem}.rhd small{opacity:.65;font-size:.72rem}
+  .rc{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:14px;padding:8px 10px;border-left:4px solid var(--c,#94a3b8)}.rc>div{flex:1;min-width:0}.rc small{opacity:.7;display:block;font-size:.72rem;line-height:1.35}
+  .rc button,.rbt{padding:6px 11px;border-radius:10px;background:#6366f1;color:#fff;font-weight:700;white-space:nowrap;font-size:.78rem}.rc button.s,.rbt.s{background:rgba(255,255,255,.18)}.rc button:disabled{opacity:.35}
+  .ri-ic{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:1.35rem;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 2px var(--c,transparent)}
+  .rmax{font-size:.7rem;font-weight:800;color:#fbbf24;padding:0 6px}
+  .rdl{font-size:.68rem;font-weight:700;margin-left:3px}.rdl.up{color:#4ade80}.rdl.dn{color:#fb7185}
+  .rchips{display:flex;gap:6px;flex-wrap:wrap}.rchip{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.1);color:#cbd5e1;font-size:.74rem;font-weight:600}.rchip.on{background:#6366f1;color:#fff}
+  .rempty{padding:10px;text-align:center;opacity:.65;font-size:.78rem;background:rgba(255,255,255,.05);border-radius:12px}
+  .rkg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .rk{background:rgba(255,255,255,.08);border-radius:14px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:1px}.rk i{font-style:normal;font-size:1.2rem}.rk b{font-size:1.05rem}.rk small{opacity:.65;font-size:.68rem}
+  .rln{font-size:.78rem;opacity:.85;line-height:1.5}
+  .rstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rstats div{background:rgba(255,255,255,.08);border-radius:12px;padding:7px 4px;text-align:center}.rstats small{display:block;opacity:.65;font-size:.66rem}.rstats b{font-size:.92rem}
+  .rbl{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.rb{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;background:rgba(255,255,255,.06);border-radius:12px;padding:6px 8px;opacity:.55}.rb.ok{opacity:1;background:rgba(244,63,94,.14)}.rb span{font-size:1.2rem}.rb b{font-size:.78rem}.rb small{flex-basis:100%;opacity:.7;font-size:.68rem}
+  .rdc{display:grid;gap:4px}.rdc span{position:relative;display:block;height:20px;border-radius:7px;background:rgba(255,255,255,.07);overflow:hidden}.rdc i{position:absolute;left:0;top:0;bottom:0;background:var(--c);opacity:.45}.rdc b{position:relative;font-size:.7rem;line-height:20px;padding-left:8px}
+  .rlg{font-size:.78rem;padding:5px 8px;border-left:3px solid var(--c);background:rgba(255,255,255,.05);border-radius:8px}.rlg small{opacity:.65}
+  .rnav{flex:none;display:flex;border-top:1px solid rgba(255,255,255,.14);background:rgba(8,10,28,.85);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .rnav button{position:relative;flex:1;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;font-size:1.25rem;color:#94a3b8;line-height:1.1}.rnav button span{font-size:.7rem;font-weight:700}.rnav button.on{color:#fff;background:linear-gradient(#4f46e544,transparent)}
+  .rdot{position:absolute;top:6px;left:calc(50% + 12px);width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 2px #0b1020}
+  .roff{position:absolute;inset:0;z-index:5;background:rgba(2,6,23,.72);align-items:center;justify-content:center;padding:18px}
+  .rcard{width:min(380px,100%);background:linear-gradient(#312e81,#1e1b4b);border-radius:22px;padding:18px;text-align:center;display:grid;gap:6px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  @media(min-width:900px){
+    .rmain{padding:0 24px 24px}.rwrap{display:grid;grid-template-columns:minmax(380px,44%) 1fr;gap:20px;align-items:start}
+    .rcol-l{position:sticky;top:0}.rstick{position:static;background:none}.rsc{--h:clamp(260px,46vh,460px)}.rsec:first-child{margin-top:0}
+    .rkg{grid-template-columns:repeat(4,1fr)}.rbl{grid-template-columns:repeat(3,1fr)}.rstats{grid-template-columns:repeat(6,1fr)}
+  }
+  @media(max-height:640px) and (max-width:899px){.rstick{position:static}.rsc{--h:150px}}
+  @media(prefers-reduced-motion:reduce){.ren.spawn,.rhero span.atk,.rdm{animation:none}}
 
 </style>
 </head>
@@ -638,7 +680,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <button class="nav" onclick="closeMenu();openJob()"><i class="fa-solid fa-book"></i><span>ใบงานเข้าเล่ม</span></button>
     <button class="nav" onclick="closeMenu();openRet()"><i class="fa-solid fa-rotate-left"></i><span>คืนเบิก</span></button>
     <button class="nav" onclick="closeMenu();openJobCfg()"><i class="fa-solid fa-screwdriver-wrench"></i><span>ตั้งค่าสูตรเข้าเล่ม</span></button>
-    <button class="nav" onclick="closeMenu();rpgToggle()"><i class="fa-solid fa-khanda"></i><span>เกมนักล่า (แผงซ้าย)</span></button>
+    <button class="nav" onclick="closeMenu();rpgToggle()"><i class="fa-solid fa-khanda"></i><span>เกมนักล่า (เต็มจอ)</span></button>
     <button class="nav" onclick="toggleRocketBtn()"><i class="fa-solid fa-eye-slash"></i><span id="rktLbl">ปุ่มเกม: เปิด</span></button>
     <button class="nav" onclick="toggleCat()"><i class="fa-solid fa-cat"></i><span id="catLbl">แมววิ่ง: เปิด</span></button>
   </aside>
@@ -1203,115 +1245,344 @@ function catInit() {
 }
 
 
-/* ================= เกม RPG ไอเดิล (แผงซ้าย ปุ่ม ⚔️) ================= */
-const RK = 'stockRpgV2';
+/* ================= เกม RPG ไอเดิล (เต็มจอ ปุ่ม ⚔️) ================= */
+/* ===== เอนจินเกม (ตรรกะล้วน ไม่แตะหน้าเว็บ) ===== */
+const RK = 'stockRpgV3', RK_OLD = 'stockRpgV2';
+const RCFG = { hpA: 24, hpP: 1.5, hpG: 1.075, bossHp: 5, atkA: 1, atkB: .6, pwG: 1.02, lvAtk: 1.1, xpK: .8, perStage: 5, bossEvery: 5, bossTime: 45, bag: 40, maxEnh: 15, enh: .12, offCap: 8 * 3600, offEff: .5, hpRegen: .02, as: 1.25 };
 const RR = [['ธรรมดา', '#94a3b8', 1], ['ดี', '#4ade80', 1.5], ['หายาก', '#60a5fa', 2.4], ['มหากาพย์', '#c084fc', 4], ['ตำนาน', '#fbbf24', 7]];
 const RN = { w: ['ดาบสั้น', 'ขวาน', 'ธนู', 'คทา', 'หอก', 'ค้อน'], a: ['เสื้อหนัง', 'เกราะเหล็ก', 'ผ้าคลุม', 'โล่'], c: ['แหวน', 'เครื่องราง', 'สร้อย'] };
-const RI = { w: '⚔️', a: '🛡️', c: '💍' }, RS = { w: 'อาวุธ (ดาเมจ)', a: 'เกราะ (HP/ดาเมจ%)', c: 'เครื่องราง (คริ)' };
+const RI = { w: '⚔️', a: '🛡️', c: '💍' }, RT = { w: 'อาวุธ', a: 'เกราะ', c: 'เครื่องราง' }, RD = { w: 'เพิ่มดาเมจโจมตี', a: 'เพิ่ม HP และลดดาเมจที่โดน', c: 'เพิ่มคริติคอลและดาเมจคริ' };
 const REN = ['🐀', '🦇', '🐺', '🕷️', '🧟', '👻', '🐍', '🦂', '🐗', '🧌'], RBE = ['👹', '🐉', '🦖', '🧛', '💀', '🦑', '👿', '🐲'];
 const RBN = ['ราชาหนู', 'มังกรเพลิง', 'เร็กซ์ทมิฬ', 'เคานต์เลือด', 'จอมโครงกระดูก', 'คราเคนลึก', 'ปีศาจราตรี', 'มังกรสุดท้าย'];
-const RSK = [['💥', 'ฟันสุดแรง', 10000], ['🔥', 'คลั่ง', 35000], ['💚', 'ฟื้นฟู', 25000]];
-const RUP = [['👆', 'ฝึกพลังแตะ', 'tp', 12, '+1.6 ดาเมจแตะ'], ['⚡', 'ฝึกโจมตีอัตโนมัติ', 'au', 25, '+2.2 ดาเมจ/วิ'], ['🎯', 'ฝึกคริติคอล', 'cr', 40, '+1.5% คริ'], ['❤️', 'ฝึกความอึด', 'hp', 30, '+20 HP สูงสุด']];
-let R = null, rHp = 1, rHero = 1, rTm = 0, rTabI = 0, rOpen = false, rRage = 0, rCd = [0, 0, 0], rLast = 0, rN = 0;
-const rNew = () => ({ g: 0, max: 1, st: 1, auto: 1, k: 0, lv: 1, xp: 0, tp: 0, au: 0, cr: 0, hp: 0, inv: [], eq: { w: null, a: null, c: null }, t: Date.now(), id: 1 });
+const RSK = [['💥', 'ฟันสุดแรง', 10], ['🔥', 'คลั่ง', 35], ['💚', 'ฟื้นฟู', 25]];   // [ไอคอน, ชื่อ, คูลดาวน์(วิ)]
+const RUP_OLD = [12, 25, 40, 30];   // ราคาเริ่มต้นของการฝึกแบบเก่า (ใช้คำนวณคืนทอง)
+
+let R = null, rNowFn = () => Date.now();
+const rNow = () => rNowFn();
+// สถานะระหว่างต่อสู้ (ไม่ต้องบันทึก)
+let rHp = 1, rHero = 1, rTm = 0, rWave = 0, rRage = 0, rCd = [0, 0, 0], rLast = 0;
+let rFx = null, rMsg = null, rEvt = null;   // ตัวเชื่อมกับหน้าจอ: แสดงเลขดาเมจ / ข้อความ / เหตุการณ์ (ดรอป ผ่านด่าน ฯลฯ)
+
+const rNew = () => ({ v: 3, g: 0, tg: 0, tx: 0, max: 1, st: 1, auto: 1, as: 1, k: 0, bk: 0, lv: 1, xp: 0, inv: [], eq: { w: { id: 1, t: 'w', r: 0, lv: 0, pw: 6, n: 'ดาบฝึกหัด', st: 0 }, a: { id: 2, t: 'a', r: 0, lv: 0, pw: 5, n: 'เสื้อผ้าเก่า', st: 0 }, c: null }, id: 3, t: Date.now(), pt: 0, bs: {}, dl: [], dc: [0, 0, 0, 0, 0], ho: null });
+function rMigrate(o) {
+  const n = rNew();
+  ['g', 'max', 'st', 'k', 'lv', 'xp', 'id'].forEach(k => { if (o[k] != null) n[k] = o[k]; });
+  n.inv = (o.inv || []).slice(0, RCFG.bag); n.eq = Object.assign({ w: null, a: null, c: null }, o.eq || {});
+  n.tg = n.g; n.tx = 0; n.auto = o.auto === 0 ? 0 : 1; n.t = o.t || Date.now();
+  // เกมเวอร์ชันเก่ามี "ฝึกสถานะ" ด้วยทอง แต่ระบบใหม่อัพได้เฉพาะของ -> คืนทองที่เคยจ่ายให้ทั้งหมด
+  let refund = 0;
+  ['tp', 'au', 'cr', 'hp'].forEach((key, k) => { for (let l = 0; l < (o[key] || 0); l++) refund += Math.ceil(RUP_OLD[k] * Math.pow(1.17, l)); });
+  n.g += refund; n.refund = refund;
+  return n;
+}
 function rSave() { try { R.t = Date.now(); localStorage.setItem(RK, JSON.stringify(R)); } catch (e) {} }
+function rLoad() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(RK)); } catch (e) {}
+  if (s && s.v === 3 && s.inv) { R = Object.assign(rNew(), s); R.eq = Object.assign({ w: null, a: null, c: null }, s.eq || {}); return; }
+  let o = null; try { o = JSON.parse(localStorage.getItem(RK_OLD)); } catch (e) {}
+  R = o && o.inv ? rMigrate(o) : rNew();
+}
+
 const rF = n => { n = Math.floor(n); if (n < 1e3) return '' + n; const u = ['K', 'M', 'B', 'T', 'Qa', 'Qi']; let i = -1; while (n >= 1e3 && i < 5) { n /= 1e3; i++; } return n.toFixed(n < 10 ? 2 : n < 100 ? 1 : 0) + u[i]; };
-const rBoss = s => s % 5 === 0, rMax = s => Math.ceil(10 * Math.pow(1.38, s - 1) * (rBoss(s) ? 5 : 1));
-const rGold = s => Math.ceil(rMax(s) * (rBoss(s) ? .3 : .45) + s), rAtk = s => (1 + s * .9) * (rBoss(s) ? 2 : 1);
-const rCost = (k, l) => Math.ceil(RUP[k][3] * Math.pow(1.17, l)), rNeed = l => Math.ceil(20 * Math.pow(l, 1.5));
-const rEf = i => i ? Math.floor(i.pw * (1 + .1 * (i.lv || 0))) : 0, rEC = i => Math.ceil(i.pw * 3 * ((i.lv || 0) + 1));
-function rStats() {
-  const e = R.eq, w = rEf(e.w), a = rEf(e.a), c = rEf(e.c), m = 1 + a / 100, L = R.lv - 1, rg = rRage > Date.now() ? 3 : 1;
-  return { tap: (1 + L * 2 + R.tp * 1.6 + w) * m * (rg > 1 ? 2 : 1), dps: (L + R.au * 2.2 + w * .4) * m * rg, cr: Math.min(75, 5 + R.cr * 1.5 + c / 6), hp: Math.floor(60 + L * 15 + R.hp * 20 + a * 1.5) };
+const rBoss = s => s % RCFG.bossEvery === 0;
+const rNeedKills = s => rBoss(s) ? 1 : RCFG.perStage;
+const rNeedXp = l => Math.ceil(20 * Math.pow(l, 1.6));
+function rEn(s) {
+  const b = rBoss(s), bi = Math.floor(s / RCFG.bossEvery) - 1;
+  return { b, e: b ? RBE[bi % RBE.length] : REN[(s - 1) % REN.length], n: b ? RBN[bi % RBN.length] : 'ศัตรู',
+    hp: Math.ceil(RCFG.hpA * Math.pow(s, RCFG.hpP) * Math.pow(RCFG.hpG, s) * (b ? RCFG.bossHp : 1)), atk: (RCFG.atkA + s * RCFG.atkB) * (b ? 1.5 : 1),
+    gold: Math.ceil((3 + s * 1.8) * (b ? 8 : 1)), xp: Math.ceil((s * RCFG.xpK + 2) * (b ? 4 : 1)) };
 }
-function rEnemy() { const s = R.st, b = rBoss(s); return { b, e: b ? RBE[(s / 5 - 1) % RBE.length] : REN[(s - 1) % REN.length], n: b ? RBN[(s / 5 - 1) % RBN.length] : 'ศัตรู' }; }
-function rSpawn() { rHp = rMax(R.st); rTm = rBoss(R.st) ? 30 : 0; }
-function rToast(m) { const e = $('rLog'); if (e) e.textContent = m; }
-function rDrop(boss) {
-  const s = R.st; let x = Math.random() * (boss ? .5 : 1), r = x < .02 ? 4 : x < .1 ? 3 : x < .3 ? 2 : x < .6 ? 1 : 0; if (boss) r = Math.max(r, 2 + (Math.random() < .35 ? 1 : 0));
-  const t = ['w', 'a', 'c'][Math.random() * 3 | 0], nm = RN[t];
-  const it = { id: R.id++, t, r, lv: 0, pw: Math.ceil((4 + s * 2.2) * RR[r][2] * (.8 + Math.random() * .4)), n: nm[Math.random() * nm.length | 0] };
-  if (R.inv.length >= 40) { R.g += it.pw * 2; return rToast('ถุงเต็ม ขาย ' + it.n + ' อัตโนมัติ'); }
-  R.inv.push(it); rToast('ดรอป! ' + RI[t] + ' ' + RR[r][0] + ' ' + it.n + ' (+' + it.pw + ')'); if (rTabI === 1) rBody();
+// ค่าพลังของของชิ้นหนึ่ง (รวมระดับอัพเกรด)
+const rEff = i => i ? i.pw * (1 + RCFG.enh * (i.lv || 0)) : 0;
+const rEC = i => Math.ceil(i.pw * 2.2 * Math.pow((i.lv || 0) + 1, 1.35));   // ราคาอัพเกรดเป็นเลเวลถัดไป
+function rStats(eq, lv) {
+  eq = eq || R.eq; lv = lv || R.lv;
+  const L = lv - 1, w = rEff(eq.w), a = rEff(eq.a), c = rEff(eq.c);
+  const atk = 5 + L * RCFG.lvAtk + w, crit = Math.min(.7, .05 + c / 800), cd = 2 + c / 300, hp = 60 + L * 12 + a * 6, dr = Math.min(.6, a / (a + 120));
+  const dps = atk * RCFG.as * (1 + crit * (cd - 1));
+  return { atk, as: RCFG.as, crit, cd, dps, hp, dr, ehp: hp / (1 - dr), cp: Math.round(Math.sqrt(dps * hp / (1 - dr))) };
 }
-function rDmg(d, crit) { const sc = $('rSc'); if (!sc) return; const e = document.createElement('div'); e.className = 'rdm' + (crit ? ' c' : ''); e.textContent = rF(d) + (crit ? '!' : ''); e.style.left = (46 + Math.random() * 30) + '%'; e.style.top = (46 + Math.random() * 20) + '%'; sc.appendChild(e); setTimeout(() => e.remove(), 800); }
-function rHit(d, crit) {
-  if (crit !== undefined) rDmg(d, crit);
-  rHp -= d; if (rHp > 0) return;
-  const s = R.st, b = rBoss(s); R.g += rGold(s); R.k++; R.xp += Math.ceil(s * 1.5 + 2);
-  while (R.xp >= rNeed(R.lv)) { R.xp -= rNeed(R.lv); R.lv++; rHero = rStats().hp; rToast('🎉 เลเวลอัพ! Lv.' + R.lv); }
-  if (b || Math.random() < .12) rDrop(b);
-  if ((R.auto || b) && s === R.max) R.st = ++R.max;
-  rSpawn(); rSave(); if (rTabI !== 1) rBody();
+// พลังรบถ้าสวมของชุดนี้
+const rCpWith = (t, item) => rStats(Object.assign({}, R.eq, { [t]: item })).cp;
+// ประเมินโอกาสผ่านด่าน s: ฆ่าได้ทันเวลาและตัวเองไม่ตายก่อน
+function rWin(s, S) {
+  S = S || rStats(); const e = rEn(s), n = rNeedKills(s);
+  const ttk = e.hp / (S.dps * 1.1), inDmg = Math.max(.001, e.atk * (1 - S.dr) - S.hp * RCFG.hpRegen);
+  const live = S.hp / inDmg;                         // รอดได้กี่วินาที
+  const lim = e.b ? RCFG.bossTime : 1e9;
+  const need = ttk * (e.b ? 1 : 1);                  // เวลาฆ่า 1 ตัว (ต้องรอดอย่างน้อยเท่านี้ต่อรอบ)
+  const r = Math.min(live / (need * 1.3), lim / (ttk * 1.15));
+  return { ttk, live, ratio: r, level: r >= 1.6 ? 3 : r >= 1 ? 2 : r >= .6 ? 1 : 0, kills: n };
 }
-function rTap() { const S = rStats(), crit = Math.random() * 100 < S.cr, en = $('rEn'); if (en) { en.classList.add('hit'); setTimeout(() => en.classList.remove('hit'), 80); } rHit(S.tap * (crit ? 2.5 : 1), crit); rPaint(); }
-function rFail(msg) { R.st = Math.max(1, R.st - 1); R.auto = 0; rSpawn(); rHero = rStats().hp; rToast(msg); rSave(); rBody(); }
-function rTick() {
-  if (!R) return; const now = Date.now(), dt = Math.min(1, (now - (rLast || now)) / 1000); rLast = now; const S = rStats();
-  if (S.dps > 0) rHit(S.dps * dt);
-  rHero = Math.min(S.hp, rHero - rAtk(R.st) * dt + S.hp * .03 * dt);
-  if (rHero <= 0) return rFail('💀 พ่ายแพ้ ถอยไปด่าน ' + Math.max(1, R.st - 1));
-  if (rTm > 0 && (rTm -= dt) <= 0) return rFail('⏰ หมดเวลาบอส ถอยไปฟาร์มก่อน');
-  if (rOpen) { rPaint(); if (rTabI === 2 && ++rN % 4 === 0) rBody(); }
+// ด่านที่ฟาร์มได้อย่างปลอดภัย (ใช้คำนวณตอนออฟไลน์)
+function rSafeStage() { const S = rStats(); for (let s = R.st; s > 1; s--) { if (!rBoss(s) && rWin(s, S).ratio >= 1.2) return s; } return 1; }
+
+function rRoll(s, boss, rnd) {
+  rnd = rnd || Math.random;
+  let x = rnd() * (boss ? .5 : 1), r = x < .02 ? 4 : x < .1 ? 3 : x < .3 ? 2 : x < .6 ? 1 : 0;
+  if (boss) r = Math.max(r, 2 + (rnd() < .35 ? 1 : 0));
+  const t = ['w', 'a', 'c'][rnd() * 3 | 0], nm = RN[t], base = (t === 'w' ? 4 + s * 2.4 : 3 + s * 2.0) * Math.pow(RCFG.pwG, s);
+  return { id: R.id++, t, r, lv: 0, pw: Math.max(1, Math.ceil(base * RR[r][2] * (.85 + rnd() * .3))), n: nm[rnd() * nm.length | 0], st: s };
+}
+// รับของ: ลงถุง / ถุงเต็มขายอัตโนมัติ (ของที่ดีกว่าที่สวมอยู่ยังคงเข้าถุงเสมอโดยไล่ขายชิ้นที่แย่สุดแทน)
+function rAddItem(it) {
+  R.dc[it.r]++; R.dl.unshift({ t: Date.now(), st: it.st, it: { t: it.t, r: it.r, n: it.n, pw: it.pw } }); if (R.dl.length > 30) R.dl.length = 30;
+  if (R.inv.length >= RCFG.bag) {
+    const worst = R.inv.reduce((a, b) => (rEff(b) < rEff(a) ? b : a));
+    if (rEff(worst) < rEff(it)) { R.g += rEff(worst) * 2; R.inv = R.inv.filter(x => x !== worst); } else { R.g += rEff(it) * 2; return false; }
+  }
+  R.inv.push(it); return true;
+}
+function rLevelUp() { let up = 0; while (R.xp >= rNeedXp(R.lv)) { R.xp -= rNeedXp(R.lv); R.lv++; up++; } if (up) { rHero = Math.min(rHero + 1e9, rStats().hp); } return up; }
+function rSpawn() { const e = rEn(R.st); rHp = e.hp; rTm = e.b ? RCFG.bossTime : 0; if (rWave >= rNeedKills(R.st)) rWave = 0; }
+function rFail(msg) { R.st = Math.max(1, R.st - 1); R.auto = 0; rWave = 0; rSpawn(); rHero = rStats().hp; if (rMsg) rMsg(msg); if (rEvt) rEvt('fail'); }
+function rKill() {
+  const s = R.st, e = rEn(s); R.g += e.gold; R.tg += e.gold; R.tx += e.xp; R.k++; R.xp += e.xp; rWave++; if (rEvt) rEvt('kill');
+  const up = rLevelUp(); if (up && rMsg) rMsg('🎉 เลเวลอัพ! Lv.' + R.lv);
+  if (e.b || Math.random() < .12) { const it = rRoll(s, e.b); const kept = rAddItem(it); if (rMsg) rMsg('ดรอป! ' + RI[it.t] + ' ' + RR[it.r][0] + ' ' + it.n + ' (+' + it.pw + ')' + (kept ? '' : ' ขายอัตโนมัติ')); if (rEvt) rEvt('drop', it); }
+  if (e.b) { const b = R.bs[s] || (R.bs[s] = { n: 0, t: Date.now() }); b.n++; R.bk++; if (rEvt) rEvt('boss', s); }
+  if (rWave >= rNeedKills(s)) {   // ผ่านด่านนี้แล้ว
+    rWave = 0;
+    if (s === R.max && (R.auto || e.b)) { R.max++; R.st = R.max; if (rEvt) rEvt('stage', R.st); }
+  }
+  rSpawn();
 }
 function rSkill(k) {
-  const now = Date.now(); if (rCd[k] > now) return; rCd[k] = now + RSK[k][2]; const S = rStats();
-  if (k === 0) { rHit(S.tap * 10, true); } else if (k === 1) { rRage = now + 8000; rToast('🔥 คลั่ง! ดาเมจ x3 นาน 8 วิ'); } else { rHero = Math.min(S.hp, rHero + S.hp * .5); rToast('💚 ฟื้นฟู HP'); }
-  rPaint();
+  const now = rNow(); if (rCd[k] > now) return false; rCd[k] = now + RSK[k][2] * 1000; const S = rStats();
+  if (k === 0) { rFx && rFx(S.atk * 6 * S.cd, true); rHp -= S.atk * 6 * S.cd; if (rHp <= 0) rKill(); }
+  else if (k === 1) { rRage = now + 8000; if (rMsg) rMsg('🔥 คลั่ง! ดาเมจ x1.8 นาน 8 วิ'); }
+  else { rHero = Math.min(S.hp, rHero + S.hp * .5); if (rMsg) rMsg('💚 ฟื้นฟู HP'); }
+  return true;
 }
-function rPaint() {
-  if (!$('rSc')) return; const en = rEnemy(), mx = rMax(R.st), S = rStats(), now = Date.now();
-  $('rG').textContent = rF(R.g); $('rSt').textContent = 'ด่าน ' + R.st + (en.b ? ' 👑บอส' : '') + ' / ' + R.max + (rTm > 0 ? ' ⏱' + Math.ceil(rTm) : '');
-  const E = $('rEn'); if (E.dataset.k !== R.st + en.e) { E.dataset.k = R.st + en.e; E.textContent = en.e; E.className = 'ren' + (en.b ? ' b' : ''); }
-  $('rHp').style.width = Math.max(0, rHp / mx * 100) + '%'; $('rNm').textContent = en.n + '  ❤ ' + rF(Math.max(0, rHp)) + '/' + rF(mx);
-  $('rHH').style.width = Math.max(0, rHero / S.hp * 100) + '%'; $('rLv').textContent = 'Lv.' + R.lv + ' · HP ' + Math.ceil(Math.max(0, rHero)) + '/' + S.hp + ' · XP ' + R.xp + '/' + rNeed(R.lv);
-  $('rWp').textContent = R.eq.w ? '⚔️' : '';
-  RSK.forEach((s, k) => { const b = $('rS' + k), l = Math.ceil((rCd[k] - now) / 1000); b.disabled = l > 0; b.querySelector('small').textContent = l > 0 ? l + 's' : s[1]; });
+// เดินเวลาการต่อสู้ไป dt วินาที (ฮีโร่โจมตีและใช้สกิลเอง = ไอเดิล)
+function rStep(dt) {
+  if (!R) return; const now = rNow(), S = rStats(), e = rEn(R.st), rg = rRage > now ? 1.8 : 1;
+  R.pt += dt;
+  if (R.as) {   // ออโต้สกิล
+    if (rCd[0] <= now && (e.b || rHp > S.atk * 12)) rSkill(0);
+    if (rCd[1] <= now && (e.b || rHp > S.dps * 10)) rSkill(1);
+    if (rCd[2] <= now && rHero < S.hp * .45) rSkill(2);
+  }
+  const d = S.dps * rg * dt; rFx && rFx(d, Math.random() < S.crit); rHp -= d;
+  if (rHp <= 0) rKill();
+  rHero = Math.min(S.hp, rHero - e.atk * (1 - S.dr) * dt + S.hp * RCFG.hpRegen * dt);
+  if (rHero <= 0) return rFail('💀 พ่ายแพ้ ถอยไปด่าน ' + Math.max(1, R.st - 1));
+  if (rTm > 0 && (rTm -= dt) <= 0) return rFail('⏰ หมดเวลาบอส ถอยไปฟาร์มก่อน');
 }
-function rItem(i, eq) {
-  const e = rEf(i), c = R.eq[i.t], d = e - rEf(c);
-  return `<div class="rc" style="--c:${RR[i.r][1]}"><span style="font-size:1.4rem">${RI[i.t]}</span><div><b style="color:${RR[i.r][1]}">${i.n}${i.lv ? ' +' + i.lv : ''}</b><small>${RR[i.r][0]} · ${e}${eq ? '' : ' (' + (d >= 0 ? '+' : '') + d + ')'}</small></div>${eq ? '' : `<button onclick="rEq(${i.id})">ใส่</button>`}<button class="s" ${(i.lv || 0) >= 10 || R.g < rEC(i) ? 'disabled' : ''} onclick="rEnh(${i.id})">⬆${rF(rEC(i))}</button>${eq ? '' : `<button class="s" onclick="rSell(${i.id})">ขาย</button>`}</div>`;
+// คำนวณรางวัลช่วงที่ไม่ได้เปิดเกม (ไม่เลื่อนด่าน ได้ครึ่งหนึ่งของปกติ)
+function rOffline(sec) {
+  sec = Math.min(sec, RCFG.offCap); if (sec < 60) return null;
+  const S = rStats(), s = rSafeStage(), e = rEn(s), ttk = Math.max(.5, e.hp / (S.dps * 1.1));
+  const kills = Math.floor(sec * RCFG.offEff / ttk), gold = kills * e.gold, xp = kills * e.xp;
+  R.g += gold; R.tg += gold; R.tx += xp; R.k += kills; R.xp += xp; const lv0 = R.lv; rLevelUp();
+  let n = 0, best = null; const rolls = Math.min(25, Math.floor(kills * .12));
+  for (let i = 0; i < rolls; i++) { const it = rRoll(s, false); if (rAddItem(it)) n++; if (!best || it.r > best.r || (it.r === best.r && it.pw > best.pw)) best = it; }
+  const rep = { sec, stage: s, kills, gold, xp, items: rolls, kept: n, best: best && { t: best.t, r: best.r, n: best.n, pw: best.pw }, lv: R.lv - lv0, t: Date.now() };
+  R.ho = rep; return rep;
 }
-function rBody() {
-  const S = rStats(), el = $('rBody'); if (!el) return; let h = '';
-  document.querySelectorAll('#rTabs button').forEach((b, i) => b.classList.toggle('on', i === rTabI));
-  if (rTabI === 0) {
-    h = `<div class="rst"><div><b>${rF(S.tap)}</b>ตี/แตะ</div><div><b>${rF(S.dps)}</b>ดาเมจ/วิ</div><div><b>${Math.round(S.cr)}%</b>คริ</div></div>`;
-    h += `<div class="rc"><div><b>ฆ่าแล้ว ${R.k} ตัว</b><small>ด่านสูงสุด ${R.max} · ศัตรูโจมตี ${rF(rAtk(R.st))}/วิ</small></div><button class="s" onclick="R.auto=R.auto?0:1;rSave();rBody()">${R.auto ? '▶ ไปด่านถัดไป' : '🔁 ฟาร์มด่านนี้'}</button></div><b>👑 เลือกสู้บอส (จับเวลา 30 วิ)</b>`;
-    for (let b = 5; b <= R.max + 4; b += 5) { const ok = b <= R.max, i = b / 5 - 1; h += `<div class="rc" style="--c:${ok ? '#f43f5e' : '#475569'}"><span style="font-size:1.5rem">${ok ? RBE[i % RBE.length] : '🔒'}</span><div><b>${RBN[i % RBN.length]}</b><small>ด่าน ${b} · ดรอปของดี</small></div><button ${ok ? '' : 'disabled'} onclick="rGo(${b})">สู้</button></div>`; }
-  } else if (rTabI === 1) {
-    h = '<b>🧙 สวมใส่อยู่</b>' + ['w', 'a', 'c'].map(t => R.eq[t] ? rItem(R.eq[t], 1) : `<div class="rc"><span style="font-size:1.4rem">${RI[t]}</span><div><b>ว่าง</b><small>${RS[t]}</small></div></div>`).join('');
-    const bt = R.inv.slice().sort((a, b) => b.r - a.r || rEf(b) - rEf(a));
-    h += `<div class="rc"><div><b>🎒 ถุง ${R.inv.length}/40</b></div><button class="s" onclick="rSellLow()">ขายที่ด้อยกว่า</button></div>` + (bt.length ? bt.map(i => rItem(i, 0)).join('') : '<div class="rc"><div>ยังไม่มีของ ไปฆ่ามอนสเตอร์/บอสเพื่อรับดรอป</div></div>');
-  } else h = RUP.map((x, k) => { const l = R[x[2]], c = rCost(k, l); return `<div class="rc"><span style="font-size:1.4rem">${x[0]}</span><div><b>${x[1]} Lv.${l}</b><small>${x[4]}</small></div><button ${R.g >= c ? '' : 'disabled'} onclick="rUp(${k})">🪙 ${rF(c)}</button></div>`; }).join('');
-  el.innerHTML = h;
-}
-function rGo(s) { s = Math.max(1, Math.min(R.max, s)); if (s === R.st && rHp > 0) return; R.st = s; if (s !== R.max) R.auto = 0; rSpawn(); rSave(); rPaint(); rBody(); }
-function rUp(k) { const l = RUP[k][2], c = rCost(k, R[l]); if (R.g < c) return; R.g -= c; R[l]++; rSave(); rPaint(); rBody(); }
+function rEquip(id) { const i = R.inv.find(x => x.id === id); if (!i) return false; R.inv = R.inv.filter(x => x.id !== id); if (R.eq[i.t]) R.inv.push(R.eq[i.t]); R.eq[i.t] = i; rHero = Math.min(rHero, rStats().hp); return true; }
 function rFind(id) { return R.inv.find(x => x.id === id) || ['w', 'a', 'c'].map(t => R.eq[t]).find(x => x && x.id === id); }
-function rEnh(id) { const i = rFind(id); if (!i || (i.lv || 0) >= 10 || R.g < rEC(i)) return; R.g -= rEC(i); i.lv = (i.lv || 0) + 1; rSave(); rPaint(); rBody(); }
-function rEq(id) { const i = R.inv.find(x => x.id === id); if (!i) return; R.inv = R.inv.filter(x => x.id !== id); if (R.eq[i.t]) R.inv.push(R.eq[i.t]); R.eq[i.t] = i; rSave(); rBody(); rToast('ใส่ ' + i.n + ' แล้ว'); }
-function rSell(id) { const i = R.inv.find(x => x.id === id); if (!i) return; R.g += rEf(i) * 2; R.inv = R.inv.filter(x => x.id !== id); rSave(); rPaint(); rBody(); }
-function rSellLow() { let g = 0; R.inv = R.inv.filter(i => { const e = R.eq[i.t]; if (e && rEf(i) <= rEf(e)) { g += rEf(i) * 2; return false; } return true; }); R.g += g; rSave(); rPaint(); rBody(); rToast('ขายได้ 🪙 ' + rF(g)); }
+function rEnh(id) { const i = rFind(id); if (!i || (i.lv || 0) >= RCFG.maxEnh || R.g < rEC(i)) return false; R.g -= rEC(i); i.lv = (i.lv || 0) + 1; return true; }
+function rSell(id) { const i = R.inv.find(x => x.id === id); if (!i) return 0; const g = Math.floor(rEff(i) * 2); R.g += g; R.inv = R.inv.filter(x => x.id !== id); return g; }
+function rSellLow() { let g = 0; R.inv = R.inv.filter(i => { const e = R.eq[i.t]; if (e && rEff(i) <= rEff(e)) { g += Math.floor(rEff(i) * 2); return false; } return true; }); R.g += g; return g; }
+// ใส่ของที่ทำให้พลังรบสูงขึ้นที่สุดในแต่ละช่อง
+function rBestAll() { let c = 0; ['w', 'a', 'c'].forEach(t => { let best = null, bcp = rStats().cp; R.inv.filter(i => i.t === t).forEach(i => { const cp = rCpWith(t, i); if (cp > bcp) { bcp = cp; best = i; } }); if (best) { rEquip(best.id); c++; } }); return c; }
+// ของที่คุ้มที่สุดที่จะอัพเกรดต่อไป (พลังรบที่เพิ่มต่อทอง)
+function rAdvice() {
+  const base = rStats().cp; let best = null;
+  ['w', 'a', 'c'].forEach(t => { const i = R.eq[t]; if (!i || (i.lv || 0) >= RCFG.maxEnh) return; const cost = rEC(i), cp = rCpWith(t, Object.assign({}, i, { lv: (i.lv || 0) + 1 })), gain = cp - base, v = gain / cost; if (!best || v > best.v) best = { t, i, cost, gain, v }; });
+  return best;
+}
+function rGo(s) { s = Math.max(1, Math.min(R.max, s)); if (s === R.st && rHp > 0) return; R.st = s; if (s !== R.max) R.auto = 0; rWave = 0; rSpawn(); }
+function rInit() { rLoad(); rSpawn(); rHero = rStats().hp; rLast = rNow(); }
+/* ===== หน้าจอเกม: เต็มจอ มี 2 หน้า  🎮 เล่น (ต่อสู้ + จัดการของ)  /  📊 ติดตาม (สถิติ รายได้ คำแนะนำ ประวัติ) ===== */
+let rOpen = false, rPage = 'play', rBagF = 'all', rSamp = [], rTrackN = 0, rOffRep = null, rSampT = 0, rListT = 0;
+const rS = (id, v) => { const e = $(id); if (e && e.textContent !== v) e.textContent = v; };
+const rEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function rDur(sec) { sec = Math.max(0, Math.floor(sec)); const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60); return d ? d + ' วัน ' + h + ' ชม.' : h ? h + ' ชม. ' + m + ' นาที' : m ? m + ' นาที' : sec + ' วิ'; }
+function rAgo(ts) { const s = (Date.now() - ts) / 1000; return s < 60 ? 'เมื่อสักครู่' : s < 3600 ? Math.floor(s / 60) + ' นาทีที่แล้ว' : s < 86400 ? Math.floor(s / 3600) + ' ชม.ที่แล้ว' : Math.floor(s / 86400) + ' วันที่แล้ว'; }
+const rPct = (a, b) => (b > 0 ? (a / b - 1) * 100 : 0);
+const rWinTxt = l => ['เสี่ยงมาก', 'ยาก', 'พอไหว', 'สบาย'][l], rWinCol = l => ['#f43f5e', '#fb923c', '#facc15', '#4ade80'][l];
+
+// สรุปคุณสมบัติของของชิ้นหนึ่ง
+function rEffTxt(i) {
+  const e = rEff(i);
+  return i.t === 'w' ? 'ATK +' + rF(e) : i.t === 'a' ? 'HP +' + rF(e * 6) + ' · ลดดาเมจ ' + Math.round(Math.min(.6, e / (e + 120)) * 100) + '%' : 'คริ +' + (e / 8).toFixed(1) + '% · ดาเมจคริ +' + (e / 300).toFixed(2) + 'x';
+}
+function rIcon(i) { return `<span class="ri-ic" style="--c:${RR[i.r][1]}">${RI[i.t]}</span>`; }
+
+/* ---------- ส่วนที่ขยับทุกจังหวะ (ไม่วาดรายการใหม่ เพื่อไม่ให้ปุ่มที่กำลังกดหาย) ---------- */
+function rPaint() {
+  if (!rOpen || !R || !$('rSc')) return;
+  const en = rEn(R.st), S = rStats(), now = rNow(), need = rNeedKills(R.st);
+  rS('rGold', rF(R.g)); rS('rCpH', rF(S.cp));
+  rS('rSt', 'ด่าน ' + R.st + ' / ' + R.max + (en.b ? ' · 👑 บอส' : ''));
+  const wv = $('rWv'), pips = Array.from({ length: need }, (_, k) => k < rWave ? '●' : '○').join(' ');
+  if (wv && wv.textContent !== pips) wv.textContent = pips;
+  const E = $('rEn'), key = R.st + en.e; if (E.dataset.k !== key) { E.dataset.k = key; E.textContent = en.e; E.className = 'ren' + (en.b ? ' b' : ''); }
+  const mx = en.hp; $('rHp').style.width = Math.max(0, rHp / mx * 100) + '%';
+  rS('rNm', en.n + (en.b ? ' 👑' : '') + '  ❤ ' + rF(Math.max(0, rHp)) + ' / ' + rF(mx));
+  $('rHH').style.width = Math.max(0, rHero / S.hp * 100) + '%';
+  rS('rLv', 'Lv.' + R.lv + ' · HP ' + Math.ceil(Math.max(0, rHero)) + '/' + Math.floor(S.hp) + ' · XP ' + R.xp + '/' + rNeedXp(R.lv));
+  const tb = $('rTb'); if (tb) { tb.style.width = (rTm > 0 ? rTm / RCFG.bossTime * 100 : 0) + '%'; tb.parentNode.style.display = rTm > 0 ? 'block' : 'none'; }
+  RSK.forEach((s, k) => { const b = $('rS' + k), l = Math.ceil((rCd[k] - now) / 1000); b.disabled = l > 0; rS('rSn' + k, l > 0 ? l + ' วิ' : s[1]); });
+  const a = $('rAutoSk'); if (a) { a.classList.toggle('on', !!R.as); a.textContent = 'ออโต้สกิล: ' + (R.as ? 'เปิด' : 'ปิด'); }
+  const g = $('rAutoGo'); if (g) { g.classList.toggle('on', !!R.auto); g.textContent = R.auto ? '▶ โหมด: ไปด่านต่อไป' : '🔁 โหมด: ฟาร์มด่านนี้'; }
+  document.querySelectorAll('[data-ec]').forEach(b => { const ok = R.g >= +b.dataset.ec; if (b.disabled === ok) b.disabled = !ok; });
+}
+function rDmgNum(d, crit) {
+  const sc = $('rSc'); if (!sc || sc.querySelectorAll('.rdm').length > 10) return;
+  const e = document.createElement('div'); e.className = 'rdm' + (crit ? ' c' : ''); e.textContent = rF(d) + (crit ? '!' : '');
+  e.style.left = (52 + Math.random() * 26) + '%'; e.style.top = (34 + Math.random() * 22) + '%'; sc.appendChild(e); setTimeout(() => e.remove(), 800);
+  const E = $('rEn'), H = $('rHr'); if (E) { E.classList.remove('hit'); void E.offsetWidth; E.classList.add('hit'); } if (H) { H.classList.remove('atk'); void H.offsetWidth; H.classList.add('atk'); }
+}
+
+/* ---------- รายการ (วาดใหม่เมื่อมีเหตุการณ์เท่านั้น) ---------- */
+function rEqHtml() {
+  return ['w', 'a', 'c'].map(t => {
+    const i = R.eq[t];
+    if (!i) return `<div class="rc"><span class="ri-ic">${RI[t]}</span><div><b>${RT[t]} · ว่าง</b><small>${RD[t]} · รอดรอปจากด่าน/บอส</small></div></div>`;
+    const max = (i.lv || 0) >= RCFG.maxEnh, c = rEC(i);
+    return `<div class="rc" style="--c:${RR[i.r][1]}">${rIcon(i)}<div><b style="color:${RR[i.r][1]}">${rEsc(i.n)}${i.lv ? ' +' + i.lv : ''}</b><small>${RR[i.r][0]} · ${rEffTxt(i)}</small></div>${max ? '<span class="rmax">MAX</span>' : `<button class="s" data-ec="${c}" ${R.g >= c ? '' : 'disabled'} onclick="rUiEnh(${i.id})">⬆ 🪙${rF(c)}</button>`}</div>`;
+  }).join('');
+}
+function rBagRows() {
+  const cur = rStats().cp;
+  return R.inv.filter(i => rBagF === 'all' || i.t === rBagF).sort((a, b) => a.t.localeCompare(b.t) || rEff(b) - rEff(a)).map(i => {
+    const d = rPct(rCpWith(i.t, i), cur), up = d > .05, c = rEC(i), max = (i.lv || 0) >= RCFG.maxEnh;
+    return `<div class="rc" style="--c:${RR[i.r][1]}">${rIcon(i)}<div><b style="color:${RR[i.r][1]}">${rEsc(i.n)}${i.lv ? ' +' + i.lv : ''} <span class="rdl ${up ? 'up' : 'dn'}">${up ? '▲ +' + d.toFixed(1) + '%' : d < -.05 ? '▼ ' + d.toFixed(1) + '%' : '='}</span></b><small>${RR[i.r][0]} · ${rEffTxt(i)} · จากด่าน ${i.st || 1}</small></div><button onclick="rUiEquip(${i.id})">ใส่</button>${max ? '' : `<button class="s" data-ec="${c}" ${R.g >= c ? '' : 'disabled'} onclick="rUiEnh(${i.id})">⬆${rF(c)}</button>`}<button class="s" onclick="rUiSell(${i.id})">ขาย</button></div>`;
+  }).join('');
+}
+function rBagHtml() {
+  const chips = [['all', 'ทั้งหมด'], ['w', '⚔️ อาวุธ'], ['a', '🛡️ เกราะ'], ['c', '💍 เครื่องราง']].map(x => `<button class="rchip ${rBagF === x[0] ? 'on' : ''}" onclick="rBagF='${x[0]}';rLists()">${x[1]}</button>`).join('');
+  const rows = rBagRows();
+  return `<div class="rhd"><b>🎒 ถุง ${R.inv.length}/${RCFG.bag}</b><span><button class="rbt" onclick="rUiBest()">ใส่ที่ดีที่สุด</button> <button class="rbt s" onclick="rUiSellLow()">ขายที่ด้อยกว่า</button></span></div><div class="rchips">${chips}</div>` +
+    (rows || '<div class="rempty">ยังไม่มีของในถุง — ปล่อยให้ตัวละครฟาร์มด่าน/บอส ของจะดรอปเอง</div>');
+}
+function rBossHtml() {
+  const S = rStats(), un = []; let top = Math.floor(R.max / RCFG.bossEvery) * RCFG.bossEvery;
+  for (let b = top, n = 0; b >= RCFG.bossEvery && n < 5; b -= RCFG.bossEvery, n++) un.push(b);
+  const mk = (b, ok) => {
+    const bi = b / RCFG.bossEvery - 1, rec = R.bs[b], w = rWin(b, S);
+    return `<div class="rc" style="--c:${ok ? '#f43f5e' : '#475569'}"><span class="ri-ic">${ok ? RBE[bi % RBE.length] : '🔒'}</span><div><b>${RBN[bi % RBN.length]}</b><small>ด่าน ${b} · ${ok ? (rec ? 'ล้มแล้ว ' + rec.n + ' ครั้ง' : 'ยังไม่เคยล้ม') + ' · <span style="color:' + rWinCol(w.level) + '">โอกาสผ่าน: ' + rWinTxt(w.level) + '</span>' : 'ผ่านด่าน ' + (b - 1) + ' ก่อน'} · ดรอปของดี</small></div><button ${ok ? '' : 'disabled'} onclick="rUiGo(${b})">สู้</button></div>`;
+  };
+  const next = top + RCFG.bossEvery;
+  return `<div class="rhd"><b>👑 ท้าบอส (จับเวลา ${RCFG.bossTime} วิ)</b></div>` + mk(next, next <= R.max) + un.map(b => mk(b, true)).join('');
+}
+function rLists() {
+  if (!rOpen || !$('rEq')) return;
+  $('rEq').innerHTML = rEqHtml(); $('rBag').innerHTML = rBagHtml(); $('rBossL').innerHTML = rBossHtml(); rBadge(); rPaint();
+}
+function rBadge() { const cur = rStats().cp, up = R.inv.some(i => rCpWith(i.t, i) > cur * 1.0005), b = $('rNavDot'); if (b) b.style.display = up ? 'inline-block' : 'none'; }
+
+/* ---------- ปุ่มต่างๆ ---------- */
+const rAfter = () => { rSave(); rLists(); };
+function rUiEnh(id) { if (rEnh(id)) rAfter(); }
+function rUiEquip(id) { const i = rFind(id); if (rEquip(id)) { rAfter(); rMsg && rMsg('ใส่ ' + i.n + ' แล้ว'); } }
+function rUiSell(id) { const g = rSell(id); if (g) { rAfter(); rMsg && rMsg('ขายได้ 🪙 ' + rF(g)); } }
+function rUiSellLow() { const g = rSellLow(); rAfter(); rMsg && rMsg('ขายที่ด้อยกว่าได้ 🪙 ' + rF(g)); }
+function rUiBest() { const n = rBestAll(); rAfter(); rMsg && rMsg(n ? 'ใส่ของที่ดีที่สุดแล้ว ' + n + ' ช่อง' : 'ชุดที่ใส่อยู่ดีที่สุดแล้ว'); }
+function rUiGo(s) { rGo(s); rAfter(); }
+function rUiAuto() { R.auto = R.auto ? 0 : 1; rSave(); rPaint(); }
+function rUiAutoSk() { R.as = R.as ? 0 : 1; rSave(); rPaint(); }
+function rUiSkill(k) { rSkill(k); rPaint(); }
+function rShowPage(p) {
+  rPage = p; ['play', 'track'].forEach(x => { $('rPg_' + x).classList.toggle('on', x === p); $('rNav_' + x).classList.toggle('on', x === p); });
+  const m = $('rMain'); if (m) m.scrollTop = 0; p === 'track' ? rTrack() : rLists();
+}
+
+/* ---------- หน้าติดตาม ---------- */
+function rRates() {
+  const now = Date.now(); let old = null;
+  for (let k = 0; k < rSamp.length; k++) if (now - rSamp[k].t <= 120000) { old = rSamp[k]; break; }
+  if (!old || now - old.t < 10000) return null;
+  const m = (now - old.t) / 60000; return { gold: (R.tg - old.tg) / m, xp: (R.tx - old.tx) / m, kills: (R.k - old.k) / m };
+}
+function rTrack() {
+  const el = $('rTrack'); if (!el || !R) return;
+  const S = rStats(), rt = rRates(), adv = rAdvice(), en = rEn(R.max), w = rWin(R.max, S), top = $('rMain').scrollTop;
+  const card = (ic, v, l) => `<div class="rk"><i>${ic}</i><b>${v}</b><small>${l}</small></div>`;
+  const gps = rt ? rt.gold / 60 : 0, eta = adv && gps > 0 ? Math.max(0, adv.cost - R.g) / gps : null;
+  const ttk = rEn(R.st).hp / (S.dps * 1.1);
+  let h = `<div class="rkg">${card('⚡', rF(S.cp), 'พลังรบ')}${card('🗺️', R.max, 'ด่านสูงสุด')}${card('☠️', rF(R.k), 'ฆ่าแล้ว (ตัว)')}${card('⏳', rDur(R.pt), 'เวลาที่เล่น')}</div>`;
+  h += `<div class="rsec"><div class="rhd"><b>💰 รายได้ตอนนี้</b><small>${rt ? 'เฉลี่ย 1–2 นาทีล่าสุด' : 'กำลังเก็บข้อมูล...'}</small></div><div class="rkg">${card('🪙', rt ? rF(rt.gold) : '–', 'ทอง/นาที')}${card('✨', rt ? rF(rt.xp) : '–', 'XP/นาที')}${card('⚔️', rF(S.dps), 'ดาเมจ/วิ')}${card('⏱️', ttk < 100 ? ttk.toFixed(1) + ' วิ' : '>100 วิ', 'ต่อศัตรู 1 ตัว')}</div><div class="rln">ได้ทองรวมแล้ว 🪙 ${rF(R.tg)} · XP รวม ${rF(R.tx)} · ดรอปประมาณ ${rt ? rF(rt.kills * .12 * 60) : '–'} ชิ้น/ชม.</div></div>`;
+  h += `<div class="rsec"><div class="rhd"><b>💡 แนะนำอัพเกรดถัดไป</b></div>` + (adv
+    ? `<div class="rc" style="--c:${RR[adv.i.r][1]}">${rIcon(adv.i)}<div><b style="color:${RR[adv.i.r][1]}">${rEsc(adv.i.n)} +${adv.i.lv || 0} → +${(adv.i.lv || 0) + 1}</b><small>พลังรบ +${rF(adv.gain)} · ราคา 🪙 ${rF(adv.cost)} · ${R.g >= adv.cost ? 'พร้อมอัพเลย' : eta == null ? 'รอเก็บทอง' : 'อีกประมาณ ' + rDur(eta)}</small></div><button ${R.g >= adv.cost ? '' : 'disabled'} onclick="rUiEnh(${adv.i.id});rTrack()">อัพเลย</button></div>`
+    : '<div class="rempty">อัพเกรดครบทุกชิ้นแล้ว — รอของใหม่จากบอส</div>') + '</div>';
+  h += `<div class="rsec"><div class="rhd"><b>🧙 พลังของตัวละคร</b></div><div class="rstats"><div><small>ATK / ครั้ง</small><b>${rF(S.atk)}</b></div><div><small>ความเร็ว</small><b>${S.as.toFixed(2)}/วิ</b></div><div><small>คริติคอล</small><b>${(S.crit * 100).toFixed(1)}%</b></div><div><small>ดาเมจคริ</small><b>x${S.cd.toFixed(2)}</b></div><div><small>HP สูงสุด</small><b>${rF(S.hp)}</b></div><div><small>ลดดาเมจ</small><b>${Math.round(S.dr * 100)}%</b></div></div></div>`;
+  h += `<div class="rsec"><div class="rhd"><b>🎯 ประเมินด่านสูงสุด (ด่าน ${R.max}${en.b ? ' · บอส' : ''})</b></div><div class="rln">ฆ่าได้ใน ~${w.ttk < 100 ? w.ttk.toFixed(1) : '>100'} วิ/ตัว · ตัวละครรอดได้ ~${w.live < 600 ? Math.floor(w.live) + ' วิ' : 'นาน'} · <b style="color:${rWinCol(w.level)}">โอกาสผ่าน: ${rWinTxt(w.level)}</b></div></div>`;
+  const bl = []; for (let b = RCFG.bossEvery; b <= R.max + RCFG.bossEvery && bl.length < 60; b += RCFG.bossEvery) bl.push(b);
+  h += `<div class="rsec"><div class="rhd"><b>👑 บอสที่ล้มแล้ว</b><small>รวม ${R.bk} ครั้ง</small></div><div class="rbl">` + bl.reverse().slice(0, 12).map(b => { const bi = b / RCFG.bossEvery - 1, rec = R.bs[b], ok = b <= R.max; return `<div class="rb ${rec ? 'ok' : ''}"><span>${ok ? RBE[bi % RBE.length] : '🔒'}</span><b>${ok ? RBN[bi % RBN.length] : '???'}</b><small>ด่าน ${b}${rec ? ' · ' + rec.n + ' ครั้ง' : ''}</small></div>`; }).join('') + '</div></div>';
+  const tot = R.dc.reduce((a, b) => a + b, 0) || 1;
+  h += `<div class="rsec"><div class="rhd"><b>🎁 ประวัติดรอป</b><small>ทั้งหมด ${R.dc.reduce((a, b) => a + b, 0)} ชิ้น</small></div><div class="rdc">${RR.map((r, k) => `<span style="--c:${r[1]}"><i style="width:${Math.max(R.dc[k] ? 8 : 0, R.dc[k] / tot * 100)}%"></i><b>${r[0]} ${R.dc[k]}</b></span>`).join('')}</div>` +
+    (R.dl.length ? R.dl.slice(0, 12).map(d => `<div class="rlg" style="--c:${RR[d.it.r][1]}">${RI[d.it.t]} <b style="color:${RR[d.it.r][1]}">${RR[d.it.r][0]} ${rEsc(d.it.n)}</b> <small>+${rF(d.it.pw)} · ด่าน ${d.st} · ${rAgo(d.t)}</small></div>`).join('') : '<div class="rempty">ยังไม่มีดรอป</div>') + '</div>';
+  if (R.ho) h += `<div class="rsec"><div class="rhd"><b>🌙 ช่วงที่ไม่อยู่ล่าสุด</b><small>${rAgo(R.ho.t)}</small></div><div class="rln">ไม่อยู่ ${rDur(R.ho.sec)} (ฟาร์มด่าน ${R.ho.stage}) → ฆ่า ${rF(R.ho.kills)} ตัว · 🪙 ${rF(R.ho.gold)} · XP ${rF(R.ho.xp)} · ของ ${R.ho.items} ชิ้น${R.ho.lv ? ' · เลเวล +' + R.ho.lv : ''}</div></div>`;
+  h += `<div class="rsec" style="text-align:center"><button class="rbt s" onclick="rReset()">เริ่มเกมใหม่ทั้งหมด</button></div>`;
+  el.innerHTML = h; $('rMain').scrollTop = top;
+}
+async function rReset() {
+  const r = await Swal.fire({ icon: 'warning', title: 'เริ่มเกมใหม่?', text: 'ความคืบหน้า ของ และทองทั้งหมดจะหายถาวร', showCancelButton: true, confirmButtonText: 'เริ่มใหม่', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#e11d48' });
+  if (!r.isConfirmed) return;
+  try { localStorage.removeItem(RK); } catch (e) {} R = rNew(); rSamp = []; rWave = 0; rSpawn(); rHero = rStats().hp; rSave(); rShowPage('play');
+}
+function rShowOff() {
+  const o = rOffRep; if (!o || !$('rOff')) return; rOffRep = null;
+  const b = o.best ? `<div class="rln">ของที่ดีที่สุดที่เจอ: ${RI[o.best.t]} <b style="color:${RR[o.best.r][1]}">${RR[o.best.r][0]} ${rEsc(o.best.n)}</b> (+${rF(o.best.pw)})</div>` : '';
+  $('rOff').innerHTML = `<div class="rcard"><div style="font-size:2.2rem">🌙</div><b style="font-size:1.05rem">ระหว่างที่ไม่อยู่ ตัวละครสู้ต่อให้</b><div class="rln">ไม่อยู่ ${rDur(o.sec)} · ฟาร์มด่าน ${o.stage}</div><div class="rkg" style="margin:8px 0"><div class="rk"><i>🪙</i><b>${rF(o.gold)}</b><small>ทอง</small></div><div class="rk"><i>☠️</i><b>${rF(o.kills)}</b><small>ฆ่า (ตัว)</small></div><div class="rk"><i>🎁</i><b>${o.items}</b><small>ของ (ชิ้น)</small></div></div>${o.lv ? `<div class="rln">เลเวลอัพ +${o.lv}</div>` : ''}${b}<button class="rbt" style="margin-top:10px;width:100%" onclick="$('rOff').style.display='none'">รับรางวัล</button></div>`;
+  $('rOff').style.display = 'flex'; rLists();
+}
+
+/* ---------- เปิด/ปิดเกม ---------- */
 function rpgToggle(force) {
-  const open = force === undefined ? !rOpen : force; rOpen = open; $('rpgPanel').classList.toggle('open', open); document.body.classList.toggle('gopen', open);
-  if (open) { rPaint(); rBody(); }
+  const open = force === undefined ? !rOpen : force; rOpen = open; if (!$('rpgPanel')) return;
+  $('rpgPanel').classList.toggle('open', open); document.body.classList.toggle('rpg-on', open);
+  if (open) { rShowPage(rPage); if (rOffRep) rShowOff(); }
+}
+function rTick() {
+  if (!R) return; const now = rNow(); let dt = (now - (rLast || now)) / 1000; rLast = now;
+  if (dt > 90) {   // ไม่ได้อยู่หน้านี้นาน -> คิดเป็นรางวัลออฟไลน์
+    const rep = rOffline(dt); if (rep) { rOffRep = rep; rSpawn(); rHero = rStats().hp; rSave(); if (rOpen) rShowOff(); }
+    return;
+  }
+  while (dt > 1e-6) { const d = Math.min(dt, 1); rStep(d); dt -= d; }
+  if (Date.now() - rSampT >= 5000) { rSampT = Date.now(); rSamp.push({ t: rSampT, tg: R.tg, tx: R.tx, k: R.k }); if (rSamp.length > 40) rSamp.shift(); }
+  if (rOpen) { rPaint(); if (rPage === 'track' && ++rTrackN % 8 === 0) rTrack(); if (rPage === 'play' && ++rListT % 20 === 0) rBadge(); }
 }
 function rpgBuild() {
-  try { const s = JSON.parse(localStorage.getItem(RK)); R = s && s.inv ? s : rNew(); } catch (e) { R = rNew(); }
+  rInit();
   const p = document.createElement('aside'); p.id = 'rpgPanel'; p.className = 'gpanel no-print';
-  p.innerHTML = `<div class="gframe rpg"><div class="gbar"><b>⚔️ นักล่าไอเดิล</b><span class="gbs">🪙 <i id="rG">0</i></span><button type="button" class="gx" id="rClose" aria-label="ปิด">✕</button></div>
-    <div class="rsc" id="rSc"><div class="rtop"><button onclick="event.stopPropagation();rGo(R.st-1)">◀</button><span id="rSt"></span><button onclick="event.stopPropagation();rGo(R.st+1)">▶</button></div><div class="rbar"><i id="rHp"></i></div><div class="rhero"><span id="rHr">🧙‍♂️</span><span id="rWp"></span></div><div class="ren" id="rEn"></div><div class="rhb"><i id="rHH"></i></div></div>
-    <div style="text-align:center;padding:2px 12px;opacity:.9" id="rNm"></div><div style="text-align:center;font-size:.72rem;opacity:.8" id="rLv"></div><div style="text-align:center;font-size:.7rem;opacity:.7;min-height:1.2em" id="rLog">แตะที่ฉากเพื่อโจมตี</div>
-    <div class="rsk">${RSK.map((s, k) => `<button id="rS${k}" onclick="rSkill(${k})">${s[0]}<small>${s[1]}</small></button>`).join('')}</div>
-    <div class="rtabs" id="rTabs"><button onclick="rTabI=0;rBody()">ต่อสู้</button><button onclick="rTabI=1;rBody()">ฮีโร่/ถุง</button><button onclick="rTabI=2;rBody()">อัพเกรด</button></div><div class="rbody" id="rBody"></div></div>`;
+  p.innerHTML = `<div class="rfs">
+    <div class="rtopbar"><b>⚔️ นักล่าไอเดิล</b><span class="rpill" title="พลังรบ">⚡ <i id="rCpH">0</i></span><span class="rpill" title="ทอง">🪙 <i id="rGold">0</i></span><button type="button" class="gx" id="rClose" aria-label="ปิด">✕</button></div>
+    <div class="rmain" id="rMain">
+      <section class="rpage on" id="rPg_play"><div class="rwrap">
+        <div class="rcol-l"><div class="rstick">
+          <div class="rsc" id="rSc"><div class="rtop"><button onclick="rUiGo(R.st-1)" aria-label="ด่านก่อนหน้า">◀</button><span><b id="rSt"></b><br><small id="rWv"></small></span><button onclick="rUiGo(R.st+1)" aria-label="ด่านถัดไป">▶</button></div>
+            <div class="rbar"><i id="rHp"></i></div><div class="rtimer"><i id="rTb"></i></div><div class="rhero"><span id="rHr">🧙‍♂️</span></div><div class="ren" id="rEn"></div><div class="rhb"><i id="rHH"></i></div></div>
+          <div class="rtx" id="rNm"></div><div class="rtx s" id="rLv"></div><div class="rtx xs" id="rLog">ตัวละครต่อสู้เอง — จัดชุดและอัพเกรดของให้แรงขึ้น</div>
+          <div class="rsk">${RSK.map((s, k) => `<button id="rS${k}" onclick="rUiSkill(${k})">${s[0]}<small id="rSn${k}">${s[1]}</small></button>`).join('')}</div>
+          <div class="rtg"><button id="rAutoSk" onclick="rUiAutoSk()"></button><button id="rAutoGo" onclick="rUiAuto()"></button></div>
+        </div></div>
+        <div class="rcol-r"><div class="rsec"><div class="rhd"><b>🧙 ชุดที่สวมใส่</b><small>อัพได้เฉพาะของ</small></div><div id="rEq"></div></div><div class="rsec" id="rBag"></div><div class="rsec" id="rBossL"></div></div>
+      </div></section>
+      <section class="rpage" id="rPg_track"><div class="rtrk"><div id="rTrack"></div></div></section>
+    </div>
+    <nav class="rnav"><button id="rNav_play" class="on" onclick="rShowPage('play')">🎮<span>เล่น</span><i id="rNavDot" class="rdot" style="display:none"></i></button><button id="rNav_track" onclick="rShowPage('track')">📊<span>ติดตาม</span></button></nav>
+    <div class="roff" id="rOff" style="display:none"></div></div>`;
   document.body.appendChild(p);
-  const t = document.createElement('button'); t.type = 'button'; t.id = 'rTab'; t.className = 'gtab no-print'; t.title = 'เกมนักล่า'; t.setAttribute('aria-label', 'เปิด/ปิดเกมนักล่า'); t.textContent = '⚔️'; document.body.appendChild(t);
-  t.onclick = () => rpgToggle(); $('rClose').onclick = () => rpgToggle(false); $('rSc').onclick = rTap;
-  const off = Math.min(4 * 3600, (Date.now() - (R.t || Date.now())) / 1000), S = rStats();
-  if (off > 60 && S.dps > 0) { const g = Math.floor(off * S.dps / rMax(R.st) * rGold(R.st) * .4); R.g += g; rToast('ระหว่างไม่อยู่ได้ 🪙 ' + rF(g)); }
-  rSpawn(); rHero = S.hp; rLast = Date.now(); rPaint(); rBody(); setInterval(rTick, 250); setInterval(rSave, 15000);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) rSave(); else rLast = Date.now(); });
+  const t = document.createElement('button'); t.type = 'button'; t.id = 'rTab'; t.className = 'gtab no-print'; t.title = 'เกมนักล่า'; t.setAttribute('aria-label', 'เปิดเกมนักล่า'); t.textContent = '⚔️'; document.body.appendChild(t);
+  t.onclick = () => rpgToggle(); $('rClose').onclick = () => rpgToggle(false);
+  rFx = (d, c) => { if (rOpen) rDmgNum(d, c); };
+  rMsg = m => { const e = $('rLog'); if (e && rOpen) e.textContent = m; };
+  rEvt = (k) => { if (!rOpen) return; if (k === 'kill') { const E = $('rEn'); if (E) { E.classList.remove('spawn'); void E.offsetWidth; E.classList.add('spawn'); } } else if (k === 'drop' || k === 'stage' || k === 'boss' || k === 'fail') rLists(); };
+  const off = (Date.now() - (R.t || Date.now())) / 1000, rep = rOffline(off);   // รางวัลระหว่างที่ปิดหน้าเว็บ
+  if (rep) { rOffRep = rep; rSpawn(); rHero = rStats().hp; }
+  if (R.refund) { const rf = R.refund; delete R.refund; setTimeout(() => { try { Swal.fire({ icon: 'info', title: 'อัปเดตเกมเป็นระบบไอเดิล', html: 'ตอนนี้อัพเกรดได้เฉพาะ <b>ของ</b> (อาวุธ/เกราะ/เครื่องราง)<br>คืนทองที่เคยฝึกสถานะให้ <b>🪙 ' + rF(rf) + '</b>', confirmButtonText: 'เข้าใจแล้ว' }); } catch (e) {} }, 800); }
+  rLast = rNow(); rSave(); setInterval(rTick, 250); setInterval(rSave, 10000);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) rSave(); });
+  window.addEventListener('pagehide', rSave);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && rOpen && !document.querySelector('.swal2-container')) rpgToggle(false); });
 }
 rpgBuild();
 
