@@ -1348,7 +1348,7 @@ function rStats(eq, lv) {
   const L = lv - 1, w = rEff(eq.w), a = rEff(eq.a) + .3 * rEff(eq.h) + .3 * rEff(eq.s), c = rEff(eq.c);
   const atk = 5 + L * RCFG.lvAtk + w + .5 * rEff(eq.h) + .4 * rEff(eq.s), raw = .05 + c / 800, crit = Math.min(1, raw), cd = 2 + c / 300 + Math.max(0, raw - 1), hp = 60 + L * 12 + a * 6, dr = Math.min(.6, a / (a + 120));
   const spd = RCFG.as * (1 + rGsp(rEff(eq.g))), kraw = Math.log(1 + rEff(eq.k) / 300) * .25, cdr = Math.min(.9, kraw), skx = Math.max(0, kraw - .9), dps = atk * spd * (1 + crit * (cd - 1));
-  return { atk, as: spd, cdr, skx, kraw, crit, raw, cd, dps, hp, dr, ehp: hp / (1 - dr), cp: Math.round(Math.sqrt(dps * hp / (1 - dr))) };
+  return { atk, as: spd, cdr, skx, kraw, crit, raw, cd, dps, hp, dr, ehp: hp / (1 - dr), cp: Math.round(Math.sqrt(dps * hp / (1 - dr)) * (1 + kraw * .3)) };
 }
 // พลังรบถ้าสวมของชุดนี้
 const rCpWith = (t, item) => rStats(Object.assign({}, R.eq, { [t]: item })).cp;
