@@ -1347,8 +1347,8 @@ function rStats(eq, lv) {
   eq = eq || R.eq; lv = lv || R.lv;
   const L = lv - 1, w = rEff(eq.w), a = rEff(eq.a) + .3 * rEff(eq.h) + .3 * rEff(eq.s), c = rEff(eq.c);
   const atk = 5 + L * RCFG.lvAtk + w + .5 * rEff(eq.h) + .4 * rEff(eq.s), raw = .05 + c / 800, crit = Math.min(1, raw), cd = 2 + c / 300 + Math.max(0, raw - 1), hp = 60 + L * 12 + a * 6, dr = Math.min(.6, a / (a + 120));
-  const spd = RCFG.as * (1 + rEff(eq.g) / (rEff(eq.g) + 400)), cdr = Math.min(.6, rEff(eq.k) / (rEff(eq.k) + 300)), dps = atk * spd * (1 + crit * (cd - 1));
-  return { atk, as: spd, cdr, crit, raw, cd, dps, hp, dr, ehp: hp / (1 - dr), cp: Math.round(Math.sqrt(dps * hp / (1 - dr))) };
+  const spd = RCFG.as * (1 + rGsp(rEff(eq.g))), kraw = Math.log(1 + rEff(eq.k) / 300) * .25, cdr = Math.min(.9, kraw), skx = Math.max(0, kraw - .9), dps = atk * spd * (1 + crit * (cd - 1));
+  return { atk, as: spd, cdr, skx, kraw, crit, raw, cd, dps, hp, dr, ehp: hp / (1 - dr), cp: Math.round(Math.sqrt(dps * hp / (1 - dr))) };
 }
 // พลังรบถ้าสวมของชุดนี้
 const rCpWith = (t, item) => rStats(Object.assign({}, R.eq, { [t]: item })).cp;
@@ -1399,12 +1399,13 @@ function rKill() {
 }
 // เดินเวลาการต่อสู้ไป dt วินาที (ฮีโร่โจมตีและใช้สกิลเอง = ไอเดิล)
 function rStep(dt) {
-  if (!R) return; const now = rNow(), S = rStats(), e = rEn(R.st), rg = rRage > now ? 1.8 : 1;
+  if (!R) return; const now = rNow(), S = rStats(), e = rEn(R.st), rg = rRage > now ? rRageM : 1;
   R.pt += dt;
   if (R.as) rAutoSk(e, S, now);
-  const d = S.dps * rg * dt; rFx && rFx(d, Math.random() < S.crit); rHp -= d;
+  rAcc += dt * S.as; const hn = Math.floor(rAcc);
+  if (hn > 0) { rAcc -= hn; const n = Math.min(hn, 6), kk = hn / n; for (let i = 0; i < n; i++) { const c = Math.random() < S.crit, x = S.atk * rg * (c ? S.cd : 1) * kk; rFx && rFx(x, c); rHp -= x; if (rHp <= 0) break; } }
   if (rHp <= 0) rKill();
-  rHero = Math.min(S.hp, rHero - e.atk * (rSlow > now ? .5 : 1) * (1 - (rGuard > now ? Math.max(S.dr, .6) : S.dr)) * dt + S.hp * RCFG.hpRegen * dt);
+  rHero = Math.min(S.hp, rHero - e.atk * (rSlow > now ? .5 : 1) * (1 - (rGuard > now ? Math.max(S.dr, rGuardV) : S.dr)) * dt + S.hp * RCFG.hpRegen * dt);
   if (rHero <= 0) return rFail('💀 พ่ายแพ้ ถอยไปด่าน ' + Math.max(1, R.st - 1));
   if (rTm > 0 && (rTm -= dt) <= 0) return rFail('⏰ หมดเวลาบอส ถอยไปฟาร์มก่อน');
 }
@@ -1444,7 +1445,7 @@ const rPct = (a, b) => (b > 0 ? (a / b - 1) * 100 : 0);
 const rWinTxt = l => ['เสี่ยงมาก', 'ยาก', 'พอไหว', 'สบาย'][l], rWinCol = l => ['#f43f5e', '#fb923c', '#facc15', '#4ade80'][l];
 
 // สรุปคุณสมบัติของของชิ้นหนึ่ง
-function rEffTxt(i) { const e = rEff(i); if (i.t === 'w') return 'ATK +' + rF(e); if (i.t === 'g') return 'ความเร็วตี +' + (e / (e + 400) * 100).toFixed(1) + '%'; if (i.t === 'k') return 'ลดคูลดาวน์สกิล ' + (Math.min(.6, e / (e + 300)) * 100).toFixed(1) + '%'; if (i.t === 'c') return 'คริ +' + (e / 8).toFixed(1) + '% · ดาเมจคริ +' + (e / 300).toFixed(2) + 'x'; const x = e * RW[i.t]; return (RA[i.t] ? 'ATK +' + rF(e * RA[i.t]) + ' · ' : '') + 'HP +' + rF(x * 6) + ' · ลดดาเมจ ~' + Math.round(Math.min(.6, x / (x + 120)) * 100) + '%'; }
+function rEffTxt(i) { const e = rEff(i); if (i.t === 'w') return 'ATK +' + rF(e); if (i.t === 'g') return 'ความเร็วตี +' + (rGsp(e) * 100).toFixed(1) + '%'; if (i.t === 'k') return 'ลดคูลดาวน์ ' + (Math.min(.9, Math.log(1 + e / 300) * .25) * 100).toFixed(1) + '%' + (Math.log(1 + e / 300) * .25 > .9 ? ' · ส่วนเกิน +' + ((Math.log(1 + e / 300) * .25 - .9) * 100).toFixed(1) + '% ดาเมจสกิล' : ''); if (i.t === 'c') return 'คริ +' + (e / 8).toFixed(1) + '% · ดาเมจคริ +' + (e / 300).toFixed(2) + 'x'; const x = e * RW[i.t]; return (RA[i.t] ? 'ATK +' + rF(e * RA[i.t]) + ' · ' : '') + 'HP +' + rF(x * 6) + ' · ลดดาเมจ ~' + Math.round(Math.min(.6, x / (x + 120)) * 100) + '%'; }
 function rIcon(i) { return `<span class="ri-ic" style="--c:${RR[i.r][1]}">${RI[i.t]}</span>`; }
 
 /* ---------- ส่วนที่ขยับทุกจังหวะ (ไม่วาดรายการใหม่ เพื่อไม่ให้ปุ่มที่กำลังกดหาย) ---------- */
@@ -1546,7 +1547,7 @@ function rTrack() {
   h += `<div class="rsec"><div class="rhd"><b>💡 แนะนำอัพเกรดถัดไป</b></div>` + (adv
     ? `<div class="rc" style="--c:${RR[adv.i.r][1]}">${rIcon(adv.i)}<div><b style="color:${RR[adv.i.r][1]}">${rEsc(adv.i.n)} +${adv.i.lv || 0} → +${(adv.i.lv || 0) + 1}</b><small>พลังรบ +${rF(adv.gain)} · ราคา 🪙 ${rF(adv.cost)} · ${R.g >= adv.cost ? 'พร้อมอัพเลย' : eta == null ? 'รอเก็บทอง' : 'อีกประมาณ ' + rDur(eta)}</small></div><button ${R.g >= adv.cost ? '' : 'disabled'} onclick="rUiEnh(${adv.i.id});rTrack()">อัพเลย</button></div>`
     : '<div class="rempty">อัพเกรดครบทุกชิ้นแล้ว — รอของใหม่จากบอส</div>') + '</div>';
-  h += `<div class="rsec"><div class="rhd"><b>🧙 พลังของตัวละคร</b></div><div class="rstats"><div><small>ATK / ครั้ง</small><b>${rF(S.atk)}</b></div><div><small>ความเร็ว</small><b>${S.as.toFixed(2)}/วิ</b></div><div><small>ลดคูลดาวน์</small><b>${Math.round(S.cdr * 100)}%</b></div><div><small>คริติคอล</small><b>${(Math.min(S.raw, 1) * 100).toFixed(1)}%${S.raw > 1 ? ' (+' + ((S.raw - 1) * 100).toFixed(0) + '% → ดาเมจคริ)' : ''}</b></div><div><small>ดาเมจคริ</small><b>x${S.cd.toFixed(2)}</b></div><div><small>HP สูงสุด</small><b>${rF(S.hp)}</b></div><div><small>ลดดาเมจ</small><b>${Math.round(S.dr * 100)}%</b></div></div></div>`;
+  h += `<div class="rsec"><div class="rhd"><b>🧙 พลังของตัวละคร</b></div><div class="rstats"><div><small>ATK / ครั้ง</small><b>${rF(S.atk)}</b></div><div><small>ความเร็ว</small><b>${S.as.toFixed(2)}/วิ</b></div><div><small>ลดคูลดาวน์</small><b>${Math.round(S.cdr * 100)}%${S.skx > 0 ? ' (+' + Math.round(S.skx * 100) + '% ดาเมจสกิล)' : ''}</b></div><div><small>คริติคอล</small><b>${(Math.min(S.raw, 1) * 100).toFixed(1)}%${S.raw > 1 ? ' (+' + ((S.raw - 1) * 100).toFixed(0) + '% → ดาเมจคริ)' : ''}</b></div><div><small>ดาเมจคริ</small><b>x${S.cd.toFixed(2)}</b></div><div><small>HP สูงสุด</small><b>${rF(S.hp)}</b></div><div><small>ลดดาเมจ</small><b>${Math.round(S.dr * 100)}%</b></div></div></div>`;
   h += `<div class="rsec"><div class="rhd"><b>🎯 ประเมินด่านสูงสุด (ด่าน ${R.max}${en.b ? ' · บอส' : ''})</b></div><div class="rln">ฆ่าได้ใน ~${w.ttk < 100 ? w.ttk.toFixed(1) : '>100'} วิ/ตัว · ตัวละครรอดได้ ~${w.live < 600 ? Math.floor(w.live) + ' วิ' : 'นาน'} · <b style="color:${rWinCol(w.level)}">โอกาสผ่าน: ${rWinTxt(w.level)}</b></div></div>`;
   const bl = []; for (let b = RCFG.bossEvery; b <= R.max + RCFG.bossEvery && bl.length < 60; b += RCFG.bossEvery) bl.push(b);
   h += `<div class="rsec"><div class="rhd"><b>👑 บอสที่ล้มแล้ว</b><small>รวม ${R.bk} ครั้ง</small></div><div class="rbl">` + bl.reverse().slice(0, 12).map(b => { const bi = b / RCFG.bossEvery - 1, rec = R.bs[b], ok = b <= R.max; return `<div class="rb ${rec ? 'ok' : ''}"><span>${ok ? RBE[bi % RBE.length] : '🔒'}</span><b>${ok ? RBN[bi % RBN.length] : '???'}</b><small>ด่าน ${b}${rec ? ' · ' + rec.n + ' ครั้ง' : ''}</small></div>`; }).join('') + '</div></div>';
@@ -1599,7 +1600,7 @@ const RSD = {
   whirl: { i: '🌪️', n: 'ฟันหมุนวน', cd: 20, t: 'a', m: 18, d: 'หมุนฟันรอบตัว ดาเมจ x18', rc: { b: 10, s: 6, c: 1, g: 1500 } },
   dragon: { i: '🐉', n: 'พิฆาตมังกร', cd: 45, t: 'a', m: 45, d: 'ท่าไม้ตาย ดาเมจ x45', rc: { b: 20, s: 14, c: 4, g: 8000 } }
 };
-let rSlow = 0, rGuard = 0;
+let rSlow = 0, rGuard = 0, rAcc = 0, rRageM = 1.8, rGuardV = .6;
 const rcOf = id => RSD[id].rc || { b: 4, s: 2, c: 0, g: 300 };
 const rCost = (id, lv) => { const c = rcOf(id); return !lv ? c : { b: Math.ceil(c.b * lv * .6), s: Math.ceil(c.s * lv * .6), c: Math.ceil(c.c * lv * .5), g: Math.ceil(c.g * lv) }; };
 const rCostTxt = c => '🦴' + c.b + ' 🔶' + c.s + (c.c ? ' 💎' + c.c : '') + ' 🪙' + rF(c.g);
@@ -1625,7 +1626,7 @@ function rSkRows() {
   let h = '';
   Object.keys(RSD).forEach(id => {
     const d = RSD[id], lv = R.sk.l[id], c = rCost(id, lv || 0), sc = `${c.b},${c.s},${c.c},${c.g}`;
-    if (lv) h += `<div class="rc" style="--c:#a78bfa"><span class="ri-ic">${d.i}</span><div><b>${d.n} Lv.${lv}</b><small>${d.d} · คูลดาวน์ ${d.cd} วิ</small></div>${false ? '<span class="rmax">MAX</span>' : `<button class="s" data-sc="${sc}" ${rCan(c) ? '' : 'disabled'} onclick="rUiSkUp('${id}')">⬆ ${rCostTxt(c)}</button>`}</div>`;
+    if (lv) h += `<div class="rc" style="--c:#a78bfa"><span class="ri-ic">${d.i}</span><div><b>${d.n} Lv.${lv}</b><small>${rSkTxt(d, lv)} · คูลดาวน์ ${d.cd} วิ</small></div>${false ? '<span class="rmax">MAX</span>' : `<button class="s" data-sc="${sc}" ${rCan(c) ? '' : 'disabled'} onclick="rUiSkUp('${id}')">⬆ ${rCostTxt(c)}</button>`}</div>`;
     else h += `<div class="rc" style="--c:#475569"><span class="ri-ic">🔒</span><div><b>${d.n}</b><small>${d.d}</small></div><button data-sc="${sc}" ${rCan(c) ? '' : 'disabled'} onclick="rUiCraft('${id}')">🔨 ${rCostTxt(c)}</button></div>`;
   });
   return h;
@@ -1633,12 +1634,14 @@ function rSkRows() {
 function rUiSlot(k, id) { const j = R.sk.e.indexOf(id); if (j >= 0 && j !== k) R.sk.e[j] = R.sk.e[k]; R.sk.e[k] = id; rSyncSk(); rCd[k] = 0; rAfter(); }
 function rUiCraft(id) { const c = rCost(id, 0); if (R.sk.l[id] || !rCan(c)) return; R.mt.b -= c.b; R.mt.s -= c.s; R.mt.c -= c.c; R.g -= c.g; R.sk.l[id] = 1; rBanner('🔨 คราฟสำเร็จ ' + RSD[id].i + RSD[id].n); rAfter(); }
 function rUiSkUp(id) { const lv = R.sk.l[id], c = rCost(id, lv); if (!lv || !rCan(c)) return; R.mt.b -= c.b; R.mt.s -= c.s; R.mt.c -= c.c; R.g -= c.g; R.sk.l[id]++; rBanner(RSD[id].n + ' Lv.' + R.sk.l[id]); rAfter(); }
+function rGsp(e) { return Math.pow(1 + e / 200, .45) - 1; }
+function rSkTxt(d, lv) { const pm = 1 + .5 * (lv - 1); return d.t === 'a' || d.t === 'f' ? 'ดาเมจ ×' + (d.m * pm).toFixed(1) : d.t === 'r' ? 'ดาเมจ ×' + (1.8 + .15 * (lv - 1)).toFixed(2) : d.t === 'g' ? 'ลดดาเมจ ' + Math.round(Math.min(.95, .6 + .03 * (lv - 1)) * 100) + '%' : 'ฟื้น HP ' + Math.round(Math.min(1, .5 + .05 * (lv - 1)) * 100) + '%'; }
 function rSkill(k) {
-  const now = rNow(); if (rCd[k] > now) return false; const id = R.sk.e[k], d = RSD[id], lv = R.sk.l[id] || 1, pm = 1 + .3 * (lv - 1);
+  const now = rNow(); if (rCd[k] > now) return false; const id = R.sk.e[k], d = RSD[id], lv = R.sk.l[id] || 1, pm = 1 + .5 * (lv - 1);
   const S = rStats(); rCd[k] = now + d.cd * 1000 * (1 - S.cdr);
-  if (d.t === 'a' || d.t === 'f') { const x = S.atk * d.m * pm * S.cd; rFx && rFx(x, 2); rHp -= x; if (d.t === 'f') { rSlow = now + 10000; if (rMsg) rMsg('❄️ ศัตรูโจมตีช้าลง'); } }
-  else if (d.t === 'r') { rRage = now + 8000; if (rMsg) rMsg('🔥 คลั่ง! ดาเมจ x1.8 นาน 8 วิ'); }
-  else if (d.t === 'g') { rGuard = now + 8000; if (rMsg) rMsg('🛡️ ป้อมเหล็ก! ลดดาเมจที่รับ'); }
+  if (d.t === 'a' || d.t === 'f') { const x = S.atk * d.m * pm * S.cd * (1 + S.skx); rFx && rFx(x, 2); rHp -= x; if (d.t === 'f') { rSlow = now + 10000; if (rMsg) rMsg('❄️ ศัตรูโจมตีช้าลง'); } }
+  else if (d.t === 'r') { rRage = now + 8000; rRageM = 1.8 + .15 * (lv - 1); if (rMsg) rMsg('🔥 คลั่ง! ดาเมจ x' + rRageM.toFixed(2) + ' นาน 8 วิ'); }
+  else if (d.t === 'g') { rGuard = now + 8000; rGuardV = Math.min(.95, .6 + .03 * (lv - 1)); if (rMsg) rMsg('🛡️ ป้อมเหล็ก! ลดดาเมจที่รับ'); }
   else { rHero = Math.min(S.hp, rHero + S.hp * (.5 + .05 * (lv - 1))); if (rMsg) rMsg('💚 ฟื้นฟู HP'); }
   kSkill(id);
   if ((d.t === 'a' || d.t === 'f') && rHp <= 0) rKill();
@@ -1916,7 +1919,7 @@ function kUpdate(dt) {
   kMonUpd(m, dt, mv);
   K.dead = K.dead.filter(o => { o.dt += dt; const p = o.dt / .9; if (o.killed) { o.g.rotation.z = -1.5 * Math.min(1, p * 2.2); o.g.position.y = -Math.max(0, p - .5) * 1.6; } else o.g.position.x += dt * 9; if (p >= 1) { K.sc.remove(o.g); o.g.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); return false; } return true; });
   // สถานะอัศวิน
-  H.t += dt; const kAtk = () => { const a = KATK[K.combo++ % 3]; kStart('atk', a.d, { a }); H.q = 0; };
+  H.t += dt; const kAtk = () => { const a = KATK[K.combo++ % 3]; kStart('atk', a.d / Math.max(1, Math.min(6, rStats().as / RCFG.as)), { a }); H.q = 0; };
   if (H.st === 'idle') { if (H.q && !sh && !mv) kAtk(); }
   else if (H.st === 'atk') { const p = H.t / H.dur; if (!H.imp && p >= H.a.i) { H.imp = 1; kImpact(H.a, H.crit); } if (p >= 1) { if (H.q && !sh) kAtk(); else kStart('idle'); } }
   else if (H.st === 'skill') { const p = H.t / H.dur; if (!H.imp && p >= H.a.i) { H.imp = 1; kSkImp(H.id); } if (p >= 1) kStart('idle'); }
