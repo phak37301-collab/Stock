@@ -218,30 +218,15 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   @keyframes catbob{50%{transform:translateY(-2px)}}
   @keyframes cattail{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
   @keyframes catjump{0%,100%{transform:translateY(0)}45%{transform:translateY(-16px)}}
-  /* แมวหลังตัวอักษร + เกมจรวด */
+  /* แมวหลังตัวอักษร + แผงเกม */
   .hdr>*:not(#catRow){position:relative;z-index:1}
   #catRow{position:absolute;left:0;right:0;bottom:0;height:0;pointer-events:none;z-index:0}
   .gpanel{width:min(340px,86vw);position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .28s ease}
   .gpanel.open{transform:none}
   .gtab{position:absolute;left:100%;top:calc(42% + 18px);width:30px;height:42px;border-radius:0 14px 14px 0;background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;font-size:1.05rem;display:grid;place-items:center;box-shadow:6px 6px 18px rgba(79,70,229,.35);cursor:pointer}
-  .gframe{height:100%;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 115%,#4338ca 0%,#1e1b4b 45%,#0b1020 100%);border-radius:0 26px 26px 0;overflow:hidden;box-shadow:10px 0 36px rgba(30,27,75,.4);border-right:1px solid rgba(255,255,255,.14);user-select:none;-webkit-user-select:none}
-  .gbar{display:flex;align-items:center;gap:.6rem;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 6px;color:#fff;font-size:.95rem}
-  .gbs{margin-left:auto;font-size:.7rem;opacity:.75}
   .gx{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:.85rem;cursor:pointer}.gx:hover{background:rgba(255,255,255,.28)}
-  .ghud{display:flex;align-items:center;gap:1rem;padding:0 14px 8px;color:#fff;font-size:.72rem}
-  .gs b{font-size:1.2rem;font-weight:700;margin-left:.2rem}
-  .gl{margin-left:auto;font-size:.95rem;letter-spacing:2px}
-  .gcvw{position:relative;flex:1;min-height:0;touch-action:none;cursor:crosshair}
-  .gcvw canvas{display:block;width:100%;height:100%;outline:none}
-  .gmsg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
-  .gcard{background:rgba(15,23,42,.72);backdrop-filter:blur(6px);color:#fff;text-align:center;border-radius:22px;padding:1.2rem 1.4rem;border:1px solid rgba(255,255,255,.18);max-width:88%}
-  .gbig{font-size:1.4rem;font-weight:700;margin-bottom:.3rem}.gcard p{font-size:.85rem;line-height:1.6;margin:.3rem 0}
-  .gtap{color:#fde047;font-weight:600;animation:gblink 1.2s ease-in-out infinite}
-  @keyframes gblink{50%{opacity:.35}}
-  @media(min-width:1024px){.shell{transition:margin-left .28s ease}body.gopen .shell{margin-left:340px}}
   @media(max-width:639px){.gpanel{bottom:calc(62px + env(safe-area-inset-bottom,0px))}}
   .mtab{position:fixed;left:0;top:calc(42% - 64px);z-index:51;width:38px;height:56px;border-radius:0 16px 16px 0;background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;font-size:1.5rem;line-height:1;display:grid;place-items:center;box-shadow:6px 6px 18px rgba(79,70,229,.35);cursor:pointer;transition:left .28s ease}
-  body.gopen .mtab{left:min(340px,86vw)}
   /* ---------- ปรับหัวเว็บ/ปุ่มรีเฟรช/แท็บข้างบนมือถือ ---------- */
   .icon-btn{flex:none;background:#fff;color:#6366f1;border:1.5px solid #ddd6fe;box-shadow:0 4px 12px rgba(99,102,241,.18);font-size:1rem}
   .icon-btn:hover{background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;border-color:transparent}
@@ -355,7 +340,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   .rq-org{font-size:.65rem;color:#94a3b8}
   .item-box.off .item-name{opacity:.45;text-decoration:line-through}
 
-  /* ===== มือถือ: หัวเว็บกระชับ + ปุ่มเมนู/เกมจรวดย้ายมาซ้ายล่าง ===== */
+  /* ===== มือถือ: หัวเว็บกระชับ + ปุ่มเมนู/เกมย้ายมาซ้ายล่าง ===== */
   @media(max-width:639px){
     .hdr.hdr{padding:8px 12px 10px;gap:8px 6px;border-radius:0 0 20px 20px;box-shadow:0 6px 16px rgba(99,102,241,.12)}
     .hdr .t-row{min-height:40px;padding-right:90px;gap:8px}
@@ -372,10 +357,9 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
   }
   @media(max-width:380px){.lowchip .lt{display:none}}
 
-  /* ===== ปุ่มเมนู ☰ + จรวด 🚀: อยู่ติดกัน เป็นปุ่มลอยแยกจากแผงเกม กดเปิด/ปิดได้ทั้งคอมและมือถือ ===== */
+  /* ===== ปุ่มเมนู ☰ + ปุ่มเกม ⚔️: อยู่ติดกัน เป็นปุ่มลอยแยกจากแผงเกม กดเปิด/ปิดได้ทั้งคอมและมือถือ ===== */
   .mtab{top:calc(42% - 40px)}
   .gtab{position:fixed;left:0;top:calc(42% + 22px);z-index:51;width:38px;height:44px;border-radius:0 16px 16px 0;font-size:1.2rem;transition:left .28s ease}
-  body.gopen .gtab{left:min(340px,86vw)}
   body.no-gtab .gtab{display:none!important}
   :root{--fb:calc(18px + env(safe-area-inset-bottom,0px))}
   @media(max-width:639px){:root{--fb:calc(74px + env(safe-area-inset-bottom,0px))}}
@@ -383,7 +367,6 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     .mtab,.gtab{top:auto;left:12px;width:46px;height:46px;border-radius:50%;box-shadow:0 8px 20px rgba(79,70,229,.42)}
     .mtab{bottom:var(--fb);font-size:1.3rem}
     .gtab{bottom:calc(var(--fb) + 56px);font-size:1.25rem}
-    body.gopen .mtab,body.gopen .gtab{left:calc(min(340px,86vw) + 12px)}
   }
   /* มือถือแนวนอน (จอเตี้ย): หัวเว็บไม่ลอยติดจอ + กระชับ เพื่อให้เห็นรายการมากขึ้น */
   @media(max-height:500px){
@@ -725,7 +708,6 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <button class="nav" onclick="closeMenu();openSettings()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
     <button class="nav" onclick="closeMenu();openJob()"><i class="fa-solid fa-book"></i><span>ใบงานเข้าเล่ม</span></button>
     <button class="nav" onclick="closeMenu();openRet()"><i class="fa-solid fa-rotate-left"></i><span>คืนเบิก</span></button>
-    <button class="nav" onclick="closeMenu();openJobCfg()"><i class="fa-solid fa-screwdriver-wrench"></i><span>ตั้งค่าสูตรเข้าเล่ม</span></button>
     <button class="nav" onclick="closeMenu();rpgToggle()"><i class="fa-solid fa-khanda"></i><span>เกมนักล่า (เต็มจอ)</span></button>
     <button class="nav" onclick="toggleRocketBtn()"><i class="fa-solid fa-eye-slash"></i><span id="rktLbl">ปุ่มเกม: เปิด</span></button>
     <button class="nav" onclick="toggleCat()"><i class="fa-solid fa-cat"></i><span id="catLbl">แมววิ่ง: เปิด</span></button>
@@ -757,6 +739,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <div class="flex flex-wrap items-center justify-center gap-3">
       <button onclick="openTx('out')" class="g-out text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-box-open mr-2"></i>ขอเบิกของ</button>
       <button onclick="openRet()" class="g-ret text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-rotate-left mr-2"></i>ขอคืนของ</button></div>
+    <div><button type="button" onclick="openJob()" class="chip !px-5 !py-2.5 !text-sm mb-2"><i class="fa-solid fa-book mr-2"></i>ขอเบิกใบงานเข้าเล่ม</button></div>
     <div><button type="button" onclick="openMyHist()" class="chip !px-5 !py-2.5 !text-sm"><i class="fa-solid fa-clock-rotate-left mr-2"></i>ดูประวัติเบิก-คืนของฉัน</button></div>
     <div class="text-left pt-4 border-t border-slate-100"><div class="flex items-center justify-between"><h3 class="text-sm font-semibold">คำขอของฉัน</h3><button onclick="paintMyReqs(true)" class="text-xs text-indigo-600 font-medium"><i id="myReqIcon" class="fa-solid fa-arrows-rotate mr-1"></i>เช็กสถานะ</button></div>
       <div id="myReqs" class="mt-2 space-y-2 text-sm text-slate-400">ยังไม่มีคำขอ</div></div>
@@ -1269,7 +1252,7 @@ function catFrame(ts) {
 function catStart() { cancelAnimationFrame(catRaf); catLast = 0; catBuild(); catRaf = requestAnimationFrame(catFrame); }
 function catStop() { cancelAnimationFrame(catRaf); $('catRow').innerHTML = ''; Cats.length = 0; }
 function catPaint() { $('catLbl').innerText = 'แมววิ่ง: ' + (catOn ? 'เปิด' : 'ปิด'); }
-/* ปุ่มจรวด 🚀 ลอยด้านซ้าย: ซ่อน/แสดงได้จากเมนู (จำค่าไว้ในเครื่อง) เหมือนแมววิ่ง */
+/* ปุ่มเกม ⚔️ ลอยด้านซ้าย: ซ่อน/แสดงได้จากเมนู (จำค่าไว้ในเครื่อง) เหมือนแมววิ่ง */
 var rktBtnOn = true;
 function rktPaint() { var l = $('rktLbl'); if (l) l.innerText = 'ปุ่มเกม: ' + (rktBtnOn ? 'เปิด' : 'ปิด'); document.body.classList.toggle('no-gtab', !rktBtnOn); }
 function toggleRocketBtn() {
@@ -3554,113 +3537,102 @@ function saveJobCfg() {
 }
 
 function buildJobForm() {
+  const sel = (id, label, hint, extra) => `<div class="rounded-xl border border-slate-100 p-3 space-y-2"><div class="text-xs font-semibold text-slate-600">${label} <span class="font-normal text-slate-400">${hint}</span></div><select id="job_${id}" class="inp" onchange="jobUnit('${id}');jobPrev()"></select>${extra || ''}</div>`;
+  const num2 = (id, label, v) => `<div><label class="text-[11px] text-slate-500">${label}</label><input type="number" id="job_${id}" min="0" step="any" value="${v}" class="inp mt-0.5" oninput="jobPrev()"></div>`;
   $('panel-job').innerHTML = `
   <div class="card p-6 border-t-4 border-indigo-500 rounded-b-none sm:rounded-b-2xl">
     <div class="flex items-start justify-between mb-4">
-      <div><h2 class="font-semibold">ใบงานเข้าเล่ม</h2><p class="text-xs text-slate-400">กรอกข้อมูลงาน ระบบคำนวณวัสดุแล้วเบิกให้ครั้งเดียว</p>
+      <div><h2 class="font-semibold">ใบงานเข้าเล่ม</h2><p class="text-xs text-slate-400">กรอกงาน เลือกวัสดุ ระบบคำนวณจำนวนที่ต้องเบิกให้</p>
         <p class="text-xs mt-1 font-medium text-indigo-600"><i class="fa-solid fa-database mr-1"></i>เบิกจากชีท: <span id="job_bk"></span></p></div>
-      <div class="flex items-center gap-1 flex-none"><button type="button" onclick="openJobCfg(true)" class="chip !py-1.5"><i class="fa-solid fa-gear mr-1.5"></i>ตั้งค่าสูตร</button>
-        <button type="button" onclick="closeTx()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
+      <button type="button" onclick="closeTx()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <form onsubmit="submitJob(event)" class="space-y-4">
-      <div><label class="text-xs font-medium">ชื่อโครงการ / หน่วยงาน *</label><input id="job_project" required class="inp mt-1" autocomplete="off" oninput="jobPrev()"></div>
+    <form onsubmit="submitJob(event)" class="space-y-3">
+      <div><label class="text-xs font-medium">ชื่อโครงการ / หน่วยงาน *</label><input id="job_project" required class="inp mt-1" autocomplete="off"></div>
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs font-medium">จำนวนเล่ม *</label><input type="number" id="job_copies" min="1" step="1" required class="inp mt-1" oninput="jobPrev()"></div>
-        <div><label class="text-xs font-medium">จำนวนหน้าต่อเล่ม *</label><input type="number" id="job_pages" min="1" step="1" required class="inp mt-1" oninput="jobPrev()"></div>
-        <div><label class="text-xs font-medium">การพิมพ์</label><select id="job_sides" class="inp mt-1" onchange="jobPrev()"><option value="1">หน้าเดียว</option><option value="2">สองหน้า</option></select></div>
-        <div><label class="text-xs font-medium">ปก</label><select id="job_cover" class="inp mt-1" onchange="jobPrev()"><option value="clear">ปกใส + ปกหลัง</option><option value="soft">ปกอ่อน</option></select></div>
-        <div class="col-span-2"><label class="text-xs font-medium">สัน</label>
-          <div class="inline-flex p-1 rounded-full bg-slate-100 ml-2"><button type="button" id="jobsp-auto" class="tab active" onclick="setJobSpine('auto')">อัตโนมัติ</button><button type="button" id="jobsp-man" class="tab" onclick="setJobSpine('man')">เลือกเอง</button></div>
-          <select id="job_spine" class="inp mt-1 hidden" onchange="jobPrev()"></select>
-          <p id="job_spnote" class="text-[11px] text-slate-400 mt-1">ระบบเลือกสันตามจำนวนแผ่นต่อเล่ม ตามที่ตั้งไว้ใน "ตั้งค่าสูตรเข้าเล่ม"</p></div>
-        <div><label class="text-xs font-medium">เผื่อเสีย (%)</label><input type="number" id="job_waste" min="0" step="any" class="inp mt-1" oninput="jobPrev()"></div>
+        ${num2('copies', 'จำนวนเล่ม *', '')}${num2('pages', 'จำนวนหน้าต่อเล่ม *', '')}
+        <div><label class="text-[11px] text-slate-500">การพิมพ์</label><select id="job_sides" class="inp mt-0.5" onchange="jobPrev()"><option value="1">หน้าเดียว</option><option value="2">สองหน้า</option></select></div>
+        ${num2('waste', 'เผื่อเสีย (%)', 5)}
       </div>
+      ${sel('paper', '① กระดาษเนื้อใน *', '', `<div class="grid grid-cols-1">${num2('paper_per', 'กี่แผ่นต่อ 1 หน่วยที่เบิก (เช่น 1 รีม = 500 แผ่น ถ้าเบิกเป็นแผ่นใส่ 1)', 1)}</div>`)}
+      ${sel('cover', '② กระดาษปก', '(ไม่ใช้ = ปล่อยว่าง)', `<div class="grid grid-cols-2 gap-3">${num2('cover_n', 'แผ่นปกต่อเล่ม', 1)}${num2('cover_per', 'กี่แผ่นต่อ 1 หน่วย', 1)}</div>`)}
+      ${sel('spine', '③ สัน', '(เลือกเอง)', `<div>${num2('spine_n', 'จำนวนต่อเล่ม', 1)}</div>`)}
+      <details class="rounded-xl border border-slate-100 p-3"><summary class="text-xs font-semibold text-slate-600 cursor-pointer">④ วัสดุเพิ่มเติม (ปกใส ปกหลัง ฯลฯ)</summary><div class="space-y-2 mt-2">
+        ${[0, 1, 2].map(k => `<div class="grid grid-cols-3 gap-2 items-end"><select id="job_x${k}" class="inp col-span-2" onchange="jobPrev()"></select>${num2('x' + k + '_n', 'ต่อเล่ม', 1)}</div>`).join('')}</div></details>
       <div class="grid sm:grid-cols-2 gap-3">
         <div><label class="text-xs font-medium">วันที่ *</label><input type="text" id="job_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
         <div><label class="text-xs font-medium">ผู้เบิก *</label><input id="job_person" required list="people" autocomplete="off" class="inp mt-1"></div>
       </div>
-      <div id="job_prev" class="rounded-2xl bg-white p-3 text-center text-sm text-slate-400">กรอกจำนวนเล่มและจำนวนหน้าเพื่อดูรายการวัสดุ</div>
-      <button id="job_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold g-out"><i class="fa-solid fa-check mr-2"></i>บันทึกใบงาน</button>
+      <div id="job_prev" class="rounded-2xl bg-white p-3 text-center text-sm text-slate-400">กรอกจำนวนเล่มและจำนวนหน้า แล้วเลือกกระดาษ</div>
+      <button id="job_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold g-out"></button>
     </form>
   </div>`;
 }
+const JOB_IDS = ['paper', 'paper_per', 'cover', 'cover_n', 'cover_per', 'spine', 'spine_n', 'x0', 'x0_n', 'x1', 'x1_n', 'x2', 'x2_n', 'waste'];
+function jobOpts(el) {
+  const cur = el.value, all = stock.slice().sort((a, b) => a.code.localeCompare(b.code));
+  el.innerHTML = '<option value="">-- ไม่ใช้ --</option>' + all.map(i => `<option value="${esc(i.code)}">[${esc(i.code)}] ${esc(i.name)} (เหลือ ${num(i.balance)} ${esc(i.unit)})</option>`).join('');
+  if (cur) el.value = cur;
+}
+function jobUnit(id) {   // เดาจำนวนแผ่นต่อหน่วย: หน่วย "รีม" = 500
+  const per = $('job_' + id + '_per'); if (!per) return;
+  const it = stock.find(i => i.code === $('job_' + id).value);
+  per.value = it && /รีม/.test(it.unit) ? 500 : 1;
+}
+function jobPrefs(save) {
+  try {
+    if (save) { const o = {}; JOB_IDS.forEach(k => o[k] = $('job_' + k).value); localStorage.setItem('jobPrefs', JSON.stringify(o)); return; }
+    const o = JSON.parse(localStorage.getItem('jobPrefs') || '{}');
+    JOB_IDS.forEach(k => { if (o[k] !== undefined && o[k] !== '' && (!/^(paper|cover|spine|x\d)$/.test(k) || stock.some(i => i.code === o[k]))) $('job_' + k).value = o[k]; });
+  } catch (e) {}
+}
 function openJob() {
-  if (needAdmin()) return;
   if (!book) return;
-  ['panel-in', 'panel-out', 'panel-adj', 'panel-mat', 'panel-jobcfg'].forEach(id => $(id).classList.add('hidden'));
+  ['panel-in', 'panel-out', 'panel-adj', 'panel-mat', 'panel-jobcfg', 'panel-ret', 'panel-myhist'].forEach(id => $(id) && $(id).classList.add('hidden'));
   $('panel-job').classList.remove('hidden'); $('job_bk').innerText = bookName();
   setDate('job_date', ymd(new Date()));
-  if (!$('job_person').value) $('job_person').value = PREPARER.name;
+  if (!$('job_person').value) $('job_person').value = isAdmin ? PREPARER.name : (myName() || '');
+  ['paper', 'cover', 'spine', 'x0', 'x1', 'x2'].forEach(k => jobOpts($('job_' + k)));
+  jobPrefs(false);
+  $('job_btn').innerHTML = isAdmin ? '<i class="fa-solid fa-check mr-2"></i>บันทึกใบงาน (ตัดสต็อกทันที)' : '<i class="fa-solid fa-paper-plane mr-2"></i>ส่งคำขอเบิกใบงาน';
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
-  const b = book;
-  google.script.run.withSuccessHandler(c => {
-    if (b !== book) return;
-    fillJobSpines();
-    $('job_waste').placeholder = 'ค่าเริ่มต้น ' + c.waste;
-    jobPrev();
-  }).withFailureHandler(showError).getBindingConfig(b);
-}
-let jobSpineMode = 'auto';
-function fillJobSpines() {
-  const sel = $('job_spine'), cur = sel.value;
-  const all = stock.slice().sort((a, b) => a.code.localeCompare(b.code));
-  const opt = i => `<option value="${esc(i.code)}">[${esc(i.code)}] ${esc(i.name)} (คงเหลือ ${num(i.balance)} ${esc(i.unit)})</option>`;
-  const a = all.filter(i => i.name.indexOf('สัน') >= 0), b = all.filter(i => i.name.indexOf('สัน') < 0);
-  sel.innerHTML = '<option value="" disabled selected>-- เลือกสัน --</option>' +
-    (a.length ? '<optgroup label="วัสดุที่ชื่อมี \'สัน\'">' + a.map(opt).join('') + '</optgroup>' : '') +
-    (b.length ? '<optgroup label="วัสดุอื่น">' + b.map(opt).join('') + '</optgroup>' : '');
-  if (cur && stock.some(i => i.code === cur)) sel.value = cur;
-}
-function setJobSpine(m) {
-  jobSpineMode = m;
-  $('jobsp-auto').classList.toggle('active', m === 'auto'); $('jobsp-man').classList.toggle('active', m === 'man');
-  $('job_spine').classList.toggle('hidden', m !== 'man');
-  $('job_spnote').innerText = m === 'auto' ? 'ระบบเลือกสันตามจำนวนแผ่นต่อเล่ม ตามที่ตั้งไว้ใน "ตั้งค่าสูตรเข้าเล่ม"' : 'เลือกสันเอง ใช้ 1 อันต่อเล่ม (ไม่ดูช่วงแผ่น)';
-  if (m === 'man') fillJobSpines();
   jobPrev();
 }
 function jobPayload() {
-  return { book: book, project: $('job_project').value, copies: $('job_copies').value, pages: $('job_pages').value,
-    duplex: $('job_sides').value === '2', cover: $('job_cover').value, spine: jobSpineMode === 'man' ? $('job_spine').value : '', waste: $('job_waste').value,
-    date: $('job_date').value, person: $('job_person').value };
+  const v = id => $('job_' + id).value, n = id => Number(v(id)) || 0;
+  return { book: book, project: v('project'), copies: v('copies'), pages: v('pages'), duplex: v('sides') === '2', waste: v('waste'), date: v('date'), person: v('person'),
+    paper: { code: v('paper'), per: n('paper_per') || 1 },
+    cover: { code: v('cover'), per: n('cover_per') || 1, sheets: n('cover_n') || 1 },
+    spine: { code: v('spine'), perBook: n('spine_n') || 1 },
+    extras: [0, 1, 2].map(k => ({ code: v('x' + k), perBook: n('x' + k + '_n') || 1 })).filter(x => x.code) };
 }
 function jobPrev() {
-  clearTimeout(jobTimer); jobOK = false;
-  const box = $('job_prev');
-  if (!(Number($('job_copies').value) > 0) || !(Number($('job_pages').value) > 0)) {
-    box.className = 'rounded-2xl bg-white p-3 text-center text-sm text-slate-400'; box.innerHTML = 'กรอกจำนวนเล่มและจำนวนหน้าเพื่อดูรายการวัสดุ'; return;
-  }
-  if (jobSpineMode === 'man' && !$('job_spine').value) {
-    box.className = 'rounded-2xl bg-white p-3 text-center text-sm text-slate-400'; box.innerHTML = 'เลือกสันก่อน'; return;
-  }
-  box.className = 'rounded-2xl bg-white p-3 text-center text-sm text-slate-400'; box.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>กำลังคำนวณ...';
+  clearTimeout(jobTimer);
+  const box = $('job_prev'), p = jobPayload(), idle = t => { box.className = 'rounded-2xl bg-white p-3 text-center text-sm text-slate-400'; box.innerHTML = t; };
+  if (!(Number(p.copies) > 0) || !(Number(p.pages) > 0)) return idle('กรอกจำนวนเล่มและจำนวนหน้า แล้วเลือกกระดาษ');
+  if (!p.paper.code) return idle('เลือกกระดาษเนื้อในก่อน');
+  idle('<i class="fa-solid fa-spinner fa-spin mr-1"></i>กำลังคำนวณ...');
   const my = ++jobSeq;
   jobTimer = setTimeout(() => google.script.run
-    .withSuccessHandler(r => { if (my !== jobSeq) return; jobOK = true; paintJob(r); })
+    .withSuccessHandler(r => { if (my === jobSeq) paintJob(r); })
     .withFailureHandler(e => { if (my !== jobSeq) return; box.className = 'rounded-2xl bg-rose-50 text-rose-800 p-3 text-sm'; box.innerHTML = esc((e && e.message) || e); })
-    .previewBindingJob(jobPayload()), 400);
+    .previewJob2(p), 400);
 }
 function paintJob(r) {
   const short = r.lines.filter(l => l.short).length;
   $('job_prev').className = 'rounded-2xl bg-white p-2 text-left';
-  $('job_prev').innerHTML = `<div class="text-xs text-slate-500 px-2 pb-2">${num(r.sheetsPerBook)} แผ่น/เล่ม · สัน: ${esc(r.spineNote)} · เผื่อเสียกระดาษ ${num(r.waste)}%</div>
-    <div class="overflow-x-auto"><table class="t w-full text-xs"><thead><tr><th>รายการ</th><th>วัสดุ</th><th class="text-right">เบิก</th><th class="text-right">คงเหลือ</th><th class="text-right">หลังเบิก</th></tr></thead><tbody class="divide-y divide-slate-100">
-    ${r.lines.map(l => `<tr class="${l.short ? 'bg-rose-50' : ''}"><td class="text-slate-500">${esc(l.role)}</td><td><div class="font-medium">${esc(l.name)}</div><div class="font-mono text-[10px] text-indigo-600">${esc(l.code)}</div></td>
-      <td class="text-right font-bold">${num(l.qty)} <span class="font-normal text-slate-400">${esc(l.unit)}</span></td><td class="text-right">${num(l.balance)}</td>
-      <td class="text-right font-bold ${l.short ? 'text-rose-600' : 'text-emerald-600'}">${num(l.after)}</td></tr>`).join('')}</tbody></table></div>
+  $('job_prev').innerHTML = `<div class="text-xs text-slate-500 px-2 pb-2">${num(r.sheetsPerBook)} แผ่น/เล่ม · เผื่อเสีย ${num(r.waste)}%</div>
+    <div class="overflow-x-auto"><table class="t w-full text-xs"><thead><tr><th>รายการ</th><th>วัสดุ</th><th class="text-right">ต้องเบิก</th><th class="text-right">หลังเบิก</th></tr></thead><tbody class="divide-y divide-slate-100">
+    ${r.lines.map(l => `<tr class="${l.short ? 'bg-rose-50' : ''}"><td class="text-slate-500">${esc(l.role)}</td><td><div class="font-medium">${esc(l.name)}</div><div class="text-[10px] text-slate-400">${esc(l.detail)}</div></td>
+      <td class="text-right font-bold">${num(l.qty)} <span class="font-normal text-slate-400">${esc(l.unit)}</span></td><td class="text-right font-bold ${l.short ? 'text-rose-600' : 'text-emerald-600'}">${num(l.after)}</td></tr>`).join('')}</tbody></table></div>
     ${short ? `<div class="text-xs text-rose-700 font-semibold px-2 pt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>ของไม่พอ ${short} รายการ</div>` : ''}`;
 }
-function submitJob(e) {
-  e.preventDefault();
-  if (jobSpineMode === 'man' && !$('job_spine').value) return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกสัน' });
-  sendJob(false);
-}
+function submitJob(e) { e.preventDefault(); sendJob(false); }
 function sendJob(force) {
   const btn = $('job_btn'), label = btn.innerHTML;
-  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังส่ง...';
   const done = () => { btn.disabled = false; btn.innerHTML = label; };
   const p = jobPayload(); p.force = force;
-  google.script.run
+  const run = google.script.run
     .withSuccessHandler(r => {
       done();
       if (r.needConfirm) return Swal.fire({
@@ -3668,14 +3640,16 @@ function sendJob(force) {
         html: r.short.map(s => `<b>${esc(s.name)}</b> ต้องใช้ ${num(s.qty)} มี ${num(s.balance)} ${esc(s.unit)}`).join('<br>') + '<br>ยอดจะติดลบ ต้องการบันทึกต่อหรือไม่?',
         showCancelButton: true, confirmButtonText: 'บันทึกต่อ', cancelButtonText: 'กลับไปแก้', confirmButtonColor: '#f43f5e'
       }).then(x => { if (x.isConfirmed) sendJob(true); });
+      jobPrefs(true); if (r.id) rememberReq(r.id);
       closeTx();
-      Swal.fire({ icon: 'success', title: 'สำเร็จ', text: r.message, timer: 2200, showConfirmButton: false });
-      ['project', 'copies', 'pages', 'waste'].forEach(k => $('job_' + k).value = '');
+      Swal.fire({ icon: 'success', title: 'สำเร็จ', text: r.message, timer: 3500, showConfirmButton: true, confirmButtonText: 'ตกลง' });
+      ['project', 'copies', 'pages'].forEach(k => $('job_' + k).value = '');
       $('job_prev').innerHTML = ''; loadAllData();
     })
-    .withFailureHandler(err => { done(); showError(err); })
-    .recordBindingJob(p);
+    .withFailureHandler(err => { done(); showError(err); });
+  isAdmin ? run.recordJob2(p) : run.submitJobRequest(p);
 }
+
 
 function showError(err) { Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: (err && err.message) || err }); }
 
