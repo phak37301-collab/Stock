@@ -706,7 +706,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <button class="nav" onclick="closeMenu();openAdj()"><i class="fa-solid fa-sliders"></i><span>ปรับยอดสต็อก</span></button>
     <button class="nav" onclick="closeMenu();openMat()"><i class="fa-solid fa-circle-plus"></i><span>เพิ่มวัสดุใหม่</span></button>
     <button class="nav" onclick="closeMenu();openSettings()"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></button>
-    <button class="nav" onclick="closeMenu();openJob()"><i class="fa-solid fa-book"></i><span>ใบงานเข้าเล่ม</span></button>
+    <button class="nav" id="jobNavBtn" onclick="closeMenu();openJob()"><i class="fa-solid fa-book"></i><span>ใบงานเข้าเล่ม</span></button>
     <button class="nav" onclick="closeMenu();openRet()"><i class="fa-solid fa-rotate-left"></i><span>คืนเบิก</span></button>
     <button class="nav" onclick="closeMenu();rpgToggle()"><i class="fa-solid fa-khanda"></i><span>เกมนักล่า (เต็มจอ)</span></button>
     <button class="nav" onclick="toggleRocketBtn()"><i class="fa-solid fa-eye-slash"></i><span id="rktLbl">ปุ่มเกม: เปิด</span></button>
@@ -739,7 +739,7 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
     <div class="flex flex-wrap items-center justify-center gap-3">
       <button onclick="openTx('out')" class="g-out text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-box-open mr-2"></i>ขอเบิกของ</button>
       <button onclick="openRet()" class="g-ret text-white font-semibold rounded-full px-8 py-3 text-base"><i class="fa-solid fa-rotate-left mr-2"></i>ขอคืนของ</button></div>
-    <div><button type="button" onclick="openJob()" class="chip !px-5 !py-2.5 !text-sm mb-2"><i class="fa-solid fa-book mr-2"></i>ขอเบิกใบงานเข้าเล่ม</button></div>
+    <div><button type="button" id="jobHomeBtn" onclick="openJob()" class="text-white font-semibold rounded-full px-8 py-3 text-base shadow-md" style="background:linear-gradient(135deg,#8b5cf6,#6366f1)"><i class="fa-solid fa-book mr-2"></i>ขอเบิกวัสดุเข้าเล่ม</button></div>
     <div><button type="button" onclick="openMyHist()" class="chip !px-5 !py-2.5 !text-sm"><i class="fa-solid fa-clock-rotate-left mr-2"></i>ดูประวัติเบิก-คืนของฉัน</button></div>
     <div class="text-left pt-4 border-t border-slate-100"><div class="flex items-center justify-between"><h3 class="text-sm font-semibold">คำขอของฉัน</h3><button onclick="paintMyReqs(true)" class="text-xs text-indigo-600 font-medium"><i id="myReqIcon" class="fa-solid fa-arrows-rotate mr-1"></i>เช็กสถานะ</button></div>
       <div id="myReqs" class="mt-2 space-y-2 text-sm text-slate-400">ยังไม่มีคำขอ</div></div>
@@ -1996,7 +1996,7 @@ function initBooks(list) {
   $('bookSel').innerHTML = list.map(b => `<option value="${esc(b.key)}">${esc(b.name)}</option>`).join('');
   let saved = ''; try { saved = localStorage.getItem('stockBook') || ''; } catch (e) {}
   book = list.some(b => b.key === saved) ? saved : (list[0] && list[0].key) || '';
-  $('bookSel').value = book;
+  $('bookSel').value = book; jobBtnPaint();
   const was = bootBook; bootBook = '';
   if (was && book === was) {            // โหลดขนานไปแล้วด้วยชีทเดียวกัน แค่ใส่ชื่อชีทให้ครบ
     $('heroBook').innerText = bookName();
@@ -2006,7 +2006,7 @@ function initBooks(list) {
   was ? switchBook(book) : loadAllData();   // ชีทที่จำไว้ถูกลบไปแล้ว -> ล้างของเดิมแล้วโหลดชีทที่ถูกต้อง
 }
 function switchBook(k) {
-  book = k; try { localStorage.setItem('stockBook', k); } catch (e) {}
+  book = k; jobBtnPaint(); try { localStorage.setItem('stockBook', k); } catch (e) {}
   stock = []; lowMap = {}; materials = []; repRaw = null; view = null; CNT = {};
   F.inv = newF(); F.rep = newF(); $('inv_q').value = ''; $('rep_q').value = '';
   ['stat-total', 'stat-normal', 'stat-low'].forEach(id => $(id).innerText = '-');
@@ -3537,40 +3537,40 @@ function saveJobCfg() {
 }
 
 function buildJobForm() {
-  const sel = (id, label, hint, extra) => `<div class="rounded-xl border border-slate-100 p-3 space-y-2"><div class="text-xs font-semibold text-slate-600">${label} <span class="font-normal text-slate-400">${hint}</span></div><select id="job_${id}" class="inp" onchange="jobUnit('${id}');jobPrev()"></select>${extra || ''}</div>`;
-  const num2 = (id, label, v) => `<div><label class="text-[11px] text-slate-500">${label}</label><input type="number" id="job_${id}" min="0" step="any" value="${v}" class="inp mt-0.5" oninput="jobPrev()"></div>`;
+  const step = (n, title, hint, body) => `<div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-3"><div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full text-white text-xs font-bold grid place-items-center flex-none" style="background:#6366f1">${n}</span><div><div class="text-sm font-semibold text-slate-800">${title}</div>${hint ? `<div class="text-xs text-slate-400">${hint}</div>` : ''}</div></div>${body}</div>`;
+  const fld = (id, label, v, hint) => `<div><label class="text-xs font-medium text-slate-600">${label}</label><input type="number" id="job_${id}" min="0" step="any" value="${v}" class="inp mt-1" oninput="jobPrev()">${hint ? `<p class="text-[11px] text-slate-400 mt-1">${hint}</p>` : ''}</div>`;
+  const pick = (id, ph) => `<select id="job_${id}" data-ph="${ph}" class="inp" onchange="jobUnit('${id}');jobPrev()"></select>`;
   $('panel-job').innerHTML = `
-  <div class="card p-6 border-t-4 border-indigo-500 rounded-b-none sm:rounded-b-2xl">
+  <div class="card p-5 sm:p-6 border-t-4 border-indigo-500 rounded-b-none sm:rounded-b-2xl">
     <div class="flex items-start justify-between mb-4">
-      <div><h2 class="font-semibold">ใบงานเข้าเล่ม</h2><p class="text-xs text-slate-400">กรอกงาน เลือกวัสดุ ระบบคำนวณจำนวนที่ต้องเบิกให้</p>
+      <div><h2 class="font-semibold text-base">📚 เบิกวัสดุเข้าเล่ม</h2><p class="text-xs text-slate-500">ตอบทีละข้อ ระบบคำนวณจำนวนที่ต้องเบิกให้เอง</p>
         <p class="text-xs mt-1 font-medium text-indigo-600"><i class="fa-solid fa-database mr-1"></i>เบิกจากชีท: <span id="job_bk"></span></p></div>
       <button type="button" onclick="closeTx()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form onsubmit="submitJob(event)" class="space-y-3">
-      <div><label class="text-xs font-medium">ชื่อโครงการ / หน่วยงาน *</label><input id="job_project" required class="inp mt-1" autocomplete="off"></div>
-      <div class="grid grid-cols-2 gap-3">
-        ${num2('copies', 'จำนวนเล่ม *', '')}${num2('pages', 'จำนวนหน้าต่อเล่ม *', '')}
-        <div><label class="text-[11px] text-slate-500">การพิมพ์</label><select id="job_sides" class="inp mt-0.5" onchange="jobPrev()"><option value="1">หน้าเดียว</option><option value="2">สองหน้า</option></select></div>
-        ${num2('waste', 'เผื่อเสีย (%)', 5)}
-      </div>
-      ${sel('paper', '① กระดาษเนื้อใน *', '', `<div class="grid grid-cols-1">${num2('paper_per', 'กี่แผ่นต่อ 1 หน่วยที่เบิก (เช่น 1 รีม = 500 แผ่น ถ้าเบิกเป็นแผ่นใส่ 1)', 1)}</div>`)}
-      ${sel('cover', '② กระดาษปก', '(ไม่ใช้ = ปล่อยว่าง)', `<div class="grid grid-cols-2 gap-3">${num2('cover_n', 'แผ่นปกต่อเล่ม', 1)}${num2('cover_per', 'กี่แผ่นต่อ 1 หน่วย', 1)}</div>`)}
-      ${sel('spine', '③ สัน', '(เลือกเอง)', `<div>${num2('spine_n', 'จำนวนต่อเล่ม', 1)}</div>`)}
-      <details class="rounded-xl border border-slate-100 p-3"><summary class="text-xs font-semibold text-slate-600 cursor-pointer">④ วัสดุเพิ่มเติม (ปกใส ปกหลัง ฯลฯ)</summary><div class="space-y-2 mt-2">
-        ${[0, 1, 2].map(k => `<div class="grid grid-cols-3 gap-2 items-end"><select id="job_x${k}" class="inp col-span-2" onchange="jobPrev()"></select>${num2('x' + k + '_n', 'ต่อเล่ม', 1)}</div>`).join('')}</div></details>
-      <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs font-medium">วันที่ *</label><input type="text" id="job_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div>
-        <div><label class="text-xs font-medium">ผู้เบิก *</label><input id="job_person" required list="people" autocomplete="off" class="inp mt-1"></div>
-      </div>
-      <div id="job_prev" class="rounded-2xl bg-white p-3 text-center text-sm text-slate-400">กรอกจำนวนเล่มและจำนวนหน้า แล้วเลือกกระดาษ</div>
-      <button id="job_btn" class="w-full py-3 rounded-xl text-white text-sm font-semibold g-out"></button>
+      ${step(1, 'งานนี้คืออะไร', '', `
+        <div><label class="text-xs font-medium text-slate-600">ชื่อโครงการ / หน่วยงาน *</label><input id="job_project" required class="inp mt-1" autocomplete="off" placeholder="เช่น โครงการ A"></div>
+        <div class="grid grid-cols-2 gap-3">${fld('copies', 'ทำกี่เล่ม *', '', '')}${fld('pages', 'แต่ละเล่มกี่หน้า *', '', '')}</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-medium text-slate-600">พิมพ์แบบไหน</label><select id="job_sides" class="inp mt-1" onchange="jobPrev()"><option value="1">พิมพ์หน้าเดียว</option><option value="2">พิมพ์หน้า-หลัง</option></select></div>
+          ${fld('waste', 'เผื่อกระดาษเสียกี่ %', 5, 'แนะนำ 5 (ไม่เผื่อใส่ 0)')}</div>`)}
+      ${step(2, 'กระดาษที่พิมพ์ข้างใน *', 'กระดาษที่ใช้พิมพ์เนื้อหาในเล่ม (ไม่รวมปก)', pick('paper', '-- เลือกกระดาษ --') + fld('paper_per', '1 หน่วยที่เบิก มีกี่แผ่น', 1, 'เบิกเป็นรีมใส่ 500 · เบิกเป็นแผ่นใส่ 1 (ระบบเดาให้แล้ว แก้ได้)'))}
+      ${step(3, 'ปก', 'ไม่ใช้ปกพิเศษ ปล่อยไว้ที่ “ไม่ใช้ปก”', pick('cover', '-- ไม่ใช้ปก --') + `<div class="grid grid-cols-2 gap-3">${fld('cover_n', 'ปกกี่แผ่นต่อเล่ม', 1, '')}${fld('cover_per', '1 หน่วยที่เบิก มีกี่แผ่น', 1, 'เบิกเป็นแผ่นใส่ 1')}</div>`)}
+      ${step(4, 'สัน', 'ไม่ใช้สัน ปล่อยไว้ที่ “ไม่ใช้สัน”', pick('spine', '-- ไม่ใช้สัน --') + fld('spine_n', 'ใช้สันกี่อันต่อเล่ม', 1, ''))}
+      <details class="rounded-2xl border border-slate-200 bg-white p-4"><summary class="text-sm font-semibold text-slate-800 cursor-pointer">＋ มีของอย่างอื่นต้องเบิกด้วยไหม <span class="font-normal text-xs text-slate-400">(ปกใส ปกหลัง ฯลฯ — ไม่บังคับ)</span></summary>
+        <div class="space-y-3 mt-3">${[0, 1, 2].map(k => `<div class="grid grid-cols-3 gap-2 items-end"><div class="col-span-2"><select id="job_x${k}" data-ph="-- ไม่ใช้ --" class="inp" onchange="jobPrev()"></select></div>${fld('x' + k + '_n', 'ชิ้นต่อเล่ม', 1, '')}</div>`).join('')}</div></details>
+      ${step(5, 'ใครเบิก และวันที่', '', `<div class="grid sm:grid-cols-2 gap-3">
+        <div><label class="text-xs font-medium text-slate-600">ชื่อผู้เบิก *</label><input id="job_person" required list="people" autocomplete="off" class="inp mt-1"></div>
+        <div><label class="text-xs font-medium text-slate-600">วันที่ *</label><input type="text" id="job_date" required class="inp mt-1" placeholder="วว/ดด/ปปปป"></div></div>`)}
+      <div><div class="text-sm font-semibold text-slate-800 mb-1.5">สรุปที่ต้องเบิก</div><div id="job_prev" class="rounded-2xl bg-white border border-dashed border-slate-300 p-3 text-center text-sm text-slate-400">กรอกจำนวนเล่ม จำนวนหน้า และเลือกกระดาษ แล้วรายการจะขึ้นตรงนี้</div></div>
+      <button id="job_btn" class="w-full py-3.5 rounded-xl text-white text-base font-semibold shadow-md" style="background:linear-gradient(135deg,#10b981,#059669)"></button>
     </form>
   </div>`;
 }
 const JOB_IDS = ['paper', 'paper_per', 'cover', 'cover_n', 'cover_per', 'spine', 'spine_n', 'x0', 'x0_n', 'x1', 'x1_n', 'x2', 'x2_n', 'waste'];
 function jobOpts(el) {
   const cur = el.value, all = stock.slice().sort((a, b) => a.code.localeCompare(b.code));
-  el.innerHTML = '<option value="">-- ไม่ใช้ --</option>' + all.map(i => `<option value="${esc(i.code)}">[${esc(i.code)}] ${esc(i.name)} (เหลือ ${num(i.balance)} ${esc(i.unit)})</option>`).join('');
+  el.innerHTML = '<option value="">' + (el.dataset.ph || '-- ไม่ใช้ --') + '</option>' + all.map(i => `<option value="${esc(i.code)}">[${esc(i.code)}] ${esc(i.name)} (เหลือ ${num(i.balance)} ${esc(i.unit)})</option>`).join('');
   if (cur) el.value = cur;
 }
 function jobUnit(id) {   // เดาจำนวนแผ่นต่อหน่วย: หน่วย "รีม" = 500
@@ -3585,15 +3585,25 @@ function jobPrefs(save) {
     JOB_IDS.forEach(k => { if (o[k] !== undefined && o[k] !== '' && (!/^(paper|cover|spine|x\d)$/.test(k) || stock.some(i => i.code === o[k]))) $('job_' + k).value = o[k]; });
   } catch (e) {}
 }
+const JOB_BOOK = 'binding';   // ใบงานเข้าเล่มเบิกได้เฉพาะคลังนี้ (ต้องตรงกับ JOB_BOOK_KEY_ ใน Code.gs)
+function jobBtnPaint() {
+  const ok = book === JOB_BOOK;
+  ['jobHomeBtn', 'jobNavBtn'].forEach(id => { const b = $(id); if (!b) return; b.style.opacity = ok ? '' : '.45'; b.title = ok ? '' : 'เลือกคลัง “วัสดุเข้าเล่ม” ก่อน'; });
+}
 function openJob() {
   if (!book) return;
+  if (book !== JOB_BOOK) {
+    return Swal.fire({ icon: 'info', title: 'เบิกเข้าเล่มได้เฉพาะคลัง “วัสดุเข้าเล่ม”', text: 'สต็อกแต่ละคลังแยกกัน คลังที่เลือกอยู่ตอนนี้เบิกผ่านใบงานเข้าเล่มไม่ได้',
+      showCancelButton: true, confirmButtonText: 'สลับไปคลังวัสดุเข้าเล่ม', cancelButtonText: 'ปิด' })
+      .then(x => { if (x.isConfirmed && Array.from($('bookSel').options).some(o => o.value === JOB_BOOK)) { $('bookSel').value = JOB_BOOK; switchBook(JOB_BOOK); } });
+  }
   ['panel-in', 'panel-out', 'panel-adj', 'panel-mat', 'panel-jobcfg', 'panel-ret', 'panel-myhist'].forEach(id => $(id) && $(id).classList.add('hidden'));
   $('panel-job').classList.remove('hidden'); $('job_bk').innerText = bookName();
   setDate('job_date', ymd(new Date()));
   if (!$('job_person').value) $('job_person').value = isAdmin ? PREPARER.name : (myName() || '');
   ['paper', 'cover', 'spine', 'x0', 'x1', 'x2'].forEach(k => jobOpts($('job_' + k)));
   jobPrefs(false);
-  $('job_btn').innerHTML = isAdmin ? '<i class="fa-solid fa-check mr-2"></i>บันทึกใบงาน (ตัดสต็อกทันที)' : '<i class="fa-solid fa-paper-plane mr-2"></i>ส่งคำขอเบิกใบงาน';
+  $('job_btn').innerHTML = isAdmin ? '<i class="fa-solid fa-check mr-2"></i>ยืนยันเบิกเลย (ตัดสต็อกทันที)' : '<i class="fa-solid fa-paper-plane mr-2"></i>ส่งคำขอเบิกให้แอดมินอนุมัติ';
   $('modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
   jobPrev();
 }
@@ -3608,8 +3618,8 @@ function jobPayload() {
 function jobPrev() {
   clearTimeout(jobTimer);
   const box = $('job_prev'), p = jobPayload(), idle = t => { box.className = 'rounded-2xl bg-white p-3 text-center text-sm text-slate-400'; box.innerHTML = t; };
-  if (!(Number(p.copies) > 0) || !(Number(p.pages) > 0)) return idle('กรอกจำนวนเล่มและจำนวนหน้า แล้วเลือกกระดาษ');
-  if (!p.paper.code) return idle('เลือกกระดาษเนื้อในก่อน');
+  if (!(Number(p.copies) > 0) || !(Number(p.pages) > 0)) return idle('กรอกจำนวนเล่ม จำนวนหน้า และเลือกกระดาษ แล้วรายการจะขึ้นตรงนี้');
+  if (!p.paper.code) return idle('เลือกกระดาษที่พิมพ์ข้างในก่อน');
   idle('<i class="fa-solid fa-spinner fa-spin mr-1"></i>กำลังคำนวณ...');
   const my = ++jobSeq;
   jobTimer = setTimeout(() => google.script.run
@@ -3621,7 +3631,7 @@ function paintJob(r) {
   const short = r.lines.filter(l => l.short).length;
   $('job_prev').className = 'rounded-2xl bg-white p-2 text-left';
   $('job_prev').innerHTML = `<div class="text-xs text-slate-500 px-2 pb-2">${num(r.sheetsPerBook)} แผ่น/เล่ม · เผื่อเสีย ${num(r.waste)}%</div>
-    <div class="overflow-x-auto"><table class="t w-full text-xs"><thead><tr><th>รายการ</th><th>วัสดุ</th><th class="text-right">ต้องเบิก</th><th class="text-right">หลังเบิก</th></tr></thead><tbody class="divide-y divide-slate-100">
+    <div class="overflow-x-auto"><table class="t w-full text-xs"><thead><tr><th>ใช้ทำอะไร</th><th>วัสดุ</th><th class="text-right">ต้องเบิก</th><th class="text-right">เหลือหลังเบิก</th></tr></thead><tbody class="divide-y divide-slate-100">
     ${r.lines.map(l => `<tr class="${l.short ? 'bg-rose-50' : ''}"><td class="text-slate-500">${esc(l.role)}</td><td><div class="font-medium">${esc(l.name)}</div><div class="text-[10px] text-slate-400">${esc(l.detail)}</div></td>
       <td class="text-right font-bold">${num(l.qty)} <span class="font-normal text-slate-400">${esc(l.unit)}</span></td><td class="text-right font-bold ${l.short ? 'text-rose-600' : 'text-emerald-600'}">${num(l.after)}</td></tr>`).join('')}</tbody></table></div>
     ${short ? `<div class="text-xs text-rose-700 font-semibold px-2 pt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>ของไม่พอ ${short} รายการ</div>` : ''}`;
