@@ -21,6 +21,6 @@ window.APP_CONFIG = {
   tagline: 'Office Supplies · เบิก รับเข้า ติดตามสต็อก',
   homeHeading: 'เบิกวัสดุสำนักงาน',
   logoVersion: '5',
-  faviconUrl: 'favicon.png',
+  faviconUrl: 'Logo.png',
   preparer: { name: 'ชนัฏฌา บัวสุวรรณ', pos: 'ธุรการจัดซื้อ' }
 };
