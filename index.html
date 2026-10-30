@@ -1120,21 +1120,27 @@ async function openBookManager() {
     const jr = document.querySelector('input[name="bm_job"]:checked');
     rows.forEach((r, i) => { r.job = !!jr && +jr.value === i; });
   };
+  const sheetId = v => { const s = String(v || '').trim(), m = s.match(/\/d\/([A-Za-z0-9_-]{20,})/); return m ? m[1] : (/^[A-Za-z0-9_-]{20,}$/.test(s) ? s : ''); };
   const paint = () => {
-    $('bm_list').innerHTML = rows.length ? rows.map((r, i) => `
+    $('bm_list').innerHTML = rows.length ? rows.map((r, i) => {
+      if (r.removed) return `<div style="border:1px dashed #fca5a5;border-radius:12px;padding:10px;margin-bottom:8px;background:#fff1f2;display:flex;gap:8px;align-items:center;font-size:.8rem;color:#9f1239"><div style="flex:1;line-height:1.5">คลัง "<b>${esc(r.name)}</b>" จะถูกถอดออกจากระบบเมื่อกดบันทึก<br><span style="opacity:.85">ไฟล์ Google Sheets ไม่ถูกลบ เชื่อมกลับได้ด้วยลิงก์</span></div><button type="button" data-act="unremove" data-i="${i}" style="${btn()}">ยกเลิก</button></div>`;
+      const sid = sheetId(r.id);
+      return `
       <div style="border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin-bottom:8px;${r.hidden ? 'opacity:.6;background:#f8fafc' : ''}">
         <div style="display:flex;gap:6px;align-items:center">
           <input class="inp" data-f="name" data-i="${i}" value="${esc(r.name)}" placeholder="ชื่อคลัง เช่น วัสดุสำนักงาน" maxlength="40" style="flex:1;min-width:0">
           <button type="button" data-act="hide" data-i="${i}" style="${btn()}">${r.hidden ? 'แสดง' : 'ซ่อน'}</button>
-          ${r.saved ? '' : `<button type="button" data-act="del" data-i="${i}" style="${btn('color:#dc2626')}">ลบแถว</button>`}
+          ${r.saved ? `<button type="button" data-act="remove" data-i="${i}" style="${btn('color:#dc2626;border-color:#fecdd3')}">ถอดออก</button>` : `<button type="button" data-act="del" data-i="${i}" style="${btn('color:#dc2626')}">ลบแถว</button>`}
         </div>
         <input class="inp" data-f="id" data-i="${i}" value="${esc(r.id)}" placeholder="วางลิงก์ชีท หรือ Spreadsheet ID" style="margin-top:6px;font-size:.78rem;width:100%">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:.78rem">
           <button type="button" data-act="check" data-i="${i}" style="${btn()}">ตรวจชีท</button>
+          ${sid ? `<a href="https://docs.google.com/spreadsheets/d/${sid}/edit" target="_blank" rel="noopener" style="color:#4f46e5;font-weight:600">เปิดชีท</a>` : ''}
           <label style="display:flex;gap:4px;align-items:center;cursor:pointer"><input type="radio" name="bm_job" value="${i}" ${r.job ? 'checked' : ''} ${r.hidden ? 'disabled' : ''}> ใช้ใบงานเข้าเล่ม</label>
           <span data-msg="${i}" style="flex:1;min-width:140px;line-height:1.5">${r.msgHtml || ''}</span>
         </div>
-      </div>`).join('') : '<div style="padding:14px;text-align:center;color:#64748b;font-size:.82rem">ยังไม่มีคลัง กด "เชื่อมชีทที่มีอยู่" หรือ "สร้างจากต้นแบบ" ด้านล่าง</div>';
+      </div>`;
+    }).join('') : '<div style="padding:14px;text-align:center;color:#64748b;font-size:.82rem">ยังไม่มีคลัง กด "เชื่อมชีทที่มีอยู่" หรือ "สร้างจากต้นแบบ" ด้านล่าง</div>';
   };
   const setMsg = (i, html) => { if (rows[i]) rows[i].msgHtml = html; const el = document.querySelector('[data-msg="' + i + '"]'); if (el) el.innerHTML = html; };
   const fmtCheck = r => {
@@ -1149,7 +1155,7 @@ async function openBookManager() {
     html: `<div style="text-align:left;font-size:.85rem">
       <div style="background:#eef2ff;border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.78rem;color:#3730a3;line-height:1.6">
         ชีทที่เชื่อมต้อง<b>แชร์ให้บัญชีนี้แบบ "ผู้แก้ไข"</b>: <b>${esc(st.owner || 'บัญชีเจ้าของระบบ (บัญชีที่ Deploy)')}</b><br>
-        ทุกชีทต้องมีแท็บ <b>สรุปรายงาน, รายการวัสดุ, รับเข้า, เบิก</b> เหมือนต้นแบบ · ลบคลังไม่ได้ ใช้ "ซ่อน" แทน (ข้อมูลในชีทยังอยู่)</div>
+        ทุกชีทต้องมีแท็บ <b>สรุปรายงาน, รายการวัสดุ, รับเข้า, เบิก</b> เหมือนต้นแบบ<br><b>ซ่อน</b> = ไม่ขึ้นในเมนู (แสดงกลับได้) · <b>ถอดออก</b> = เอาออกจากระบบ แต่<b>ไฟล์ชีทไม่ถูกลบ</b> เชื่อมกลับได้ด้วยลิงก์ (ถ้ามีคำขอค้างรออนุมัติ จะถอดไม่ได้)</div>
       <div id="bm_list" style="max-height:38vh;overflow:auto;padding:2px"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">
         <button type="button" id="bm_add" style="${btn('padding:6px 12px')}">+ เชื่อมชีทที่มีอยู่</button>
@@ -1162,7 +1168,8 @@ async function openBookManager() {
         <div id="bm_tmsg" style="font-size:.78rem;line-height:1.5;margin-top:4px"></div>
         <div style="display:flex;gap:6px;margin-top:8px"><input id="bm_newname" class="inp" maxlength="40" placeholder="ชื่อคลังใหม่" style="flex:1;min-width:0">
           <button type="button" id="bm_new" style="${btn('padding:6px 12px;background:#eef2ff;border-color:#a5b4fc')}">+ สร้างจากต้นแบบ</button></div>
-        <div style="font-size:.72rem;color:#64748b;margin-top:4px">คัดลอกไฟล์ใหม่ไปไว้ใน Google Drive ของบัญชีเจ้าของระบบ และเพิ่มเข้ารายการให้ทันที (ใช้เวลาประมาณ 10–30 วินาที)</div>
+        <input id="bm_share" class="inp" value="${esc(st.notifyEmail || '')}" placeholder="แชร์ไฟล์ให้อีเมล (คั่นด้วย , ไม่เกิน 5)" style="margin-top:6px;font-size:.78rem;width:100%">
+        <div style="font-size:.72rem;color:#64748b;margin-top:4px;line-height:1.6">ไฟล์ที่สร้างจะ<b>เป็นของบัญชี ${esc(st.owner || 'เจ้าของระบบ (บัญชีที่ Deploy)')}</b> (อยู่ใน Google Drive ของบัญชีนั้น) ใส่อีเมลด้านบนเพื่อแชร์ให้เปิด/แก้ไขไฟล์ได้โดยตรง (Google จะส่งอีเมลแจ้ง) · ไม่แชร์ก็ได้ ระบบนี้ใช้งานได้ทุกคนอยู่แล้ว · ใช้เวลาประมาณ 10–30 วินาที</div>
       </div></div>`,
     didOpen: () => {
       paint();
@@ -1172,6 +1179,11 @@ async function openBookManager() {
         sync(); const i = +t.dataset.i, act = t.dataset.act;
         if (act === 'hide') { rows[i].hidden = !rows[i].hidden; if (rows[i].hidden) rows[i].job = false; paint(); return; }
         if (act === 'del') { rows.splice(i, 1); paint(); return; }
+        if (act === 'remove') {
+          if (!confirm('ถอดคลัง "' + rows[i].name + '" ออกจากระบบ?\n\n• ไฟล์ Google Sheets ไม่ถูกลบ ข้อมูลไม่หาย\n• ผู้ใช้จะไม่เห็นคลังนี้อีก\n• เชื่อมกลับได้ทุกเมื่อด้วยลิงก์ชีท\n\n(จะมีผลเมื่อกด "บันทึกรายการคลัง")')) return;
+          rows[i].removed = true; rows[i].job = false; paint(); return;
+        }
+        if (act === 'unremove') { rows[i].removed = false; paint(); return; }
         if (act === 'check') {
           setMsg(i, '<span style="color:#64748b">กำลังตรวจ...</span>'); t.disabled = true;
           try { setMsg(i, fmtCheck(await api('checkBook', Object.assign(admArgs(), { id: rows[i].id })))); } catch (e) { setMsg(i, '<span style="color:#dc2626">✗ ' + esc((e && e.message) || e) + '</span>'); }
@@ -1193,9 +1205,9 @@ async function openBookManager() {
         if (!name) { tmsg('<span style="color:#dc2626">✗ ตั้งชื่อคลังใหม่ก่อน</span>'); return; }
         const b = $('bm_new'); b.disabled = true; tmsg('<span style="color:#64748b">กำลังคัดลอกชีทต้นแบบ... อย่าปิดหน้านี้</span>');
         try {
-          const res = await api('adminCreateBook', Object.assign(admArgs(), { name: name }));
+          const res = await api('adminCreateBook', Object.assign(admArgs(), { name: name, share: $('bm_share').value }));
           rows.push({ key: res.created.key, name: res.created.name, id: res.created.id, hidden: false, saved: true, job: false, msgHtml: '<span style="color:#16a34a">✓ สร้างแล้ว</span> <a href="' + esc(res.created.url) + '" target="_blank" rel="noopener" style="color:#4f46e5">เปิดชีท</a>' });
-          $('bm_newname').value = ''; paint(); tmsg('<span style="color:#16a34a">✓ ' + esc(res.message) + '</span>');
+          $('bm_newname').value = ''; paint(); tmsg('<span style="color:#16a34a">✓ ' + esc(res.message) + '</span>' + ((res.created.shareFailed || []).length ? '<br><span style="color:#d97706">⚠ แชร์ให้ไม่สำเร็จ: ' + res.created.shareFailed.map(esc).join(', ') + ' (ตรวจอีเมล หรือแชร์เองจาก Google Drive)</span>' : ''));
           const l = $('bm_list'); l.scrollTop = l.scrollHeight;
         } catch (e) { tmsg('<span style="color:#dc2626">✗ ' + esc((e && e.message) || e) + '</span>'); }
         b.disabled = false;
@@ -1205,8 +1217,9 @@ async function openBookManager() {
       sync();
       try {
         return await api('adminSaveBooks', Object.assign(admArgs(), {
-          books: rows.map(x => ({ key: x.key || '', name: x.name, id: x.id, hidden: !!x.hidden })),
-          jobIndex: rows.findIndex(x => x.job) }));
+          books: rows.filter(x => !x.removed).map(x => ({ key: x.key || '', name: x.name, id: x.id, hidden: !!x.hidden })),
+          remove: rows.filter(x => x.removed && x.saved).map(x => x.key),
+          jobIndex: rows.filter(x => !x.removed).findIndex(x => x.job) }));
       } catch (e) { Swal.showValidationMessage(esc((e && e.message) || e)); return false; }
     }
   });
@@ -1381,13 +1394,13 @@ function spPaintMats() {
 function spRefresh() { try { if (typeof SP !== 'undefined' && SP.open && SP.tab === 'mats') spPaintMats(); } catch (e) {} }
 async function spPaintBooks() {
   const box = $('sp_p_books'); if (!box) return;
-  box.innerHTML = `<div class="sp-card"><h3><i class="fa-solid fa-database"></i>คลัง (ชีทข้อมูล)</h3><div class="sp-sub">แต่ละคลังคือ Google Sheets 1 ไฟล์ · ไม่มีการลบคลัง ใช้ "ซ่อน" แทน (ข้อมูลในชีทยังอยู่ครบ)</div><div id="sp_books" class="sp-help" style="margin-top:12px">กำลังโหลด...</div>
+  box.innerHTML = `<div class="sp-card"><h3><i class="fa-solid fa-database"></i>คลัง (ชีทข้อมูล)</h3><div class="sp-sub">แต่ละคลังคือ Google Sheets 1 ไฟล์ · "ซ่อน" = ไม่ขึ้นในเมนู · "ถอดออก" = เอาออกจากระบบ (ไฟล์ชีทไม่ถูกลบ)</div><div id="sp_books" class="sp-help" style="margin-top:12px">กำลังโหลด...</div>
     <div class="sp-actions"><button type="button" class="sp-btn pri" onclick="spManageBooks()"><i class="fa-solid fa-pen-to-square"></i>จัดการคลัง / เชื่อมชีท / สร้างจากต้นแบบ</button></div></div>`;
   try {
     const b = await api('getBookAdmin', admArgs());
     if (!SP.open || !$('sp_books')) return;
-    const list = (b.books || []).map(x => `<div class="sp-brow${x.hidden ? ' off' : ''}"><i class="fa-solid fa-database"></i><div class="sp-bn">${esc(x.name)}</div>${x.hidden ? '<span class="sp-tag">ซ่อน</span>' : ''}${x.key && x.key === b.jobBookKey ? '<span class="sp-tag job">ใบงานเข้าเล่ม</span>' : ''}</div>`).join('');
-    spSet('sp_books', (list || '<div class="sp-empty">ยังไม่มีคลัง กดปุ่มด้านล่างเพื่อเชื่อมชีท</div>') + `<div class="sp-help" style="margin-top:8px">ชีทต้นแบบสำหรับสร้างคลังใหม่: ${b.templateId ? 'ตั้งไว้แล้ว' : 'ยังไม่ได้ตั้ง'}</div>`);
+    const list = (b.books || []).map(x => `<div class="sp-brow${x.hidden ? ' off' : ''}"><i class="fa-solid fa-database"></i><div class="sp-bn">${esc(x.name)}</div>${x.hidden ? '<span class="sp-tag">ซ่อน</span>' : ''}${x.key && x.key === b.jobBookKey ? '<span class="sp-tag job">ใบงานเข้าเล่ม</span>' : ''}${/^[A-Za-z0-9_-]{20,}$/.test(x.id || '') ? `<a class="sp-tag" style="background:#eef2ff;color:#4338ca" href="https://docs.google.com/spreadsheets/d/${esc(x.id)}/edit" target="_blank" rel="noopener">เปิดชีท</a>` : ''}</div>`).join('');
+    spSet('sp_books', (list || '<div class="sp-empty">ยังไม่มีคลัง กดปุ่มด้านล่างเพื่อเชื่อมชีท</div>') + `<div class="sp-help" style="margin-top:8px">ชีทต้นแบบสำหรับสร้างคลังใหม่: ${b.templateId ? 'ตั้งไว้แล้ว' : 'ยังไม่ได้ตั้ง'}<br>ไฟล์ที่สร้างจากต้นแบบจะเป็นของบัญชี <b>${esc(b.owner || 'เจ้าของระบบ')}</b> ถ้าเปิดแล้วขึ้น "ขอสิทธิ์เข้าถึง" ให้ใช้บัญชีนั้น หรือให้เจ้าของแชร์ไฟล์ให้ (ระบบใช้งานได้ปกติโดยไม่ต้องมีสิทธิ์ในไฟล์)</div>`);
   } catch (e) { spSet('sp_books', '<span style="color:#e11d48">โหลดไม่สำเร็จ: ' + esc((e && e.message) || e) + '</span>'); }
 }
 async function spManageBooks() { await openBookManager(); if (SP.open) spPaintBooks(); }
