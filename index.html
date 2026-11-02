@@ -224,6 +224,15 @@ dialog.cfd{width:min(92vw,400px)}
 @media(min-width:761px){dialog.pop{width:min(92vw,400px);margin:76px 28px auto auto}}
 @media(max-width:760px){.cfb{flex-direction:column-reverse}.cfb .btn{flex:none;width:100%}}
 @media(max-width:820px){#qs{position:sticky;bottom:calc(88px + env(safe-area-inset-bottom));z-index:4;box-shadow:0 10px 24px #0003}}
+dialog.lgd{padding:0!important;width:min(92vw,380px)}
+.brl2{display:grid;gap:10px;max-height:52vh;overflow:auto}
+.bk{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:2px solid transparent;background:var(--tint);border-radius:18px;padding:12px 14px;font:inherit;color:var(--ink);cursor:pointer}.bk:hover{border-color:var(--ac)}.bk.cur{border-color:var(--ac);background:#fff}
+.bk .bi{width:42px;height:42px;border-radius:14px;background:var(--ac);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}.bk b{flex:1;min-width:0}.bk small{color:var(--mut);flex:none}
+.pdots{display:flex;gap:16px;justify-content:center;margin:20px 0 8px}.pdots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--mut);transition:.12s}.pdots i.on{background:var(--ac);border-color:var(--ac);transform:scale(1.15)}
+.pdots.shake{animation:shk .35s}@keyframes shk{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:290px;margin:6px auto 0}
+.pad button{height:62px;border:0;border-radius:20px;background:var(--tint);font:600 24px "IBM Plex Sans Thai",sans-serif;color:var(--ink);cursor:pointer}.pad button:active{background:var(--ac);color:#fff}.pad button.x{background:none;font-size:20px}
+@media(prefers-reduced-motion:reduce){.pdots.shake{animation:none}}
 </style>
 </head>
 <body>
@@ -276,7 +285,13 @@ dialog.cfd{width:min(92vw,400px)}
 
 <dialog id="ed"><b id="edN"></b><label>จำนวน</label><input id="edQ" type="number" inputmode="numeric"><label>วันหมดอายุ</label><input id="edD" type="date"><label>สถานะเคลม</label><div class="chips" id="edC"></div>
  <div class="row" style="margin-top:14px"><button class="btn alt" onclick="ed.close()">ยกเลิก</button><button class="btn" onclick="W(this,saveEdit)">บันทึกการแก้ไข</button></div></dialog>
-<dialog id="lg"><b>เลือกสาขา</b><label for="brSel">สาขา</label><select id="brSel"></select><label for="pw">รหัสสาขา (สาขาที่เคยเข้าแล้วเว้นว่างได้)</label><input id="pw" type="password" autocomplete="off"><button class="btn big" onclick="W(this,login)">เข้าใช้งาน</button><button class="btn alt big" style="margin-top:8px" onclick="lg.close();go('set')">ตั้งค่าแอดมิน</button></dialog>
+<dialog id="lg" class="lgd"><div class="in">
+ <div id="lgA"><h3 style="margin:0 0 4px;font-size:21px">เลือกสาขา</h3><div class="mut" style="margin-bottom:14px">แตะสาขาที่ต้องการใช้งาน</div><div id="brL" class="brl2"></div><button class="btn alt big" style="margin-top:14px" onclick="$('lg').close();go('set')">ตั้งค่าแอดมิน</button></div>
+ <div id="lgB" class="hide"><button class="chipb" onclick="pinBack()">← เปลี่ยนสาขา</button><h3 id="pinN" style="margin:14px 0 2px;font-size:21px;text-align:center"></h3><div class="mut" id="pinH" style="text-align:center">ใส่รหัส 4 หลัก</div>
+  <div id="pinP"><div class="pdots" id="pdots"><i></i><i></i><i></i><i></i></div><div id="pinE" style="min-height:22px;color:#c8102e;text-align:center;font-size:14px"></div><div class="pad" id="pad"></div></div>
+  <div id="pinT" class="hide"><input id="pw" type="password" autocomplete="off" placeholder="รหัสสาขา" style="margin-top:14px"><div id="pinE2" style="min-height:22px;color:#c8102e;font-size:14px;margin-top:6px"></div><button class="btn big" style="margin-top:6px" onclick="W(this,()=>tryLogin($('pw').value))">เข้าใช้งาน</button></div>
+  <div style="text-align:center;margin-top:14px"><button class="chipb" id="pinM" onclick="pinMode(!PTXT)">ใช้รหัสแบบตัวอักษร</button></div></div>
+</div></dialog>
 <dialog id="sc" class="scan">
  <div class="row" style="margin-bottom:10px"><div style="font-weight:600"><i class="dot" id="sdot" style="--c:#7f5cff"></i><span id="sst">กำลังสแกน</span></div>
   <button class="ib fit" id="bp" onclick="toggleBeep()" aria-label="เปิดปิดเสียงบี๊บ">🔊</button><button class="ib fit hide" id="tq" onclick="torch()" aria-label="ไฟฉาย">🔦</button><button class="ib fit" onclick="stopScan()" aria-label="ปิดกล้อง">✕</button></div>
@@ -325,14 +340,29 @@ async function api(b){
  if(!BR||!CODE){openBr();throw new Error('เลือกสาขาและใส่รหัสก่อน')}
  const r=await post({branch:BR,code:CODE,...b});
  if(!r.ok){if(r.auth){CODE='';localStorage.removeItem('code');delete CODES[BR];localStorage.setItem('codes',JSON.stringify(CODES));openBr()}throw new Error(r.error)}return r}
+let PK='',PN2='',PIN='',PTXT=0,BL=[],PBUSY=0;
 async function openBr(){
- $('lg').showModal();$('brSel').innerHTML='<option>กำลังโหลดสาขา...</option>';
- try{const r=await post({action:'branches'});$('brSel').innerHTML=r.branches.map(x=>`<option value="${esc(x.key)}">${esc(x.name)}</option>`).join('');if(BR)$('brSel').value=BR}catch(e){toast('เชื่อมต่อระบบไม่ได้ ตรวจ apiUrl ใน config.js')}}
-async function login(){
- const k=$('brSel').value,pw=$('pw').value||CODES[k]||'';
- try{const r=await post({branch:k,code:pw,action:'list'});if(!r.ok)throw new Error(r.error);
-  BR=k;CODE=pw;CODES[k]=pw;localStorage.setItem('codes',JSON.stringify(CODES));BRN=$('brSel').selectedOptions[0].text;localStorage.setItem('br',BR);localStorage.setItem('code',CODE);localStorage.setItem('brn',BRN);
-  $('pw').value='';$('lg').close();D=r;loaded=1;drawAll();toast('เข้าสาขา '+BRN+' แล้ว')}catch(e){toast(e.message)}}
+ PK='';$('lgA').classList.remove('hide');$('lgB').classList.add('hide');if(!$('lg').open)$('lg').showModal();
+ $('brL').innerHTML='<div class="mut">กำลังโหลดสาขา...</div>';
+ try{const r=await post({action:'branches'});BL=r.branches;
+  $('brL').innerHTML=BL.map((x,i)=>`<button class="bk ${x.key==BR?'cur':''}" onclick="pickBr(${i})"><span class="bi">${esc([...x.name][0]||'?')}</span><b>${esc(x.name)}</b><small>${x.key==BR?'กำลังใช้':CODES[x.key]?'จำรหัสแล้ว':''}</small></button>`).join('')||'<div class="mut">ยังไม่มีสาขา ให้แอดมินเพิ่มก่อน</div>'}
+ catch(e){$('brL').innerHTML='';toast('เชื่อมต่อระบบไม่ได้ ตรวจ apiUrl ใน config.js')}}
+function pickBr(i){PK=BL[i].key;PN2=BL[i].name;if(CODES[PK]){toast('กำลังเข้า '+PN2+'...');tryLogin(CODES[PK],1)}else showPin('')}
+function showPin(err,shake){PIN='';$('lgA').classList.add('hide');$('lgB').classList.remove('hide');$('pinN').textContent=PN2;pinMode(0);drawPin();$('pinE').textContent=err||'';$('pinE2').textContent=err||'';
+ $('pad').innerHTML=[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>k===''?'<span></span>':`<button type="button" class="${k=='⌫'?'x':''}" onclick="${k=='⌫'?'pinDel()':'pinKey('+k+')'}" aria-label="${k=='⌫'?'ลบ':k}">${k}</button>`).join('');
+ if(shake){const d=$('pdots');d.classList.remove('shake');void d.offsetWidth;d.classList.add('shake');navigator.vibrate&&navigator.vibrate(120)}}
+function pinBack(){PIN='';$('lgB').classList.add('hide');$('lgA').classList.remove('hide')}
+function pinMode(t){PTXT=t?1:0;$('pinP').classList.toggle('hide',!!t);$('pinT').classList.toggle('hide',!t);$('pinM').textContent=t?'กลับไปใช้ PIN 4 หลัก':'ใช้รหัสแบบตัวอักษร';$('pinH').textContent=t?'ใส่รหัสสาขา':'ใส่รหัส 4 หลัก';if(t)setTimeout(()=>$('pw').focus(),50)}
+const drawPin=()=>document.querySelectorAll('#pdots i').forEach((e,i)=>e.classList.toggle('on',i<PIN.length));
+function pinKey(d){if(PBUSY||PIN.length>=4)return;PIN+=d;drawPin();$('pinE').textContent='';if(PIN.length==4)setTimeout(()=>tryLogin(PIN),120)}
+function pinDel(){if(PBUSY)return;PIN=PIN.slice(0,-1);drawPin()}
+$('lg').addEventListener('keydown',e=>{if($('lgB').classList.contains('hide')||PTXT)return;if(/^\d$/.test(e.key))pinKey(e.key);else if(e.key=='Backspace')pinDel()});
+async function tryLogin(code,silent){const k=PK;if(!k||!code||PBUSY)return;PBUSY=1;
+ try{const r=await post({branch:k,code,action:'list'});if(!r.ok)throw new Error(r.error);
+  BR=k;CODE=code;CODES[k]=code;BRN=PN2;localStorage.setItem('codes',JSON.stringify(CODES));localStorage.setItem('br',BR);localStorage.setItem('code',CODE);localStorage.setItem('brn',BRN);
+  $('pw').value='';$('lg').close();D=r;loaded=1;drawAll();toast('เข้าสาขา '+BRN+' แล้ว')}
+ catch(e){if(silent){delete CODES[k];localStorage.setItem('codes',JSON.stringify(CODES))}showPin(silent?'รหัสที่จำไว้ใช้ไม่ได้ ใส่ใหม่อีกครั้ง':e.message,1)}
+ finally{PBUSY=0}}
 async function load(){if(!loaded)document.body.classList.add('ldg');try{D=await api({action:'list'});loaded=1;drawAll()}catch(e){toast(e.message)}finally{document.body.classList.remove('ldg')}}
 function drawAll(){buildCL();const n=BRN||'เลือกสาขา',m=n.match(/[A-Za-z]+\d+|[A-Za-z0-9]{2,}/g);
  document.querySelectorAll('.brl').forEach(e=>e.textContent=n);$('lgb').textContent=m?m[m.length-1].slice(0,4):[...n].slice(0,3).join('');
@@ -584,7 +614,7 @@ async function admLoad(){AD=$('adm').value;let r=await adm('adminList');
  if(r.needInit){if(AD.length<4)return toast('ตั้งรหัสแอดมินอย่างน้อย 4 ตัว');r=await adm('adminInit');if(!r.ok)return toast(r.error);toast('ตั้งรหัสแอดมินแล้ว');r=await adm('adminList')}
  if(!r.ok)return toast(r.error);drawAdm(r.list)}
 function drawAdm(l){$('brs').innerHTML=l.map(b=>brCard(b)).join('')+'<button class="btn alt big" onclick="this.insertAdjacentHTML(\'beforebegin\',brCard({key:\'\',name:\'\',id:\'\'}))">＋ เพิ่มสาขา</button>'+'<div class="row" style="margin-top:14px"><input id="npw" type="password" placeholder="รหัสแอดมินใหม่"><button class="btn alt fit" onclick="W(this,admPw)">เปลี่ยนรหัสแอดมิน</button></div>'}
-const brCard=b=>`<div class="card" style="box-shadow:none;border:1px solid var(--ln);margin-top:12px" data-k="${esc(b.key)}"><label>ชื่อสาขา</label><input class="bn" value="${esc(b.name)}"><label>ลิงก์หรือ ID ของสเปรดชีตสาขา (ว่าง = ชีทที่ผูกกับสคริปต์)</label><input class="bi" value="${esc(b.id)}"><label>รหัสสาขา ${b.hasCode?'(เว้นว่าง = ไม่เปลี่ยน)':'(ยังไม่ได้ตั้ง ต้องใส่)'}</label><input class="bc2" type="password" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn sm" onclick="W(this,()=>svBr(this))">บันทึก</button><button class="btn del sm" onclick="W(this,()=>dlBr(this))">ลบสาขา</button>${b.key?'<button class="btn alt sm" onclick="W(this,()=>shLoad(this))">จัดการชีท</button>':''}</div><div class="shp"></div></div>`;
+const brCard=b=>`<div class="card" style="box-shadow:none;border:1px solid var(--ln);margin-top:12px" data-k="${esc(b.key)}"><label>ชื่อสาขา</label><input class="bn" value="${esc(b.name)}"><label>ลิงก์หรือ ID ของสเปรดชีตสาขา (ว่าง = ชีทที่ผูกกับสคริปต์)</label><input class="bi" value="${esc(b.id)}"><label>PIN รหัสสาขา (ตัวเลข 4 หลัก) ${b.hasCode?'(เว้นว่าง = ไม่เปลี่ยน)':'(ยังไม่ได้ตั้ง ต้องใส่)'}</label><input class="bc2" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN 4 หลัก เช่น 1234"><div class="row" style="margin-top:10px"><button class="btn sm" onclick="W(this,()=>svBr(this))">บันทึก</button><button class="btn del sm" onclick="W(this,()=>dlBr(this))">ลบสาขา</button>${b.key?'<button class="btn alt sm" onclick="W(this,()=>shLoad(this))">จัดการชีท</button>':''}</div><div class="shp"></div></div>`;
 const shPrev=r=>Object.entries(r.preview||{}).map(([t,rows])=>`<div class="mut" style="margin-top:10px">ตัวอย่างที่อ่านได้จากชีท <b>${esc(t)}</b></div>`+(rows.length?`<div style="overflow-x:auto"><table><tr><th>บาร์โค้ด</th><th>ชื่อ</th><th>จำนวน</th><th>หมดอายุ</th><th>เคลม</th></tr>${rows.map(x=>'<tr>'+x.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>').join('')}</table></div>`:'<div class="mut">ยังไม่มีข้อมูลในชีทนี้</div>')).join('');
 const shView=(k,r)=>`<div class="row" style="margin:8px 0"><button class="btn sm" onclick="W(this,()=>shDet(this))">🔍 ตรวจชีทอัตโนมัติ</button></div>`+shPrev(r)+`<div class="mut" style="margin-top:12px">ติ๊ก "สต็อก" ได้หลายชีท · เลือก "ฐานข้อมูล" 1 ชีท</div>`+r.sheets.map(n=>`<div class="sr"><b>${esc(n)}</b><div class="row"><label><input type="checkbox" class="shs" value="${esc(n)}" ${r.tabs.includes(n)?'checked':''}> สต็อก</label><label><input type="radio" name="db_${k}" class="shd" value="${esc(n)}" ${r.db==n?'checked':''}> ฐานข้อมูล</label><button class="btn alt sm fit" data-n="${esc(n)}" onclick="W(this,()=>shRen(this))">เปลี่ยนชื่อ</button></div></div>`).join('')+`<div class="row" style="margin-top:10px"><input class="shn" placeholder="ชื่อชีทใหม่"><button class="btn alt sm fit" onclick="W(this,()=>shAdd(this))">＋ สร้างชีท</button></div><button class="btn sm" style="margin-top:10px" onclick="W(this,()=>shSet(this))">บันทึกการเลือกชีท</button><label style="margin-top:14px">ตัวเลือกสถานะเคลมเพิ่มเอง (คั่นด้วย , ) · ระบบดึงจากค่าในชีทให้อัตโนมัติอยู่แล้ว</label><div class="row"><input class="shc" value="${esc((r.claims||[]).join(', '))}" placeholder="เช่น Lotus's, Makro"><button class="btn alt sm fit" onclick="W(this,()=>shCl(this))">บันทึก</button></div>`;
 const shRun=async(el,b)=>{const c=el.closest('[data-k]'),r=await adm(b.action,{key:c.dataset.k,...b});if(!r.ok)return toast(r.error);c.querySelector('.shp').innerHTML=shView(c.dataset.k,r);toast('บันทึกแล้ว');if(BR&&CODE&&c.dataset.k==BR)load()};
