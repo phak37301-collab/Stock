@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>สต็อกวันหมดอายุ</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <script src="config.js"></script>
 <style>
 :root{--s1:#4338ca;--s2:#7c3aed;--s3:#c084fc;--tint:#eceeff;--ink:#1c2240;--mut:#7a84a6;--card:#fff;--ac:#5b5bf0;--ac2:#7f5cff;--ln:#e6eaf4;--sh:0 8px 28px #3b4a9a14}
@@ -150,33 +151,65 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
 .lc{border:1px solid #e9ecfb;border-left:5px solid var(--c,#ddd);box-shadow:0 4px 14px #4f46e50f}
 summary{cursor:pointer;font-weight:600;list-style:none}summary::-webkit-details-marker{display:none}
 @media(max-width:760px){.stepc,.card{margin-bottom:12px}}
+
+/* ===== UI v4: mono / rail nav / grouped list ===== */
+:root{--ac:#111827;--ac2:#1f2937;--tint:#f2f3f5;--ink:#101216;--mut:#7b8290;--ln:#e8eaee}
+body{font:15px/1.5 "IBM Plex Sans Thai",Prompt,system-ui,sans-serif;background:#e8ecef;color:var(--ink)}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#shell{display:grid;grid-template-columns:96px minmax(0,1fr);margin:12px;background:#fff;border-radius:28px;min-height:calc(100vh - 24px)}
+#nav{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 0}
+#nav .lgb{width:52px;height:52px;border:0;border-radius:18px;background:#111;color:#fff;font:700 15px "IBM Plex Sans Thai",sans-serif;margin-bottom:18px;cursor:pointer}
+#nav button[data-p]{width:50px;height:50px;border:0;border-radius:16px;background:none;color:#5b6370;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font:600 14px "IBM Plex Sans Thai",sans-serif}
+#nav button[data-p] span{display:none}#nav button[data-p].on{background:#fff;color:#111;box-shadow:0 0 0 1px var(--ln),0 6px 16px #0000001a}
+#main{padding:34px 34px 48px;min-width:0}.ph{margin-bottom:18px}.ph h1,.hdr h1{font-size:30px;line-height:1.25;margin:0 0 2px;font-weight:600}.sech{font-size:20px;margin:26px 0 12px}
+.lgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start}#dp{display:none;background:#f6f7f9;border-radius:24px;padding:24px}
+@media(min-width:1000px){.lgrid{grid-template-columns:minmax(0,1fr) 340px}#dp{display:block;position:sticky;top:24px}.rw.on{background:var(--tint)}}
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:18px}.hdr .ht{flex:1;min-width:0}
+.srch{display:flex;align-items:center;gap:8px;background:var(--tint);border-radius:99px;padding:0 5px 0 16px;height:46px;flex:1;max-width:340px;color:var(--mut)}
+.srch input{background:none;border:0;padding:0;height:100%;border-radius:0;flex:1;min-width:0;font-size:15px}.srch input:focus-visible{outline:0}
+.srch .sb{width:36px;height:36px;border-radius:50%;border:0;background:#111;color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}.srch .sb svg{width:19px;height:19px}
+.bell{position:relative;width:46px;height:46px;border-radius:50%;border:0;background:var(--tint);display:grid;place-items:center;cursor:pointer;flex:none;color:var(--ink)}
+.bell b{position:absolute;right:-3px;top:-3px;min-width:20px;height:20px;border-radius:99px;background:#c8102e;color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px}.bell.m,.mtop{display:none}
+.chipb{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--tint);border-radius:99px;padding:10px 16px;font:600 15px "IBM Plex Sans Thai",sans-serif;color:var(--ink);cursor:pointer}.gdot{width:8px;height:8px;border-radius:50%;background:#1f9d55}
+.cc{background:#f6f7f9;border-radius:22px;padding:18px 20px;margin-bottom:18px}.ccl{display:flex;justify-content:space-between;margin-bottom:12px}.ccl span{color:var(--mut);font-size:13px}
+.cbs{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;height:150px}.cb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}.cb i{display:block;width:100%;max-width:56px;border-radius:8px 8px 3px 3px}.cb small{font-weight:600;font-size:12px}.cb em{font-style:normal;font-size:12px;color:var(--mut)}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}.tab{flex:none;border:0;border-radius:99px;padding:9px 16px;background:var(--tint);color:#3a404a;font:500 14px "IBM Plex Sans Thai",sans-serif;cursor:pointer}.tab.on{background:#111;color:#fff}
+.fbx{margin-bottom:6px}.fbx summary{display:inline-block;background:var(--tint);padding:8px 14px;border-radius:99px;font-size:14px;font-weight:500}.fbx details>:not(summary){margin-top:8px}
+.grp{display:flex;gap:10px;align-items:baseline;margin:20px 0 4px;padding:0 12px}.grp b{font-size:15px}.grp span{color:var(--mut);font-size:14px}
+.rw{display:grid;grid-template-columns:56px minmax(0,1fr) 130px 100px 84px;gap:0 14px;align-items:center;width:100%;text-align:left;border:0;background:none;border-radius:16px;padding:12px;font:inherit;color:inherit;cursor:pointer}.rw:hover{background:#f7f8fa}
+.dn{font-size:34px;font-weight:600;text-align:center;line-height:1}.nm2{min-width:0}.nm2 b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm2 small{color:var(--mut);font-size:13px}
+.mcs{display:flex;gap:4px;margin-top:3px}.mcs .pill{font-size:11px;padding:0 8px}.bar2{height:5px;border-radius:9px;background:#e6e8ec;overflow:hidden}.bar2 i{display:block;height:100%;border-radius:9px}
+.dt2{color:#555c68;font-size:14px}.qt{text-align:right;white-space:nowrap}.qt b{font-size:22px;font-weight:600}.qt small{color:var(--mut);margin-left:3px}
+#dp h2,.dh{font-size:22px;margin:2px 0;font-weight:600}.bigd{font-size:72px;line-height:1;font-weight:700;margin:18px 0 14px}.bigd small{font-size:16px;color:var(--mut);font-weight:400;margin-left:8px}
+.kv{display:flex;justify-content:space-between;padding:8px 0;font-size:14px}.kv span{color:var(--mut)}
+.lot{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:12px;border-radius:16px;background:#fff;margin-top:8px;border:1px solid var(--ln)}.lot .lq{text-align:right}.lot .la{grid-column:1/-1;display:flex;gap:8px}
+.btn{background:var(--ac);border-radius:99px;font-weight:600}.btn.alt{background:var(--tint);color:var(--ink)}.btn.del{background:#fdecee;color:#c8102e}
+input,select{background:var(--tint);border:1px solid transparent;border-radius:14px}.card,.stepc{box-shadow:none;border:1px solid var(--ln);border-radius:22px}.sh i{background:#111}.kp .hero{background:#111}.bcin{background:#fff}
+@media(max-width:820px){
+#shell{display:block;margin:0;border-radius:0;min-height:100vh}
+#nav{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));height:64px;border-radius:99px;background:#111;flex-direction:row;justify-content:space-around;padding:8px;gap:4px;z-index:6;box-shadow:0 12px 30px #0003}
+#nav .lgb{display:none}#nav button[data-p]{flex:1;width:auto;height:48px;border-radius:99px;color:#c5cad3}#nav button[data-p].on{flex:2.2;background:#fff;color:#111;box-shadow:none}#nav button[data-p].on span{display:inline}
+#main{padding:14px 16px calc(100px + env(safe-area-inset-bottom))}.mtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.bell.m{display:grid}.bell.d,.cc{display:none}
+.hdr{flex-wrap:wrap;gap:12px}.hdr .ht{flex:1 1 100%}.srch{flex:1 1 100%;max-width:none}.ph h1,.hdr h1{font-size:26px}
+.rw{grid-template-columns:46px minmax(0,1fr) auto;grid-template-areas:"dn nm qt" "dn bar qt";gap:4px 12px;padding:10px 4px}.dn{grid-area:dn;font-size:30px}.nm2{grid-area:nm}.bar2{grid-area:bar}.qt{grid-area:qt}.dt2{display:none}.grp{padding:0 4px}
+#toast{bottom:calc(100px + env(safe-area-inset-bottom))}}
+@media print{#nav{display:none!important}#shell{margin:0}}
 </style>
 </head>
 <body>
 <div id="bar"></div>
-<nav id="side"><div class="lg">📦</div><button data-p="home" data-l="ภาพรวม" class="on" title="ภาพรวม">▦</button><button data-p="list" data-l="รายการ" title="รายการ">☰</button><button class="fab" data-l="สแกน" onclick="scan()" title="สแกน">▣</button><button data-p="add" data-l="เพิ่ม" title="เพิ่มสินค้า">＋</button><button data-p="rep" data-l="รายงาน" title="รายงาน">▤</button><button data-p="set" data-l="ตั้งค่า" title="ตั้งค่า">⚙</button></nav>
-<main>
-<div class="top"><div style="flex:1"><h2 id="hi">สวัสดี</h2><div class="mut" id="sub"></div></div><button class="pillbtn dsk" onclick="scan()">▣ สแกน</button><button class="pillbtn" id="brBtn" onclick="openBr()">เลือกสาขา</button><button class="pillbtn" onclick="W(this,load)">รีเฟรช</button></div>
-
-<section id="home"><div class="banner" id="bn"><div><h3 id="bn1">กำลังโหลดข้อมูล…</h3><p id="bn2"></p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn fit" onclick="scan('add')">▣ สแกนเพิ่มสินค้า</button><button class="btn o fit" onclick="go('list')">ดูรายการ</button></div></div><div class="art" id="bnA">📦</div></div>
-<div class="kp">
- <div class="card hero k"><i class="ic">⏳</i><span id="k1t"></span><b id="k1"></b><small id="k1s"></small></div>
- <div class="card k"><i class="ic" style="--c:#ef4444">🚨</i><span class="mut">หมดอายุแล้ว / ตัดเบิก</span><b id="k4"></b><small class="mut" id="k4s"></small></div>
- <div class="card k"><i class="ic" style="--c:#6366f1">📦</i><span class="mut">จำนวนล็อตทั้งหมด</span><b id="k2"></b></div>
- <div class="card k"><i class="ic" style="--c:#22c7a1">🧮</i><span class="mut">จำนวนชิ้นรวม</span><b id="k3"></b></div>
-</div><div class="g">
- <div class="card wide"><h3>หมดอายุรายเดือน (ชิ้น)</h3><div id="bars" style="display:flex;gap:2.5%;height:210px"></div></div>
- <div class="card"><h3>แยกตามสถานะ</h3><svg id="dn" viewBox="0 0 100 100" width="150" style="display:block;margin:auto"></svg><div id="lg2" style="margin-top:8px"></div></div>
- <div class="card"><h3>ใกล้หมดอายุมากที่สุด (ชิ้น)</h3><div id="tp5"></div></div><div class="card wide"><h3>ต้องจัดการก่อน</h3><div class="dsk" style="overflow-x:auto"><table id="top"></table></div><div class="mob" id="topc"></div></div>
-</div></section>
-
-<section id="list" class="hide">
- <div class="lv" id="lv"></div>
- <div class="card fbx" id="fb1"></div>
- <div class="card"><div class="row" style="margin-bottom:10px"><input id="q" placeholder="ค้นหาชื่อหรือบาร์โค้ด" oninput="drawList()"><button class="btn fit" onclick="scan('find')">▣ สแกน</button></div><div class="dsk" style="overflow-x:auto"><table id="tbl"></table></div><div class="mob" id="cards"></div></div>
-</section>
-
-<section id="add" class="hide"><div class="sq"><div>
+<div id="shell"><nav id="nav"><button class="lgb" id="lgb" onclick="bmenu()" aria-label="เมนูสาขา">B</button>
+ <button data-p="add" title="เพิ่มสินค้า"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/></svg><span>สแกน</span></button><button data-p="stat" title="สถิติและรายงาน"><svg class="i" viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-7"/></svg><span>สถิติ</span></button><button data-p="list" class="on" title="รายการ"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg><span>รายการ</span></button></nav>
+<div id="main">
+<section id="list"><div class="mtop"><button class="chipb" onclick="bmenu()"><i class="gdot"></i><span class="brl">สาขา</span> ▾</button><button class="bell m" onclick="bellTap()" aria-label="แจ้งเตือน"><svg class="i" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0"/></svg><b class="bn">0</b></button></div>
+<div class="lgrid"><div>
+ <div class="hdr"><div class="ht"><h1>รายการทั้งหมด</h1><div class="mut" id="lsub"></div></div>
+  <div class="srch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="q" placeholder="ค้นหาหรือยิงบาร์โค้ด" oninput="drawList()"><button class="sb" onclick="scan('find')" aria-label="สแกนค้นหา"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/></svg></button></div>
+  <button class="bell d" onclick="bellTap()" aria-label="แจ้งเตือน"><svg class="i" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0"/></svg><b class="bn">0</b></button></div>
+ <div class="cc"><div class="ccl"><b>ชิ้นที่จะหมดอายุใน 8 วันข้างหน้า</b><span id="c8t"></span></div><div class="cbs" id="c8"></div></div>
+ <div class="tabs" id="tabs"></div><div class="fbx" id="fb1"></div><div id="lst"></div></div>
+ <aside id="dp"></aside></div></section>
+<section id="add" class="hide"><div class="ph"><h1>เพิ่มสินค้า</h1><div class="mut">สแกนหรือพิมพ์ชื่อ แล้วเข้าคิวบันทึกทีเดียว</div></div><div class="sq"><div>
  <div class="stepc"><div class="sh"><i>1</i><b>สินค้า</b></div>
   <div class="row"><input id="bc" class="bcin" autocomplete="off" placeholder="พิมพ์ชื่อ หรือบาร์โค้ดบางส่วน" oninput="SEL=null;lookup()"><button class="btn fit" style="padding:15px 16px" onclick="scan('add')">▣ สแกน</button></div>
   <div id="sug"></div><div id="pk" class="pk hide"></div></div>
@@ -188,20 +221,28 @@ summary{cursor:pointer;font-weight:600;list-style:none}summary::-webkit-details-
   <div id="tabRow" class="hide"><label for="tabSel">บันทึกลงชีท</label><select id="tabSel"></select></div></div>
  <button class="btn big" style="margin-top:0" onclick="queue()">＋ เข้าคิว</button></div>
  <div class="card qcard e0" id="qcard"><h3>🧾 คิวรอบันทึก <small id="qn"></small></h3><div id="ql"></div><button class="btn big" id="qs" onclick="W(this,saveQ)">บันทึกทั้งหมดเข้าชีต</button></div></div></section>
-
-<section id="rep" class="hide">
+<section id="stat" class="hide"><div class="ph"><h1>สถิติและรายงาน</h1><div class="mut">ภาพรวมสต็อกและรายงานตามวันหมดอายุ</div></div>
+<div id="bn" class="hide"><b id="bn1"></b><i id="bn2"></i><i id="bnA"></i></div><div class="kp">
+ <div class="card hero k"><i class="ic">⏳</i><span id="k1t"></span><b id="k1"></b><small id="k1s"></small></div>
+ <div class="card k"><i class="ic" style="--c:#ef4444">🚨</i><span class="mut">หมดอายุแล้ว / ตัดเบิก</span><b id="k4"></b><small class="mut" id="k4s"></small></div>
+ <div class="card k"><i class="ic" style="--c:#6366f1">📦</i><span class="mut">จำนวนล็อตทั้งหมด</span><b id="k2"></b></div>
+ <div class="card k"><i class="ic" style="--c:#22c7a1">🧮</i><span class="mut">จำนวนชิ้นรวม</span><b id="k3"></b></div>
+</div><div class="g">
+ <div class="card wide"><h3>หมดอายุรายเดือน (ชิ้น)</h3><div id="bars" style="display:flex;gap:2.5%;height:210px"></div></div>
+ <div class="card"><h3>แยกตามสถานะ</h3><svg id="dn" viewBox="0 0 100 100" width="150" style="display:block;margin:auto"></svg><div id="lg2" style="margin-top:8px"></div></div>
+ <div class="card"><h3>ใกล้หมดอายุมากที่สุด (ชิ้น)</h3><div id="tp5"></div></div><div class="card wide"><h3>ต้องจัดการก่อน</h3><div class="dsk" style="overflow-x:auto"><table id="top"></table></div><div class="mob" id="topc"></div></div>
+</div><h3 class="sech">รายงาน</h3>
  <div class="row noprint" style="margin-bottom:12px"><select id="f2" onchange="drawRep();drawExtra()"></select><button class="btn alt fit" onclick="csv()">CSV</button><button class="btn fit" onclick="print()">พิมพ์ / PDF</button></div>
  <div class="card fbx" id="fb2"></div>
  <div class="card"><div class="row" id="sum" style="flex-wrap:wrap;margin-bottom:10px"></div><div class="dsk" style="overflow-x:auto"><table id="tb"></table></div><div class="mob" id="tbc"></div></div>
 </section>
-
-<section id="set" class="hide">
+<section id="set" class="hide"><div class="ph"><button class="chipb" onclick="go('list')">← กลับ</button><h1 style="margin-top:14px">ตั้งค่า</h1></div>
  <div id="setb" class="sgrid"></div>
  <div class="card" style="margin-top:14px"><h3>🔐 จัดการสาขา (แอดมิน)</h3>
   <div class="row"><input id="adm" type="password" placeholder="รหัสแอดมิน (ครั้งแรก: ตั้งรหัสใหม่ 4 ตัวขึ้นไป)" autocomplete="off"><button class="btn fit" onclick="W(this,admLoad)">เข้าสู่โหมดแอดมิน</button></div>
   <div id="brs"></div></div>
 </section>
-</main>
+</div></div>
 
 <dialog id="ed"><b id="edN"></b><label>จำนวน</label><input id="edQ" type="number" inputmode="numeric"><label>วันหมดอายุ</label><input id="edD" type="date"><label>สถานะเคลม</label><div class="chips" id="edC"></div>
  <div class="row" style="margin-top:14px"><button class="btn alt" onclick="ed.close()">ยกเลิก</button><button class="btn" onclick="W(this,saveEdit)">บันทึกการแก้ไข</button></div></dialog>
@@ -215,6 +256,11 @@ summary{cursor:pointer;font-weight:600;list-style:none}summary::-webkit-details-
  <div class="mut" id="scmsg" style="margin:6px 0;min-height:22px;text-align:center"></div>
  <div class="row"><label class="btn alt" for="pic" style="text-align:center">ถ่ายรูปแทน</label><button class="btn hide" id="addNew">เพิ่มสินค้านี้</button></div>
  <input id="pic" type="file" accept="image/*" capture="environment" class="hide" onchange="scanPic(this)"></dialog>
+<dialog id="bm"><b id="bmt" style="font-size:18px"></b><div class="mut" style="margin-bottom:12px">เมนูสาขาและระบบ</div>
+ <button class="btn alt big" style="margin-top:8px" onclick="$('bm').close();openBr()">⇄ สลับสาขา</button><button class="btn alt big" style="margin-top:8px" onclick="$('bm').close();go('set')">⚙ ตั้งค่า</button>
+ <button class="btn alt big" style="margin-top:8px" onclick="$('bm').close();load()">↻ รีเฟรชข้อมูล</button><button class="btn alt big" style="margin-top:8px" onclick="$('bm').close();openSheet()">📄 เปิดชีต Google</button>
+ <button class="btn del big" style="margin-top:8px" onclick="$('bm').close();logout()">ออกจากสาขานี้</button><button class="btn big" style="margin-top:8px" onclick="$('bm').close()">ปิด</button></dialog>
+<dialog id="dt"><div id="dtb"></div><button class="btn big" onclick="$('dt').close()">ปิด</button></dialog>
 <div id="toast"></div>
 <script>
 const $=id=>document.getElementById(id),API=(window.APP_CONFIG||{}).apiUrl||'',ls=k=>localStorage.getItem(k)||'';
@@ -251,7 +297,9 @@ async function login(){
   BR=k;CODE=pw;CODES[k]=pw;localStorage.setItem('codes',JSON.stringify(CODES));BRN=$('brSel').selectedOptions[0].text;localStorage.setItem('br',BR);localStorage.setItem('code',CODE);localStorage.setItem('brn',BRN);
   $('pw').value='';$('lg').close();D=r;loaded=1;drawAll();toast('เข้าสาขา '+BRN+' แล้ว')}catch(e){toast(e.message)}}
 async function load(){if(!loaded)document.body.classList.add('ldg');try{D=await api({action:'list'});loaded=1;drawAll()}catch(e){toast(e.message)}finally{document.body.classList.remove('ldg')}}
-function drawAll(){$('brBtn').textContent=BRN||'เลือกสาขา';$('hi').textContent='สวัสดี'+(BRN?', '+BRN:'');$('sub').textContent=APPN+' · สรุปสต็อกและวันหมดอายุ';drawFb();drawAdd();drawQ();drawHome();drawList();drawRep();drawExtra();lookup()}
+function drawAll(){const n=BRN||'เลือกสาขา',m=n.match(/[A-Za-z]+\d+|[A-Za-z0-9]{2,}/g);
+ document.querySelectorAll('.brl').forEach(e=>e.textContent=n);$('lgb').textContent=m?m[m.length-1].slice(0,4):[...n].slice(0,3).join('');
+ drawFb();drawAdd();drawQ();drawHome();drawList();drawRep();drawExtra();lookup()}
 function drawHome(){
  const E=D.entries,near=E.filter(e=>days(e.due)<=TH[1]),sum=a=>a.reduce((s,e)=>s+e.qty,0);
  $('k1t').textContent='ใกล้หมดอายุ (ภายใน '+TH[1]+' วัน)';cnt('k1',near.length);$('k1s').textContent='ล็อต · รวม '+sum(near)+' ชิ้น';
@@ -264,11 +312,37 @@ function drawHome(){
  $('dn').innerHTML=c.map((n,i)=>{const l=n/tot*251.3,s=`<circle cx="50" cy="50" r="40" fill="none" stroke="${COL[i]}" stroke-width="14" stroke-dasharray="${l} 251.3" stroke-dashoffset="${-off}" transform="rotate(-90 50 50)"/>`;off+=l;return s}).join('')+`<text x="50" y="55" text-anchor="middle" font-size="16" font-weight="600" fill="#1c2240">${E.length}</text>`;
  $('lg2').innerHTML=NM().map((n,i)=>`<div class="mut"><i class="dot" style="--c:${COL[i]}"></i> ${n} <b style="float:right;color:#1c2240">${c[i]}</b></div>`).join('');
  $('top').innerHTML='<tr><th>สินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th></tr>'+[...E].sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1).slice(0,6).map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${esc(e.item||D.db[e.barcode]||e.barcode)}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td></tr>`).join('')}
+const dc=d=>isNaN(d)?'#9aa1ad':d<=0?'#c8102e':d<=1?'#d9380f':d<=7?'#d65a00':d<=30?'#a67600':d<=90?'#5a8f2a':'#1f8a5b';
+const BK=[[d=>d<0,'หมดอายุแล้ว'],[d=>d==0,'วันนี้'],[d=>d==1,'พรุ่งนี้'],[d=>d<=5,'อีก 2–5 วัน'],[d=>d<=10,'อีก 6–10 วัน'],[d=>d<=30,'อีก 11–30 วัน'],[d=>d<=90,'อีก 31–90 วัน'],[d=>true,'มากกว่า 90 วัน']],NMB=BK.map(x=>x[1]).concat('ไม่ระบุวันที่');
+const TABS=[['all','ทั้งหมด'],['exp','หมดแล้ว'],['0','วันนี้'],['7','7 วัน'],['30','30 วัน'],['90','90 วัน'],['cl','สินค้าเคลม']];
+let TAB2='all',SELB='',GP=[];
+const wide=()=>matchMedia('(min-width:1000px)').matches,byDue=(a,b)=>(a.due||'9')<(b.due||'9')?-1:1;
+function tabOk(t,e){const d=days(e.due);return t=='all'||(t=='exp'?d<0:t=='0'?d==0:t=='cl'?!!e.claim&&e.claim!='-':t=='urg'?d<=TH[0]:d>=0&&d<=+t)}
 function drawList(){
- const c=[0,0,0,0,0,0];D.entries.forEach(e=>c[lv(days(e.due))]++);
- $('lv').innerHTML=NM().map((n,i)=>`<button style="--c:${COL[i]};--t:${TX[i]}" class="${flt==i?'on':''}" onclick="flt=flt==${i}?-1:${i};drawList()"><span class="em">${EM[i]}</span>${n}<b>${c[i]}</b></button>`).join('');
- const q=$('q').value.toLowerCase(),a=D.entries.filter(e=>okF(e)&&(flt<0||lv(days(e.due))==flt)&&(e.item+e.barcode).toLowerCase().includes(q)).sort((x,y)=>(x.due||'9')<(y.due||'9')?-1:1);
- $('tbl').innerHTML='<tr><th>บาร์โค้ด</th><th>ชื่อสินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th><th>เคลม</th><th></th></tr>'+(a.map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${e.barcode}</td><td>${esc(e.item||D.db[e.barcode]||'')}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td><td>${clPill(e.claim)}</td><td style="white-space:nowrap"><button class="btn alt sm" onclick="openEdit(${D.entries.indexOf(e)})">แก้ไข</button> <button class="btn del sm" onclick="W(this,()=>del(${D.entries.indexOf(e)}))">ลบ</button></td></tr>`).join('')||'<tr><td colspan="7" class="mut">ไม่พบรายการ</td></tr>');$('cards').innerHTML=a.map(e=>lc(e.item||D.db[e.barcode]||'(ไม่มีชื่อ)',e.barcode+' · '+fd(e.due),e.qty+' ชิ้น',pill(days(e.due))+' '+clPill(e.claim),`<div><button class="btn alt sm" onclick="openEdit(${D.entries.indexOf(e)})">แก้ไข</button> <button class="btn del sm" onclick="W(this,()=>del(${D.entries.indexOf(e)}))">ลบ</button></div>`)).join('')||'<p class="mut">ไม่พบรายการ</p>'}
+ const E=D.entries,tot=E.reduce((a,e)=>a+e.qty,0),urg=E.filter(e=>days(e.due)<=TH[0]).length;
+ $('lsub').textContent=new Set(E.map(e=>e.barcode)).size+' รายการ, รวม '+tot+' ชิ้น'+(loaded?' · เชื่อมต่อ Google Sheets แล้ว':'');
+ document.querySelectorAll('.bn').forEach(b=>{b.textContent=urg;b.style.display=urg?'':'none'});
+ const c=[...Array(9)].map((_,i)=>E.filter(e=>days(e.due)==i).reduce((a,e)=>a+e.qty,0)),mx=Math.max(1,...c);
+ $('c8t').textContent='รวม '+c.reduce((a,b)=>a+b,0)+' ชิ้น';
+ $('c8').innerHTML=c.map((v,i)=>`<div class="cb"><small>${v}</small><i style="height:${v?Math.max(8,v/mx*96):3}px;background:${v?dc(i):'#d9dde3'}"></i><em>${i?i:'วันนี้'}</em></div>`).join('');
+ $('tabs').innerHTML=TABS.map(([k,n])=>`<button class="tab ${TAB2==k?'on':''}" onclick="TAB2='${k}';drawList()">${n}</button>`).join('')+(TAB2=='urg'?`<button class="tab on" onclick="TAB2='all';drawList()">ด่วน ≤${TH[0]} วัน ✕</button>`:'');
+ const q=$('q').value.toLowerCase(),m={};
+ E.filter(e=>tabOk(TAB2,e)&&okF(e)&&((e.item||D.db[e.barcode]||'')+e.barcode).toLowerCase().includes(q)).forEach(e=>(m[e.barcode]=m[e.barcode]||{b:e.barcode,n:e.item||D.db[e.barcode]||e.barcode,l:[]}).l.push(e));
+ GP=Object.values(m).map(p=>{p.l.sort(byDue);p.d=days(p.l[0].due);p.q=p.l.reduce((a,e)=>a+e.qty,0);p.k=isNaN(p.d)?8:BK.findIndex(x=>x[0](p.d));return p}).sort((x,y)=>x.k-y.k||x.d-y.d||x.n.localeCompare(y.n));
+ const n={};GP.forEach(p=>n[p.k]=(n[p.k]||0)+1);let last=-1,h='';
+ GP.forEach((p,i)=>{if(p.k!=last){last=p.k;h+=`<div class="grp"><b>${NMB[p.k]}</b><span>${n[p.k]} รายการ</span></div>`}
+  const cls=[...new Set(p.l.map(e=>e.claim).filter(x=>x&&x!='-'))];
+  h+=`<button class="rw ${SELB==p.b?'on':''}" onclick="pickP(${i})"><div class="dn" style="color:${dc(p.d)}">${isNaN(p.d)?'–':p.d}</div><div class="nm2"><b>${esc(p.n)}</b><small>${esc(p.b)} · ${p.l.length} ล็อต</small>${cls.length?'<div class="mcs">'+cls.map(x=>clPill(x)).join('')+'</div>':''}</div><div class="bar2"><i style="width:${isNaN(p.d)?0:Math.max(4,Math.min(Math.max(p.d,0),30)/30*100)}%;background:${dc(p.d)}"></i></div><div class="dt2">${fd(p.l[0].due)}</div><div class="qt"><b>${p.q}</b><small>ชิ้น</small></div></button>`});
+ $('lst').innerHTML=h||`<div class="mut" style="padding:36px 0;text-align:center">${!loaded?(BR?'กำลังโหลดข้อมูล…':'เลือกสาขาเพื่อเริ่มใช้งาน'):'ไม่พบรายการ'}</div>`;drawDetail()}
+function pickP(i){SELB=GP[i].b;drawList();if(!wide())$('dt').showModal()}
+const bellTap=()=>{TAB2='urg';go('list');drawList()};
+function bmenu(){$('bmt').textContent=BRN||'ยังไม่ได้เลือกสาขา';$('bm').showModal()}
+function drawDetail(){const el=SELB?D.entries.filter(e=>e.barcode==SELB).sort(byDue):[];
+ const h=!el.length?'<div class="mut" style="padding:24px 0;text-align:center">เลือกสินค้าจากรายการ เพื่อดูรายละเอียดแต่ละล็อต</div>':detail(el);$('dp').innerHTML=h;$('dtb').innerHTML=h}
+function detail(el){const f=el[0],d=days(f.due),nm=f.item||D.db[f.barcode]||f.barcode,tot=el.reduce((a,e)=>a+e.qty,0),
+ lab=isNaN(d)?'ไม่ระบุวันที่':d<0?'หมดอายุแล้ว':d==0?'หมดอายุวันนี้':d==1?'หมดอายุพรุ่งนี้':'หมดอายุในอีก '+d+' วัน';
+ return `<div class="mut">${lab}</div><h2 class="dh">${esc(nm)}</h2><div class="mut">${esc(f.barcode)}</div><div class="bigd" style="color:${dc(d)}">${isNaN(d)?'–':d}<small>วัน</small></div><div class="kv"><span>วันหมดอายุ</span><b>${fd(f.due)}</b></div><div class="kv"><span>จำนวนรวม</span><b>${tot} ชิ้น, ${el.length} ล็อต</b></div>`+
+ el.map(e=>{const k=days(e.due),x=D.entries.indexOf(e);return `<div class="lot"><div><b>${fd(e.due)}</b> <small class="mut">${isNaN(k)?'':k<0?'เกิน '+(-k)+' วัน':'อีก '+k+' วัน'}</small><div>${clPill(e.claim)}${e.tab&&tabs().length>1?' <small class="mut">'+esc(e.tab)+'</small>':''}</div></div><div class="lq"><b style="font-size:20px">${e.qty}</b> ชิ้น</div><div class="la"><button class="btn alt sm" onclick="openEdit(${x})">แก้ไข</button><button class="btn del sm" onclick="W(this,()=>del(${x}))">ลบ</button></div></div>`}).join('')}
 function group(f){const m={};D.entries.filter(e=>okF(e)&&(f<0||lv(days(e.due))==f)).forEach(e=>{const k=e.barcode+'|'+e.due+'|'+(e.claim||'-');(m[k]=m[k]||{...e,qty:0}).qty+=e.qty});return Object.values(m).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1)}
 function drawRep(){
  const s=$('f2'),v=s.value||-1;s.innerHTML='<option value="-1">ทุกสถานะ</option>'+NM().map((n,i)=>`<option value="${i}">${n}</option>`).join('');s.value=v;
@@ -411,7 +485,7 @@ function toAdd(c){stopScan();go('add');SEL=null;$('bc').value=c;lookup();($('nmI
 function got(c){
  if(SM=='add')return toAdd(c);
  const n=D.entries.filter(e=>e.barcode==c).length;
- if(n){stopScan();go('list');flt=-1;$('q').value=c;drawList();toast('พบ '+n+' ล็อต');return}
+ if(n){stopScan();go('list');TAB2='all';$('q').value=c;drawList();toast('พบ '+n+' ล็อต');return}
  // ไม่พบ: เปิดกล้องค้างไว้ สแกนตัวต่อไปได้เลย
  $('scmsg').textContent='ไม่พบ '+c+' ในสต็อก (สแกนตัวต่อไปได้เลย)';const b=$('addNew');b.classList.remove('hide');b.onclick=()=>toAdd(c);
  setTimeout(()=>{paused=0;status(0)},1200)}
@@ -422,7 +496,7 @@ async function scanPic(i){
   if(!c){await zxLoad();c=(await new ZXing.BrowserMultiFormatReader(hints()).decodeFromImageUrl(URL.createObjectURL(f))).getText()}
   c=strip(c);paused=1;beep();status(1);got(c)}catch(e){$('scmsg').textContent='อ่านบาร์โค้ดจากรูปไม่ได้ ลองถ่ายให้ใกล้และชัดขึ้น'}}
 // หน้าตั้งค่า (ค่าเก็บในเครื่องนี้)
-const THEMES=[['indigo','#5b5bf0','#7f5cff'],['ocean','#0284c7','#2563eb'],['emerald','#059669','#0d9488'],['rose','#e11d48','#f97316']];
+const THEMES=[['indigo','#111827','#374151'],['ocean','#0284c7','#2563eb'],['emerald','#059669','#0d9488'],['rose','#e11d48','#f97316']];
 const qv=v=>typeof v=='string'?"'"+v+"'":v;
 const seg=(k,o)=>'<div class="sg">'+o.map(([v,t])=>`<button class="${S[k]===v?'on':''}" onclick="setS('${k}',${qv(v)})">${t}</button>`).join('')+'</div>';
 const sw=k=>`<button class="sw ${S[k]?'on':''}" role="switch" aria-checked="${!!S[k]}" onclick="setS('${k}',${!S[k]})"></button>`;
@@ -435,7 +509,7 @@ function drawSet(){
  const pv=NM().map((n,i)=>`<span class="pill" style="--c:${COL[i]};--t:${TX[i]}">${EM[i]} ${n}</span>`).join(' ');
  $('setb').innerHTML=
  '<div class="card"><h3>👤 บัญชีและสาขา</h3>'+SR('สาขาที่ใช้งาน',esc(BRN||'ยังไม่ได้เลือกสาขา'),'<button class="btn alt sm" onclick="openBr()">เปลี่ยนสาขา</button>')+SR('เปิดชีตของสาขา','ดูหรือแก้ข้อมูลใน Google Sheets','<button class="btn alt sm" onclick="openSheet()">เปิดชีต</button>')+SR('ออกจากสาขานี้','ลบรหัสที่จำไว้ในเครื่องนี้','<button class="btn del sm" onclick="logout()">ออกจากระบบ</button>')+'</div>'+
- '<div class="card"><h3>🎨 การแสดงผล</h3>'+SR('ธีมสี','',`<div class="th">${th}</div>`)+SR('รูปแบบปี','แสดงในรายการและรายงาน',seg('be',[[0,'ค.ศ.'],[1,'พ.ศ.']]))+SR('หน้ารายการเริ่มต้นที่','ตัวกรองสถานะตอนเปิดเว็บ',vw)+'</div>'+
+ '<div class="card"><h3>🎨 การแสดงผล</h3>'+SR('ธีมสี','',`<div class="th">${th}</div>`)+SR('รูปแบบปี','แสดงในรายการและรายงาน',seg('be',[[0,'ค.ศ.'],[1,'พ.ศ.']]))+'</div>'+
  `<div class="card"><h3>🚦 เกณฑ์สถานะสี (วัน)</h3><div class="row">${ti}</div><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${pv}</div></div>`+
  '<div class="card"><h3>▣ การสแกน</h3>'+SR('เสียงบี๊บ','เมื่ออ่านบาร์โค้ดได้',sw('beep'))+SR('สั่นเมื่อสแกนติด','เฉพาะมือถือที่รองรับ',sw('vib'))+SR('โหมดสแกนเริ่มต้น','กดสแกนแล้วเริ่มที่โหมดไหน',seg('scanMode',[['auto','ตามหน้า'],['add','เพิ่ม'],['find','ค้นหา']]))+SR('ซูมกล้องเริ่มต้น','ถ้ากล้องรองรับ',seg('zoom',[[1,'1x'],[2,'2x'],[3,'3x'],[5,'5x']]))+'</div>'+
  '<div class="card"><h3>📝 การบันทึกสินค้า</h3>'+SR('เมื่อมีล็อตวันหมดอายุเดียวกันอยู่แล้ว','บาร์โค้ดและวันที่ตรงกัน',seg('dup',[['ask','ถามทุกครั้ง'],['merge','บวกจำนวน'],['new','แถวใหม่']]))+'</div>'+
@@ -465,8 +539,8 @@ async function svBr(el){const c=el.closest('[data-k]'),m=c.querySelector('.bi').
  if(!r.ok)return toast(r.error);toast('บันทึกสาขาแล้ว');drawAdm(r.list)}
 async function dlBr(el){const c=el.closest('[data-k]');if(!c.dataset.k)return c.remove();if(!confirm('ลบสาขานี้ออกจากระบบ? (ข้อมูลในชีตไม่ถูกลบ)'))return;const r=await adm('adminDel',{key:c.dataset.k});if(!r.ok)return toast(r.error);drawAdm(r.list)}
 async function admPw(){const r=await adm('adminPw',{newAdmin:$('npw').value});if(!r.ok)return toast(r.error);AD=$('npw').value;$('adm').value=AD;$('npw').value='';toast('เปลี่ยนรหัสแอดมินแล้ว')}
-let CUR='home';function go(p){CUR=p;scrollTo(0,0);if(p=='set')drawSet();document.querySelectorAll('#side button').forEach(x=>x.classList.toggle('on',x.dataset.p==p));['home','list','add','rep','set'].forEach(s=>$(s).classList.toggle('hide',s!=p))}
-document.querySelectorAll('#side button[data-p]').forEach(b=>b.onclick=()=>go(b.dataset.p));
+let CUR='list';function go(p){CUR=p;scrollTo(0,0);if(p=='set')drawSet();document.querySelectorAll('#nav button[data-p]').forEach(x=>x.classList.toggle('on',x.dataset.p==p));['list','add','stat','set'].forEach(k=>$(k).classList.toggle('hide',k!=p))}
+document.querySelectorAll('#nav button[data-p]').forEach(b=>b.onclick=()=>go(b.dataset.p));
 drawSet();
 BR&&CODE?load():(BR||0,drawAll(),BR||toast('ยังไม่ได้เลือกสาขา'),openBr());
 </script>
