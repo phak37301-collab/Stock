@@ -133,6 +133,13 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
 .pill{background:var(--c);color:var(--t,#1c2240)}
 .lv button{background:var(--c);color:var(--t,#1c2240)}.lv button.on{border-color:var(--ink);transform:translateY(-2px)}
 @media print{#side,.top,.noprint{display:none!important}main{margin:0}body{background:#fff}.card{box-shadow:none}}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:2px solid transparent;border-radius:99px;padding:9px 18px;min-height:44px;font:600 15px Prompt,sans-serif;background:var(--c);color:var(--t);cursor:pointer;transition:transform .12s}.chip.on{border-color:var(--ink);box-shadow:0 5px 14px #0002;transform:translateY(-1px)}
+.sq{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;max-width:1040px;align-items:start}.sq .card{margin:0}.sq h3 small{color:var(--mut);font-weight:400}
+.bcin{font-size:20px;letter-spacing:1px;padding:14px 16px;border-radius:16px;background:#fff;border:2px solid var(--tint)}.bcin:focus{border-color:var(--ac);outline:0}
+.sq .nm{font-size:22px;margin-top:10px}.stp{display:flex;gap:8px;margin-top:14px}.stp .btn{flex:1;padding:13px 8px}
+.fbx label{margin-top:0}.fbx select{margin-top:10px}.mini{padding:6px 12px;min-height:0;font-size:13px}
+.shp{margin-top:10px}.shp .sr input[type=checkbox],.shp .sr input[type=radio]{width:auto}.shp .sr label{display:flex;gap:5px;align-items:center;margin:0}
+@media(max-width:760px){.sq{grid-template-columns:1fr}.bcin{font-size:18px}.chip{padding:8px 14px}}
 </style>
 </head>
 <body>
@@ -155,19 +162,24 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
 
 <section id="list" class="hide">
  <div class="lv" id="lv"></div>
+ <div class="card fbx" id="fb1"></div>
  <div class="card"><div class="row" style="margin-bottom:10px"><input id="q" placeholder="ค้นหาชื่อหรือบาร์โค้ด" oninput="drawList()"><button class="btn fit" onclick="scan('find')">▣ สแกน</button></div><div class="dsk" style="overflow-x:auto"><table id="tbl"></table></div><div class="mob" id="cards"></div></div>
 </section>
 
-<section id="add" class="hide"><div class="addg"><div class="card scanbox"><button class="pulse" onclick="scan('add')" aria-label="สแกนบาร์โค้ด">▣</button><h3>สแกนบาร์โค้ดสินค้า</h3><p class="mut">กดสแกนแล้วเล็งที่บาร์โค้ด ระบบจะดึงชื่อสินค้าให้เอง เหลือกรอกแค่จำนวนและวันหมดอายุ</p></div><div class="card">
- <label for="bc">บาร์โค้ด (พิมพ์ ยิงด้วยเครื่องสแกน หรือกดสแกนด้วยกล้อง)</label>
- <div class="row"><input id="bc" inputmode="numeric" autocomplete="off"><button class="btn fit" onclick="scan('add')">สแกนกล้อง</button></div>
+<section id="add" class="hide"><div class="sq"><div class="card">
+ <h3>สแกน / กรอกสินค้า <small>เพิ่มได้หลายรายการ แล้วบันทึกทีเดียว</small></h3>
+ <div class="row"><input id="bc" class="bcin" inputmode="numeric" autocomplete="off" placeholder="ยิงหรือพิมพ์บาร์โค้ด"><button class="btn fit" style="padding:15px 18px" onclick="scan('add')">▣ กล้อง</button></div>
  <div class="nm" id="nm"></div><div class="mut" id="lots"></div>
- <input id="nmIn" class="hide" placeholder="ไม่พบในฐานข้อมูล พิมพ์ชื่อสินค้าใหม่">
+ <input id="nmIn" class="hide" placeholder="ไม่พบในฐานข้อมูล พิมพ์ชื่อสินค้าใหม่" style="margin-top:8px">
  <div class="row"><div><label for="qty">จำนวน</label><input id="qty" type="number" inputmode="numeric" min="1"></div><div><label for="due">วันหมดอายุ</label><input id="due" type="date"></div></div>
- <button class="btn big" onclick="W(this,add)">บันทึกเข้าชีต</button></div></div></section>
+ <label>สถานะเคลม</label><div class="chips" id="cl"></div>
+ <div id="tabRow" class="hide"><label for="tabSel">บันทึกลงชีท</label><select id="tabSel"></select></div>
+ <div class="stp"><button class="btn alt" onclick="queue()">＋ เข้าคิว</button><button class="btn" onclick="queue(1)">▣ เข้าคิวแล้วสแกนต่อ</button></div></div>
+ <div class="card"><h3>คิวรอบันทึก <small id="qn"></small></h3><div id="ql"></div><button class="btn big" id="qs" onclick="W(this,saveQ)">บันทึกทั้งหมดเข้าชีต</button></div></div></section>
 
 <section id="rep" class="hide">
  <div class="row noprint" style="margin-bottom:12px"><select id="f2" onchange="drawRep();drawExtra()"></select><button class="btn alt fit" onclick="csv()">CSV</button><button class="btn fit" onclick="print()">พิมพ์ / PDF</button></div>
+ <div class="card fbx" id="fb2"></div>
  <div class="card"><div class="row" id="sum" style="flex-wrap:wrap;margin-bottom:10px"></div><div class="dsk" style="overflow-x:auto"><table id="tb"></table></div><div class="mob" id="tbc"></div></div>
 </section>
 
@@ -179,9 +191,9 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
 </section>
 </main>
 
-<dialog id="ed"><b id="edN"></b><label>จำนวน</label><input id="edQ" type="number" inputmode="numeric"><label>วันหมดอายุ</label><input id="edD" type="date">
+<dialog id="ed"><b id="edN"></b><label>จำนวน</label><input id="edQ" type="number" inputmode="numeric"><label>วันหมดอายุ</label><input id="edD" type="date"><label>สถานะเคลม</label><div class="chips" id="edC"></div>
  <div class="row" style="margin-top:14px"><button class="btn alt" onclick="ed.close()">ยกเลิก</button><button class="btn" onclick="W(this,saveEdit)">บันทึกการแก้ไข</button></div></dialog>
-<dialog id="lg"><b>เลือกสาขา</b><label for="brSel">สาขา</label><select id="brSel"></select><label for="pw">รหัสสาขา (ขอจากแอดมิน)</label><input id="pw" type="password" autocomplete="off"><button class="btn big" onclick="W(this,login)">เข้าใช้งาน</button><button class="btn alt big" style="margin-top:8px" onclick="lg.close();go('set')">ตั้งค่าแอดมิน</button></dialog>
+<dialog id="lg"><b>เลือกสาขา</b><label for="brSel">สาขา</label><select id="brSel"></select><label for="pw">รหัสสาขา (สาขาที่เคยเข้าแล้วเว้นว่างได้)</label><input id="pw" type="password" autocomplete="off"><button class="btn big" onclick="W(this,login)">เข้าใช้งาน</button><button class="btn alt big" style="margin-top:8px" onclick="lg.close();go('set')">ตั้งค่าแอดมิน</button></dialog>
 <dialog id="sc" class="scan">
  <div class="row" style="margin-bottom:10px"><div style="font-weight:600"><i class="dot" id="sdot" style="--c:#7f5cff"></i><span id="sst">กำลังสแกน</span></div>
   <button class="ib fit" id="bp" onclick="toggleBeep()" aria-label="เปิดปิดเสียงบี๊บ">🔊</button><button class="ib fit hide" id="tq" onclick="torch()" aria-label="ไฟฉาย">🔦</button><button class="ib fit" onclick="stopScan()" aria-label="ปิดกล้อง">✕</button></div>
@@ -207,7 +219,7 @@ function days(s){const a=new Date();a.setHours(0,0,0,0);return Math.round((new D
 const EM=['🚨','⚠️','⏳','📅','✅','❔'];
 const pill=d=>{const l=lv(d);return `<span class="pill" style="--c:${COL[l]};--t:${TX[l]}">${EM[l]} ${isNaN(d)?'ไม่ระบุวันที่':d<=0?'หมดอายุ ตัดเบิก':'เหลือ '+d+' วัน'}</span>`};
 function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2600)}
-let PEND=0,loaded=0;
+let PEND=0,loaded=0,CODES={};try{CODES=JSON.parse(ls('codes')||'{}')}catch(e){}
 async function post(b){PEND++;document.body.classList.add('busy');
  try{return await (await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)})).json()}
  catch(e){throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจอินเทอร์เน็ตหรือ apiUrl ใน config.js')}
@@ -223,12 +235,12 @@ async function openBr(){
  $('lg').showModal();$('brSel').innerHTML='<option>กำลังโหลดสาขา...</option>';
  try{const r=await post({action:'branches'});$('brSel').innerHTML=r.branches.map(x=>`<option value="${esc(x.key)}">${esc(x.name)}</option>`).join('');if(BR)$('brSel').value=BR}catch(e){toast('เชื่อมต่อระบบไม่ได้ ตรวจ apiUrl ใน config.js')}}
 async function login(){
- const k=$('brSel').value;
- try{const r=await post({branch:k,code:$('pw').value,action:'list'});if(!r.ok)throw new Error(r.error);
-  BR=k;CODE=$('pw').value;BRN=$('brSel').selectedOptions[0].text;localStorage.setItem('br',BR);localStorage.setItem('code',CODE);localStorage.setItem('brn',BRN);
+ const k=$('brSel').value,pw=$('pw').value||CODES[k]||'';
+ try{const r=await post({branch:k,code:pw,action:'list'});if(!r.ok)throw new Error(r.error);
+  BR=k;CODE=pw;CODES[k]=pw;localStorage.setItem('codes',JSON.stringify(CODES));BRN=$('brSel').selectedOptions[0].text;localStorage.setItem('br',BR);localStorage.setItem('code',CODE);localStorage.setItem('brn',BRN);
   $('pw').value='';$('lg').close();D=r;loaded=1;drawAll();toast('เข้าสาขา '+BRN+' แล้ว')}catch(e){toast(e.message)}}
 async function load(){if(!loaded)document.body.classList.add('ldg');try{D=await api({action:'list'});loaded=1;drawAll()}catch(e){toast(e.message)}finally{document.body.classList.remove('ldg')}}
-function drawAll(){$('brBtn').textContent=BRN||'เลือกสาขา';$('hi').textContent='สวัสดี'+(BRN?', '+BRN:'');$('sub').textContent=APPN+' · สรุปสต็อกและวันหมดอายุ';drawHome();drawList();drawRep();drawExtra();lookup()}
+function drawAll(){$('brBtn').textContent=BRN||'เลือกสาขา';$('hi').textContent='สวัสดี'+(BRN?', '+BRN:'');$('sub').textContent=APPN+' · สรุปสต็อกและวันหมดอายุ';drawFb();drawAdd();drawQ();drawHome();drawList();drawRep();drawExtra();lookup()}
 function drawHome(){
  const E=D.entries,near=E.filter(e=>days(e.due)<=TH[1]),sum=a=>a.reduce((s,e)=>s+e.qty,0);
  $('k1t').textContent='ใกล้หมดอายุ (ภายใน '+TH[1]+' วัน)';cnt('k1',near.length);$('k1s').textContent='ล็อต · รวม '+sum(near)+' ชิ้น';
@@ -244,29 +256,52 @@ function drawHome(){
 function drawList(){
  const c=[0,0,0,0,0,0];D.entries.forEach(e=>c[lv(days(e.due))]++);
  $('lv').innerHTML=NM().map((n,i)=>`<button style="--c:${COL[i]};--t:${TX[i]}" class="${flt==i?'on':''}" onclick="flt=flt==${i}?-1:${i};drawList()"><span class="em">${EM[i]}</span>${n}<b>${c[i]}</b></button>`).join('');
- const q=$('q').value.toLowerCase(),a=D.entries.filter(e=>(flt<0||lv(days(e.due))==flt)&&(e.item+e.barcode).toLowerCase().includes(q)).sort((x,y)=>(x.due||'9')<(y.due||'9')?-1:1);
- $('tbl').innerHTML='<tr><th>บาร์โค้ด</th><th>ชื่อสินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th><th></th></tr>'+(a.map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${e.barcode}</td><td>${esc(e.item||D.db[e.barcode]||'')}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td><td style="white-space:nowrap"><button class="btn alt sm" onclick="openEdit(${e.row})">แก้ไข</button> <button class="btn del sm" onclick="W(this,()=>del(${e.row}))">ลบ</button></td></tr>`).join('')||'<tr><td colspan="6" class="mut">ไม่พบรายการ</td></tr>');$('cards').innerHTML=a.map(e=>lc(e.item||D.db[e.barcode]||'(ไม่มีชื่อ)',e.barcode+' · '+fd(e.due),e.qty+' ชิ้น',pill(days(e.due)),`<div><button class="btn alt sm" onclick="openEdit(${e.row})">แก้ไข</button> <button class="btn del sm" onclick="W(this,()=>del(${e.row}))">ลบ</button></div>`)).join('')||'<p class="mut">ไม่พบรายการ</p>'}
-function group(f){const m={};D.entries.filter(e=>f<0||lv(days(e.due))==f).forEach(e=>{const k=e.barcode+'|'+e.due;(m[k]=m[k]||{...e,qty:0}).qty+=e.qty});return Object.values(m).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1)}
+ const q=$('q').value.toLowerCase(),a=D.entries.filter(e=>okF(e)&&(flt<0||lv(days(e.due))==flt)&&(e.item+e.barcode).toLowerCase().includes(q)).sort((x,y)=>(x.due||'9')<(y.due||'9')?-1:1);
+ $('tbl').innerHTML='<tr><th>บาร์โค้ด</th><th>ชื่อสินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th><th>เคลม</th><th></th></tr>'+(a.map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${e.barcode}</td><td>${esc(e.item||D.db[e.barcode]||'')}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td><td>${clPill(e.claim)}</td><td style="white-space:nowrap"><button class="btn alt sm" onclick="openEdit(${D.entries.indexOf(e)})">แก้ไข</button> <button class="btn del sm" onclick="W(this,()=>del(${D.entries.indexOf(e)}))">ลบ</button></td></tr>`).join('')||'<tr><td colspan="7" class="mut">ไม่พบรายการ</td></tr>');$('cards').innerHTML=a.map(e=>lc(e.item||D.db[e.barcode]||'(ไม่มีชื่อ)',e.barcode+' · '+fd(e.due),e.qty+' ชิ้น',pill(days(e.due))+' '+clPill(e.claim),`<div><button class="btn alt sm" onclick="openEdit(${D.entries.indexOf(e)})">แก้ไข</button> <button class="btn del sm" onclick="W(this,()=>del(${D.entries.indexOf(e)}))">ลบ</button></div>`)).join('')||'<p class="mut">ไม่พบรายการ</p>'}
+function group(f){const m={};D.entries.filter(e=>okF(e)&&(f<0||lv(days(e.due))==f)).forEach(e=>{const k=e.barcode+'|'+e.due+'|'+(e.claim||'-');(m[k]=m[k]||{...e,qty:0}).qty+=e.qty});return Object.values(m).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1)}
 function drawRep(){
  const s=$('f2'),v=s.value||-1;s.innerHTML='<option value="-1">ทุกสถานะ</option>'+NM().map((n,i)=>`<option value="${i}">${n}</option>`).join('');s.value=v;
  const g=group(+s.value);
  $('sum').innerHTML=`<b>${g.length} รายการ / ${g.reduce((a,e)=>a+e.qty,0)} ชิ้น</b>`;
- $('tb').innerHTML='<tr><th>บาร์โค้ด</th><th>ชื่อสินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th></tr>'+g.map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${e.barcode}</td><td>${esc(e.item)}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td></tr>`).join('')}
-function csv(){const g=group(+$('f2').value),r=[['บาร์โค้ด','ชื่อสินค้า','จำนวน','วันหมดอายุ','เหลือ(วัน)']].concat(g.map(e=>[e.barcode,e.item,e.qty,fd(e.due),days(e.due)]));
+ $('tb').innerHTML='<tr><th>บาร์โค้ด</th><th>ชื่อสินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th><th>เคลม</th></tr>'+g.map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${e.barcode}</td><td>${esc(e.item)}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td><td>${clPill(e.claim)}</td></tr>`).join('')}
+function csv(){const g=group(+$('f2').value),r=[['บาร์โค้ด','ชื่อสินค้า','จำนวน','วันหมดอายุ','เหลือ(วัน)','สถานะเคลม']].concat(g.map(e=>[e.barcode,e.item,e.qty,fd(e.due),days(e.due),e.claim||'-']));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.map(x=>x.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n')],{type:'text/csv'}));a.download='รายงานสต็อก_'+new Date().toISOString().slice(0,10)+'.csv';a.click()}
 function lookup(){const b=$('bc').value.trim(),n=D.db[b],l=D.entries.filter(e=>e.barcode==b);
  $('nm').textContent=b?(n||''):'';$('nmIn').classList.toggle('hide',!b||!!n);$('lots').textContent=l.length?'มีในชีตแล้ว: '+l.map(e=>fd(e.due)+' ×'+e.qty).join(', '):''}
 $('bc').addEventListener('input',lookup);$('bc').addEventListener('keydown',e=>{if(e.key==='Enter'){lookup();$('qty').focus()}});
-async function add(){
- const b=$('bc').value.trim(),q=+$('qty').value,d=$('due').value,item=D.db[b]||$('nmIn').value.trim();
+const CL=[['-','#e6e9f2','#1c2240'],['เคลมได้','#6fa88c','#fff'],["Lotus's",'#fdeab9','#7a5c14'],['Makro','#d1605f','#fff']];
+let Q=[];try{Q=JSON.parse(ls('Q')||'[]')}catch(e){}let CLV='-',EC='-',F={from:'',to:'',cl:[],tab:''};
+const clr=n=>CL.find(c=>c[0]==n)||CL[0],clPill=n=>{const c=clr(n||'-');return `<span class="pill" style="--c:${c[1]};--t:${c[2]}">${esc(c[0])}</span>`};
+const chipsH=(sel,fn,m)=>CL.map((c,i)=>`<button type="button" class="chip ${(m?sel.includes(c[0]):sel==c[0])?'on':''}" style="--c:${c[1]};--t:${c[2]}" onclick="${fn}(${i})">${esc(c[0])}</button>`).join('');
+const tabs=()=>D.tabs||[],ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function drawAdd(){$('cl').innerHTML=chipsH(CLV,'setCl');const v=$('tabSel').value;$('tabSel').innerHTML=tabs().map(t=>`<option ${t==v?'selected':''}>${esc(t)}</option>`).join('');$('tabRow').classList.toggle('hide',tabs().length<2)}
+const setCl=i=>{CLV=CL[i][0];drawAdd()};
+function drawQ(){localStorage.setItem('Q',JSON.stringify(Q));$('qn').textContent=Q.length?Q.length+' รายการ · '+Q.reduce((a,x)=>a+x.qty,0)+' ชิ้น':'';$('qs').classList.toggle('hide',!Q.length);
+ $('ql').innerHTML=Q.map((x,i)=>`<div class="lc" style="--c:${clr(x.claim)[1]}"><div class="t"><b>${esc(x.item)}</b><span class="mut">${esc(x.barcode)} · ${fd(x.due)}${tabs().length>1?' · '+esc(x.tab):''}</span><div>${clPill(x.claim)}</div></div><div class="r"><b>×${x.qty}</b><button class="btn del sm" onclick="Q.splice(${i},1);drawQ()">ลบ</button></div></div>`).join('')||'<p class="mut">ยังไม่มีรายการ สแกนหรือกรอกด้านซ้าย แล้วกด "เข้าคิว"</p>'}
+function queue(again){const b=$('bc').value.trim(),q=+$('qty').value,d=$('due').value,item=D.db[b]||$('nmIn').value.trim();
  if(!b||!item||!(q>0)||!d)return toast('กรอกบาร์โค้ด ชื่อ จำนวน และวันหมดอายุให้ครบ');
- try{const same=D.entries.find(e=>e.barcode==b&&e.due==d);
-  if(same&&(S.dup=='merge'||(S.dup!='new'&&confirm('มีล็อตวันหมดอายุเดียวกันอยู่แล้ว ('+same.qty+' ชิ้น)\nกด OK = บวกจำนวนเพิ่ม, Cancel = เพิ่มเป็นแถวใหม่'))))await api({action:'update',row:same.row,barcode:b,qty:same.qty+q,due:d});
-  else await api({action:'add',barcode:b,item,qty:q,due:d});
-  toast('บันทึกแล้ว');['bc','qty','due','nmIn'].forEach(i=>$(i).value='');await load();$('bc').focus()}catch(e){toast(e.message)}}
-function openEdit(r){editing=D.entries.find(e=>e.row==r);$('edN').textContent=editing.item;$('edQ').value=editing.qty;$('edD').value=editing.due;$('ed').showModal()}
-async function saveEdit(){if(!$('edD').value)return toast('เลือกวันหมดอายุก่อน');try{await api({action:'update',row:editing.row,barcode:editing.barcode,qty:+$('edQ').value,due:$('edD').value});$('ed').close();toast('แก้ไขแล้ว');load()}catch(e){toast(e.message)}}
-async function del(r){const e=D.entries.find(x=>x.row==r);if(!confirm('ลบ '+e.item+'\nจำนวน '+e.qty+' หมดอายุ '+fd(e.due)+' ?'))return;try{await api({action:'delete',row:r,barcode:e.barcode});toast('ลบแล้ว');load()}catch(x){toast(x.message)}}
+ Q.push({barcode:b,item,qty:q,due:d,claim:CLV,tab:$('tabSel').value||tabs()[0]||''});D.db[b]=item;
+ ['bc','qty','nmIn'].forEach(k=>$(k).value='');lookup();drawQ();toast('เข้าคิวแล้ว ('+Q.length+')');if(again)scan('add');else $('bc').focus()}
+async function saveQ(){const add=[],up=[];
+ for(const x of Q){const same=D.entries.find(e=>e.barcode==x.barcode&&e.due==x.due&&e.tab==x.tab);
+  if(same&&(S.dup=='merge'||(S.dup!='new'&&confirm(x.item+'\nมีล็อตวันหมดอายุเดียวกันอยู่แล้ว ('+same.qty+' ชิ้น)\nOK = บวกจำนวน, Cancel = เพิ่มแถวใหม่'))))up.push([same,x]);else add.push(x)}
+ try{for(const [o,x] of up)await api({action:'update',tab:o.tab,row:o.row,barcode:o.barcode,qty:o.qty+x.qty,due:x.due,claim:x.claim});
+  if(add.length)await api({action:'add',items:add});
+  toast('บันทึก '+Q.length+' รายการแล้ว');Q=[];drawQ();await load()}catch(e){toast(e.message)}}
+// ฟิลเตอร์: ช่วงวันหมดอายุ + ประเภท(สถานะเคลม) + ชีท ใช้ร่วมกันในหน้ารายการและรายงาน
+const okF=e=>(!F.from||e.due>=F.from)&&(!F.to||e.due<=F.to)&&(!F.cl.length||F.cl.includes(e.claim||'-'))&&(!F.tab||e.tab==F.tab);
+function pre(n){const a=new Date(),b=new Date();if(n=='m'){a.setDate(1);b.setMonth(b.getMonth()+1,0)}else b.setDate(b.getDate()+n);F.from=ymd(a);F.to=ymd(b);drawAll()}
+const tgCl=i=>{const v=CL[i][0];F.cl=F.cl.includes(v)?F.cl.filter(x=>x!=v):F.cl.concat(v);drawAll()};
+function drawFb(){const on=F.from||F.to||F.cl.length||F.tab,pb=(t,a)=>`<button class="btn alt sm mini" onclick="${a}">${t}</button>`;
+ const h=`<div class="row"><div><label>หมดอายุตั้งแต่</label><input type="date" value="${F.from}" onchange="F.from=this.value;drawAll()"></div><div><label>ถึงวันที่</label><input type="date" value="${F.to}" onchange="F.to=this.value;drawAll()"></div></div>
+ <div class="chips" style="margin-top:10px">${pb('7 วันนี้','pre(7)')}${pb('30 วัน','pre(30)')}${pb('เดือนนี้',"pre('m')")}${on?pb('✕ ล้างตัวกรอง',"F={from:'',to:'',cl:[],tab:''};drawAll()"):''}</div>
+ <label style="margin-top:12px">ประเภท (สถานะเคลม)</label><div class="chips">${chipsH(F.cl,'tgCl',1)}</div>
+ ${tabs().length>1?`<select onchange="F.tab=this.value;drawAll()"><option value="">ทุกชีท</option>${tabs().map(t=>`<option ${F.tab==t?'selected':''}>${esc(t)}</option>`).join('')}</select>`:''}`;
+ $('fb1').innerHTML=$('fb2').innerHTML=h}
+const setEc=i=>{EC=CL[i][0];$('edC').innerHTML=chipsH(EC,'setEc')};
+function openEdit(r){editing=D.entries[r];EC=editing.claim||'-';$('edC').innerHTML=chipsH(EC,'setEc');$('edN').textContent=editing.item;$('edQ').value=editing.qty;$('edD').value=editing.due;$('ed').showModal()}
+async function saveEdit(){if(!$('edD').value)return toast('เลือกวันหมดอายุก่อน');try{await api({action:'update',tab:editing.tab,row:editing.row,barcode:editing.barcode,qty:+$('edQ').value,due:$('edD').value,claim:EC});$('ed').close();toast('แก้ไขแล้ว');load()}catch(e){toast(e.message)}}
+async function del(r){const e=D.entries[r];if(!confirm('ลบ '+e.item+'\nจำนวน '+e.qty+' หมดอายุ '+fd(e.due)+' ?'))return;try{await api({action:'delete',tab:e.tab,row:e.row,barcode:e.barcode});toast('ลบแล้ว');load()}catch(x){toast(x.message)}}
 const lc=(n,sub,right,ph,act)=>`<div class="lc" style="--c:${(ph.match(/--c:([^">;]+)/)||[])[1]||'#ddd'}"><div class="t"><b>${esc(n)}</b><span class="mut">${sub}</span><div>${ph}</div></div><div class="r"><b>${right}</b>${act||''}</div></div>`;
 function cnt(id,to){const el=$(id);if(matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent=to;return}const t0=performance.now();(function f(t){const p=Math.min(1,(t-t0)/700);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)}
 function drawExtra(){
@@ -372,7 +407,7 @@ function dl(r,nm){const a=document.createElement('a');a.href=URL.createObjectURL
 function csvAll(){if(!D.entries.length)return toast('ยังไม่มีข้อมูล');dl([['บาร์โค้ด','ชื่อสินค้า','จำนวน','วันหมดอายุ','เหลือ(วัน)']].concat(D.entries.map(e=>{const d=days(e.due);return[e.barcode,e.item||D.db[e.barcode]||'',e.qty,fd(e.due),isNaN(d)?'':d]})),'สำรองสต็อก_')}
 async function ping(){const t=performance.now(),r=await post({action:'branches'});toast(r.ok?'เชื่อมต่อปกติ · '+Math.round(performance.now()-t)+' ms':'ระบบตอบกลับผิดปกติ')}
 function openSheet(){D.url?window.open(D.url,'_blank'):toast('ยังไม่มีลิงก์ชีต ให้เข้าสาขาก่อน')}
-function logout(){CODE=BR=BRN='';['code','br','brn'].forEach(k=>localStorage.removeItem(k));D={entries:[],db:{}};loaded=0;drawAll();drawSet();openBr()}
+function logout(){delete CODES[BR];localStorage.setItem('codes',JSON.stringify(CODES));CODE=BR=BRN='';['code','br','brn'].forEach(k=>localStorage.removeItem(k));D={entries:[],db:{}};loaded=0;drawAll();drawSet();openBr()}
 function resetS(){if(confirm('คืนค่าตั้งต้นของเครื่องนี้ทั้งหมด?')){['S','th'].forEach(k=>localStorage.removeItem(k));location.reload()}}
 // ตั้งค่า
 function saveTh(){const t=[0,1,2].map(i=>+$('t'+i).value);if(!(t[0]>0&&t[1]>t[0]&&t[2]>t[1]))return toast('ต้องเรียงจากน้อยไปมาก เช่น 7 / 30 / 60');TH=t;localStorage.setItem('th',JSON.stringify(t));drawAll();drawSet();toast('บันทึกเกณฑ์แล้ว')}
@@ -381,7 +416,13 @@ async function admLoad(){AD=$('adm').value;let r=await adm('adminList');
  if(r.needInit){if(AD.length<4)return toast('ตั้งรหัสแอดมินอย่างน้อย 4 ตัว');r=await adm('adminInit');if(!r.ok)return toast(r.error);toast('ตั้งรหัสแอดมินแล้ว');r=await adm('adminList')}
  if(!r.ok)return toast(r.error);drawAdm(r.list)}
 function drawAdm(l){$('brs').innerHTML=l.map(b=>brCard(b)).join('')+'<button class="btn alt big" onclick="this.insertAdjacentHTML(\'beforebegin\',brCard({key:\'\',name:\'\',id:\'\'}))">＋ เพิ่มสาขา</button>'+'<div class="row" style="margin-top:14px"><input id="npw" type="password" placeholder="รหัสแอดมินใหม่"><button class="btn alt fit" onclick="W(this,admPw)">เปลี่ยนรหัสแอดมิน</button></div>'}
-const brCard=b=>`<div class="card" style="box-shadow:none;border:1px solid var(--ln);margin-top:12px" data-k="${esc(b.key)}"><label>ชื่อสาขา</label><input class="bn" value="${esc(b.name)}"><label>ลิงก์หรือ ID ของสเปรดชีตสาขา (ว่าง = ชีทที่ผูกกับสคริปต์)</label><input class="bi" value="${esc(b.id)}"><label>รหัสสาขา ${b.hasCode?'(เว้นว่าง = ไม่เปลี่ยน)':'(ยังไม่ได้ตั้ง ต้องใส่)'}</label><input class="bc2" type="password" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn sm" onclick="W(this,()=>svBr(this))">บันทึก</button><button class="btn del sm" onclick="W(this,()=>dlBr(this))">ลบสาขา</button></div></div>`;
+const brCard=b=>`<div class="card" style="box-shadow:none;border:1px solid var(--ln);margin-top:12px" data-k="${esc(b.key)}"><label>ชื่อสาขา</label><input class="bn" value="${esc(b.name)}"><label>ลิงก์หรือ ID ของสเปรดชีตสาขา (ว่าง = ชีทที่ผูกกับสคริปต์)</label><input class="bi" value="${esc(b.id)}"><label>รหัสสาขา ${b.hasCode?'(เว้นว่าง = ไม่เปลี่ยน)':'(ยังไม่ได้ตั้ง ต้องใส่)'}</label><input class="bc2" type="password" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn sm" onclick="W(this,()=>svBr(this))">บันทึก</button><button class="btn del sm" onclick="W(this,()=>dlBr(this))">ลบสาขา</button>${b.key?'<button class="btn alt sm" onclick="W(this,()=>shLoad(this))">จัดการชีท</button>':''}</div><div class="shp"></div></div>`;
+const shView=(k,r)=>`<div class="mut">ติ๊ก "สต็อก" ได้หลายชีท · เลือก "ฐานข้อมูล" 1 ชีท</div>`+r.sheets.map(n=>`<div class="sr"><b>${esc(n)}</b><div class="row"><label><input type="checkbox" class="shs" value="${esc(n)}" ${r.tabs.includes(n)?'checked':''}> สต็อก</label><label><input type="radio" name="db_${k}" class="shd" value="${esc(n)}" ${r.db==n?'checked':''}> ฐานข้อมูล</label><button class="btn alt sm fit" data-n="${esc(n)}" onclick="W(this,()=>shRen(this))">เปลี่ยนชื่อ</button></div></div>`).join('')+`<div class="row" style="margin-top:10px"><input class="shn" placeholder="ชื่อชีทใหม่"><button class="btn alt sm fit" onclick="W(this,()=>shAdd(this))">＋ สร้างชีท</button></div><button class="btn sm" style="margin-top:10px" onclick="W(this,()=>shSet(this))">บันทึกการเลือกชีท</button>`;
+const shRun=async(el,b)=>{const c=el.closest('[data-k]'),r=await adm(b.action,{key:c.dataset.k,...b});if(!r.ok)return toast(r.error);c.querySelector('.shp').innerHTML=shView(c.dataset.k,r);toast('บันทึกแล้ว');load()};
+async function shLoad(el){const c=el.closest('[data-k]'),r=await adm('adminSheets',{key:c.dataset.k});if(!r.ok)return toast(r.error);c.querySelector('.shp').innerHTML=shView(c.dataset.k,r)}
+const shAdd=el=>shRun(el,{action:'adminSheetAdd',sheet:el.closest('.shp').querySelector('.shn').value});
+const shRen=el=>{const to=prompt('ชื่อใหม่ของชีท',el.dataset.n);return to&&to!=el.dataset.n?shRun(el,{action:'adminSheetRename',from:el.dataset.n,to}):0};
+const shSet=el=>{const p=el.closest('.shp'),d=p.querySelector('.shd:checked');return shRun(el,{action:'adminSheetSet',tabs:[...p.querySelectorAll('.shs:checked')].map(x=>x.value),db:d?d.value:''})};
 async function svBr(el){const c=el.closest('[data-k]'),m=c.querySelector('.bi').value.match(/\/d\/([\w-]+)/);
  const r=await adm('adminSave',{key:c.dataset.k,name:c.querySelector('.bn').value,id:m?m[1]:c.querySelector('.bi').value.trim(),code:c.querySelector('.bc2').value});
  if(!r.ok)return toast(r.error);toast('บันทึกสาขาแล้ว');drawAdm(r.list)}
