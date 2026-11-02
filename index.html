@@ -140,6 +140,10 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
 .fbx label{margin-top:0}.fbx select{margin-top:10px}.mini{padding:6px 12px;min-height:0;font-size:13px}
 .shp{margin-top:10px}.shp .sr input[type=checkbox],.shp .sr input[type=radio]{width:auto}.shp .sr label{display:flex;gap:5px;align-items:center;margin:0}
 @media(max-width:760px){.sq{grid-template-columns:1fr}.bcin{font-size:18px}.chip{padding:8px 14px}}
+.pk{display:flex;gap:10px;align-items:center;margin-top:10px;padding:12px 14px;border-radius:16px;background:var(--tint)}.pk.new{background:#fff7e6;border:1px dashed #f0b44c}.pk.hide{display:none}.pk .t{flex:1;min-width:0}.pk .t b{display:block;font-size:18px}
+.sg2{display:flex;justify-content:space-between;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid var(--ln);background:#fff;padding:12px 6px;font:inherit;color:var(--ink);cursor:pointer}.sg2 small{color:var(--mut)}#sug{margin-top:6px}
+.two{display:grid;grid-template-columns:128px 1fr;gap:10px;align-items:start}.qs2{display:flex;align-items:center;gap:4px}.qs2 button{width:36px;height:46px;border:0;border-radius:12px;background:var(--tint);color:var(--ac);font-size:20px;cursor:pointer;flex:none}.qs2 input{text-align:center;padding:11px 2px}.dpv{min-height:26px;margin-top:6px}
+@media(max-width:760px){.scan{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0;padding:10px}.qcard{order:-1}.qcard.e0{display:none}#ql{max-height:30vh;overflow:auto}}
 </style>
 </head>
 <body>
@@ -166,16 +170,16 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
  <div class="card"><div class="row" style="margin-bottom:10px"><input id="q" placeholder="ค้นหาชื่อหรือบาร์โค้ด" oninput="drawList()"><button class="btn fit" onclick="scan('find')">▣ สแกน</button></div><div class="dsk" style="overflow-x:auto"><table id="tbl"></table></div><div class="mob" id="cards"></div></div>
 </section>
 
-<section id="add" class="hide"><div class="sq"><div class="card">
- <h3>สแกน / กรอกสินค้า <small>เพิ่มได้หลายรายการ แล้วบันทึกทีเดียว</small></h3>
- <div class="row"><input id="bc" class="bcin" inputmode="numeric" autocomplete="off" placeholder="ยิงหรือพิมพ์บาร์โค้ด"><button class="btn fit" style="padding:15px 18px" onclick="scan('add')">▣ กล้อง</button></div>
- <div class="nm" id="nm"></div><div class="mut" id="lots"></div>
- <input id="nmIn" class="hide" placeholder="ไม่พบในฐานข้อมูล พิมพ์ชื่อสินค้าใหม่" style="margin-top:8px">
- <div class="row"><div><label for="qty">จำนวน</label><input id="qty" type="number" inputmode="numeric" min="1"></div><div><label for="due">วันหมดอายุ</label><input id="due" type="date"></div></div>
+<section id="add" class="hide"><div class="sq"><div class="card" id="efh"><div id="ef">
+ <div class="row"><input id="bc" class="bcin" autocomplete="off" placeholder="ชื่อสินค้า หรือบาร์โค้ด (ใส่บางส่วนก็ได้)" oninput="SEL=null;lookup()"><button class="btn fit" style="padding:15px 18px" onclick="scan('add')" aria-label="สแกน">▣</button></div>
+ <div id="sug"></div><div id="pk" class="pk hide"></div>
+ <div class="two"><div><label for="qty">จำนวน</label><div class="qs2"><button onclick="qa(-1)">−</button><input id="qty" type="number" inputmode="numeric" min="1" value="1"><button onclick="qa(1)">＋</button></div></div>
+ <div><label for="due">วันหมดอายุ</label><div class="row"><input id="due" inputmode="decimal" autocomplete="off" placeholder="14.2.26" oninput="pv()"><label class="btn alt fit" style="margin:0;position:relative;padding:12px 14px">📅<input type="date" onchange="dp(this)" style="position:absolute;inset:0;opacity:0;width:100%;padding:0"></label></div></div></div>
+ <div class="dpv" id="dpv"></div>
  <label>สถานะเคลม</label><div class="chips" id="cl"></div>
  <div id="tabRow" class="hide"><label for="tabSel">บันทึกลงชีท</label><select id="tabSel"></select></div>
- <div class="stp"><button class="btn alt" onclick="queue()">＋ เข้าคิว</button><button class="btn" onclick="queue(1)">▣ เข้าคิวแล้วสแกนต่อ</button></div></div>
- <div class="card"><h3>คิวรอบันทึก <small id="qn"></small></h3><div id="ql"></div><button class="btn big" id="qs" onclick="W(this,saveQ)">บันทึกทั้งหมดเข้าชีต</button></div></div></section>
+ <div class="stp"><button class="btn alt" onclick="queue()">＋ เข้าคิว</button><button class="btn" onclick="queue(1)">▣ เข้าคิวแล้วสแกนต่อ</button></div></div></div>
+ <div class="card qcard e0" id="qcard"><h3>คิวรอบันทึก <small id="qn"></small></h3><div id="ql"></div><button class="btn big" id="qs" onclick="W(this,saveQ)">บันทึกทั้งหมดเข้าชีต</button></div></div></section>
 
 <section id="rep" class="hide">
  <div class="row noprint" style="margin-bottom:12px"><select id="f2" onchange="drawRep();drawExtra()"></select><button class="btn alt fit" onclick="csv()">CSV</button><button class="btn fit" onclick="print()">พิมพ์ / PDF</button></div>
@@ -196,11 +200,11 @@ dialog:not(.scan){width:100vw;max-width:100vw;margin:auto 0 0;border-radius:22px
 <dialog id="lg"><b>เลือกสาขา</b><label for="brSel">สาขา</label><select id="brSel"></select><label for="pw">รหัสสาขา (สาขาที่เคยเข้าแล้วเว้นว่างได้)</label><input id="pw" type="password" autocomplete="off"><button class="btn big" onclick="W(this,login)">เข้าใช้งาน</button><button class="btn alt big" style="margin-top:8px" onclick="lg.close();go('set')">ตั้งค่าแอดมิน</button></dialog>
 <dialog id="sc" class="scan">
  <div class="row" style="margin-bottom:10px"><div style="font-weight:600"><i class="dot" id="sdot" style="--c:#7f5cff"></i><span id="sst">กำลังสแกน</span></div>
-  <button class="ib fit" id="bp" onclick="toggleBeep()" aria-label="เปิดปิดเสียงบี๊บ">🔊</button><button class="ib fit hide" id="tq" onclick="torch()" aria-label="ไฟฉาย">🔦</button><button class="ib fit" onclick="stopScan()" aria-label="ปิดกล้อง">✕</button></div>
+  <button class="ib fit" id="bp" onclick="toggleBeep()" aria-label="เปิดปิดเสียงบี๊บ">🔊</button><button class="ib fit hide" id="tq" onclick="torch()" aria-label="ไฟฉาย">🔦</button><button class="btn sm fit hide" id="qd" onclick="stopScan()"></button><button class="ib fit" onclick="stopScan()" aria-label="ปิดกล้อง">✕</button></div>
  <div class="seg"><button data-m="add" class="on" onclick="setMode('add')">เพิ่มสินค้า</button><button data-m="find" onclick="setMode('find')">ค้นหา</button></div>
  <div class="vw" id="vw" onclick="focusTap(event)"><video id="vid" playsinline muted autoplay></video><b class="cn a"></b><b class="cn b"></b><b class="cn c"></b><b class="cn d"></b><i class="sl"></i><i class="fr" id="fr"></i></div>
  <div class="row" id="zm" style="justify-content:center;margin-top:10px"></div>
- <div class="mut" id="scmsg" style="margin:8px 0;min-height:42px;text-align:center"></div>
+ <div class="mut" id="scmsg" style="margin:6px 0;min-height:22px;text-align:center"></div><div id="slot" class="hide"></div>
  <div class="row"><label class="btn alt" for="pic" style="text-align:center">ถ่ายรูปแทน</label><button class="btn alt" onclick="stopScan();go('add')">พิมพ์เอง</button><button class="btn hide" id="addNew">เพิ่มสินค้านี้</button></div>
  <div class="mut" style="text-align:center;font-size:12px;margin-top:8px">แตะที่ภาพเพื่อโฟกัส · ใช้ซูมช่วยถ้าบาร์โค้ดเล็ก</div>
  <input id="pic" type="file" accept="image/*" capture="environment" class="hide" onchange="scanPic(this)"></dialog>
@@ -266,9 +270,32 @@ function drawRep(){
  $('tb').innerHTML='<tr><th>บาร์โค้ด</th><th>ชื่อสินค้า</th><th class="n">จำนวน</th><th>หมดอายุ</th><th>สถานะ</th><th>เคลม</th></tr>'+g.map(e=>`<tr style="--c:${COL[lv(days(e.due))]}"><td>${e.barcode}</td><td>${esc(e.item)}</td><td class="n">${e.qty}</td><td>${fd(e.due)}</td><td>${pill(days(e.due))}</td><td>${clPill(e.claim)}</td></tr>`).join('')}
 function csv(){const g=group(+$('f2').value),r=[['บาร์โค้ด','ชื่อสินค้า','จำนวน','วันหมดอายุ','เหลือ(วัน)','สถานะเคลม']].concat(g.map(e=>[e.barcode,e.item,e.qty,fd(e.due),days(e.due),e.claim||'-']));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.map(x=>x.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n')],{type:'text/csv'}));a.download='รายงานสต็อก_'+new Date().toISOString().slice(0,10)+'.csv';a.click()}
-function lookup(){const b=$('bc').value.trim(),n=D.db[b],l=D.entries.filter(e=>e.barcode==b);
- $('nm').textContent=b?(n||''):'';$('nmIn').classList.toggle('hide',!b||!!n);$('lots').textContent=l.length?'มีในชีตแล้ว: '+l.map(e=>fd(e.due)+' ×'+e.qty).join(', '):''}
-$('bc').addEventListener('input',lookup);$('bc').addEventListener('keydown',e=>{if(e.key==='Enter'){lookup();$('qty').focus()}});
+let SEL=null,SG=[],pkKey='';
+const lotsOf=b=>{const l=D.entries.filter(e=>e.barcode==b);return l.length?'มีในชีตแล้ว: '+l.map(e=>fd(e.due)+' ×'+e.qty).join(', '):''};
+function lookup(){const v=$('bc').value.trim(),pk=$('pk'),sg=$('sug');SG=[];
+ if(!SEL&&v&&D.db[v])SEL={b:v,n:D.db[v]};
+ if(SEL){sg.innerHTML='';pkKey='';pk.className='pk';pk.innerHTML=`<div class="t"><b>${esc(SEL.n)}</b><span class="mut">${esc(SEL.b)}</span><div class="mut">${lotsOf(SEL.b)}</div></div><button class="ib" onclick="SEL=null;$('bc').value='';lookup();$('bc').focus()" aria-label="เปลี่ยนสินค้า">✕</button>`;return}
+ if(!v){sg.innerHTML=pk.innerHTML='';pk.className='pk hide';pkKey='';return}
+ const q=v.toLowerCase(),dg=/^\d+$/.test(v);
+ if(!dg||v.length>=3)SG=Object.entries(D.db).filter(([b,n])=>dg?b.includes(v):(n.toLowerCase().includes(q)||b.toLowerCase().includes(q))).sort((a,b)=>b[0].endsWith(v)-a[0].endsWith(v)).slice(0,6);
+ sg.innerHTML=SG.map(([b,n],i)=>`<button class="sg2" onclick="pick(${i})"><b>${esc(n)}</b><small>${esc(b)}</small></button>`).join('')||(dg&&v.length<3?'<div class="mut">พิมพ์เลขท้ายบาร์โค้ด 3 ตัวขึ้นไป หรือพิมพ์ชื่อสินค้า</div>':'');
+ const nw=!SG.length&&(!dg||v.length>=8)&&v.length>=2,k=nw?'n'+v:'';
+ if(!nw){pk.className='pk hide';pk.innerHTML='';pkKey='';return}
+ if(k!==pkKey){pkKey=k;pk.className='pk new';pk.innerHTML=`<div style="flex:1;min-width:0"><div class="mut" style="margin-bottom:6px">🆕 ไม่พบในฐานข้อมูล จะเพิ่มลงชีท Database ให้อัตโนมัติ</div><input id="nmIn" placeholder="ชื่อสินค้า" value="${dg?'':esc(v)}"><input id="nbc" inputmode="numeric" placeholder="บาร์โค้ด (ไม่ใส่ก็ได้)" value="${dg?esc(v):''}" style="margin-top:8px"></div>`}}
+function pick(i){SEL={b:SG[i][0],n:SG[i][1]};$('bc').value=SG[i][1];lookup();$('due').focus()}
+const qa=n=>{$('qty').value=Math.max(1,(+$('qty').value||0)+n)};
+// อ่านวันที่แบบพิมพ์เร็ว: 14.2.26 / 14/2 / 14-2-2569 / 1402 / 140226 / 14022026 (ไม่ใส่ปี = ปีนี้, ปี 2 หลัก >=55 = พ.ศ.)
+function pd(t){t=String(t||'').trim();let m=t.match(/^(\d{1,2})[\s.\/,\-]+(\d{1,2})(?:[\s.\/,\-]+(\d{2}|\d{4}))?$/),d,mo,y;
+ if(m){d=+m[1];mo=+m[2];y=m[3]}else{const g=t.match(/^(\d{2})(\d{2})(\d{2}|\d{4})?$/);if(!g)return'';d=+g[1];mo=+g[2];y=g[3]}
+ y=y?(y.length==2?(+y>=55?2500+ +y-543:2000+ +y):(+y>2400?+y-543:+y)):new Date().getFullYear();
+ const x=new Date(y,mo-1,d);return x.getFullYear()==y&&x.getMonth()==mo-1&&x.getDate()==d?ymd(x):''}
+function pv(){const t=$('due').value.trim(),e=$('dpv');if(!t){e.innerHTML='';return}const d=pd(t);
+ e.innerHTML=d?`→ <b>${fd(d)}</b> ${pill(days(d))}`:'<span style="color:#d6336c">อ่านวันที่ไม่ได้ ลองพิมพ์ เช่น 14.2.26 หรือ 14/2</span>'}
+const dp=el=>{if(el.value){$('due').value=el.value.split('-').reverse().join('/');pv()}};
+function resumeScan(){if(!stream)return;paused=0;last={c:'',t:0};status(0);$('scmsg').textContent='สแกนตัวต่อไปได้เลย'}
+$('bc').onkeydown=e=>{if(e.key=='Enter'){e.preventDefault();SG.length&&!SEL?pick(0):$('due').focus()}};
+$('qty').onkeydown=e=>{if(e.key=='Enter')$('due').focus()};$('due').onkeydown=e=>{if(e.key=='Enter')queue()};
+$('sc').addEventListener('close',()=>{stopStream();$('efh').appendChild($('ef'))});
 const CL=[['-','#e6e9f2','#1c2240'],['เคลมได้','#6fa88c','#fff'],["Lotus's",'#fdeab9','#7a5c14'],['Makro','#d1605f','#fff']];
 let Q=[];try{Q=JSON.parse(ls('Q')||'[]')}catch(e){}let CLV='-',EC='-',F={from:'',to:'',cl:[],tab:''};
 const clr=n=>CL.find(c=>c[0]==n)||CL[0],clPill=n=>{const c=clr(n||'-');return `<span class="pill" style="--c:${c[1]};--t:${c[2]}">${esc(c[0])}</span>`};
@@ -276,12 +303,15 @@ const chipsH=(sel,fn,m)=>CL.map((c,i)=>`<button type="button" class="chip ${(m?s
 const tabs=()=>D.tabs||[],ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function drawAdd(){$('cl').innerHTML=chipsH(CLV,'setCl');const v=$('tabSel').value;$('tabSel').innerHTML=tabs().map(t=>`<option ${t==v?'selected':''}>${esc(t)}</option>`).join('');$('tabRow').classList.toggle('hide',tabs().length<2)}
 const setCl=i=>{CLV=CL[i][0];drawAdd()};
-function drawQ(){localStorage.setItem('Q',JSON.stringify(Q));$('qn').textContent=Q.length?Q.length+' รายการ · '+Q.reduce((a,x)=>a+x.qty,0)+' ชิ้น':'';$('qs').classList.toggle('hide',!Q.length);
+function drawQ(){localStorage.setItem('Q',JSON.stringify(Q));$('qn').textContent=Q.length?Q.length+' รายการ · '+Q.reduce((a,x)=>a+x.qty,0)+' ชิ้น':'';$('qs').classList.toggle('hide',!Q.length);$('qcard').classList.toggle('e0',!Q.length);$('qd').textContent='เสร็จ · คิว '+Q.length;$('qd').classList.toggle('hide',!Q.length);
  $('ql').innerHTML=Q.map((x,i)=>`<div class="lc" style="--c:${clr(x.claim)[1]}"><div class="t"><b>${esc(x.item)}</b><span class="mut">${esc(x.barcode)} · ${fd(x.due)}${tabs().length>1?' · '+esc(x.tab):''}</span><div>${clPill(x.claim)}</div></div><div class="r"><b>×${x.qty}</b><button class="btn del sm" onclick="Q.splice(${i},1);drawQ()">ลบ</button></div></div>`).join('')||'<p class="mut">ยังไม่มีรายการ สแกนหรือกรอกด้านซ้าย แล้วกด "เข้าคิว"</p>'}
-function queue(again){const b=$('bc').value.trim(),q=+$('qty').value,d=$('due').value,item=D.db[b]||$('nmIn').value.trim();
- if(!b||!item||!(q>0)||!d)return toast('กรอกบาร์โค้ด ชื่อ จำนวน และวันหมดอายุให้ครบ');
- Q.push({barcode:b,item,qty:q,due:d,claim:CLV,tab:$('tabSel').value||tabs()[0]||''});D.db[b]=item;
- ['bc','qty','nmIn'].forEach(k=>$(k).value='');lookup();drawQ();toast('เข้าคิวแล้ว ('+Q.length+')');if(again)scan('add');else $('bc').focus()}
+function queue(again){let b,item;
+ if(SEL){b=SEL.b;item=SEL.n}else{const n=$('nmIn'),c=$('nbc');if(!n)return toast('พิมพ์ค้นหา แล้วเลือกสินค้าจากรายการ');item=n.value.trim();if(!item)return toast('ใส่ชื่อสินค้าใหม่');b=c.value.trim()||'NB'+Date.now().toString().slice(-9)}
+ const q=+$('qty').value,d=pd($('due').value);
+ if(!(q>0))return toast('ใส่จำนวน');if(!d)return toast('ใส่วันหมดอายุให้ถูกต้อง เช่น 14.2.26');
+ Q.push({barcode:b,item,qty:q,due:d,claim:CLV,tab:$('tabSel').value||tabs()[0]||''});D.db[b]=item;SEL=null;
+ $('bc').value=$('due').value='';$('qty').value=1;lookup();pv();drawQ();toast('เข้าคิวแล้ว ('+Q.length+') '+item);
+ if($('sc').open)resumeScan();else if(again)scan('add');else $('bc').focus()}
 async function saveQ(){const add=[],up=[];
  for(const x of Q){const same=D.entries.find(e=>e.barcode==x.barcode&&e.due==x.due&&e.tab==x.tab);
   if(same&&(S.dup=='merge'||(S.dup!='new'&&confirm(x.item+'\nมีล็อตวันหมดอายุเดียวกันอยู่แล้ว ('+same.qty+' ชิ้น)\nOK = บวกจำนวน, Cancel = เพิ่มแถวใหม่'))))up.push([same,x]);else add.push(x)}
@@ -323,7 +353,7 @@ const strip=r=>String(r||'').replace(/[\x00-\x1f\x7f]/g,'').trim().replace(/^\][
 const zxLoad=()=>window.ZXing?0:new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
 const hints=()=>{const h=new Map(),F=ZXing.BarcodeFormat;h.set(ZXing.DecodeHintType.TRY_HARDER,true);h.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[F.EAN_8,F.EAN_13,F.CODE_128,F.UPC_A,F.UPC_E]);return h};
 const mkRd=()=>{rd=new ZXing.MultiFormatReader();rd.setHints(hints())};
-function setMode(m){SM=m;document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.m==m))}
+function setMode(m){SM=m;document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.m==m));const a=m=='add';$('slot').classList.toggle('hide',!a);(a?$('slot'):$('efh')).appendChild($('ef'))}
 function toggleBeep(){beepOn=!beepOn;S.beep=beepOn;localStorage.setItem('S',JSON.stringify(S));$('bp').textContent=beepOn?'🔊':'🔇'}
 function beep(){if(!beepOn||!AC)return;try{AC.resume&&AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type='sine';o.frequency.setValueAtTime(1200,t);o.frequency.exponentialRampToValueAtTime(600,t+.15);g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+.22)}catch(e){}}
 function status(hit){$('vw').classList.toggle('hit',!!hit);$('sst').textContent=hit?'อ่านได้แล้ว':'กำลังสแกน';$('sdot').style.setProperty('--c',hit?'#22c7a1':'#7f5cff')}
@@ -361,7 +391,7 @@ async function scan(m){
  }catch(e){stopStream();$('scmsg').textContent=/Line|FBAN|FBAV|Instagram/i.test(navigator.userAgent)?'เปิดกล้องไม่ได้ในแอปนี้ ให้เปิดลิงก์ด้วย Safari/Chrome หรือกด "ถ่ายรูปแทน"':'เปิดกล้องไม่ได้ (ต้องเปิดผ่าน https และอนุญาตกล้อง) ลองกด "ถ่ายรูปแทน" หรือพิมพ์บาร์โค้ดเอง'}}
 function setZ(v){document.querySelectorAll('.zb').forEach(b=>b.classList.toggle('on',Math.abs(v-+b.dataset.z)<.15))}
 async function applyZoom(p){if(!ztrack||!zr)return;const v=Math.min(Math.max(p,zr.min),zr.max);try{await ztrack.applyConstraints({advanced:[{zoom:v}]});setZ(v);S.zoom=v;localStorage.setItem('S',JSON.stringify(S))}catch(e){}}
-async function focusTap(e){
+async function focusTap(e){if(paused&&stream&&SM=='add')resumeScan();
  const t=ztrack;if(!t)return;const r=$('vw').getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height,cp=(t.getCapabilities&&t.getCapabilities())||{},f=$('fr');
  f.style.left=x*100+'%';f.style.top=y*100+'%';f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
  const adv=[],fm=cp.focusMode||[];if(fm.includes('single-shot'))adv.push({focusMode:'single-shot'});else if(fm.includes('manual'))adv.push({focusMode:'manual'});
@@ -370,7 +400,7 @@ async function focusTap(e){
 function stopStream(){clearInterval(tmr);if(stream)stream.getTracks().forEach(t=>t.stop());stream=ztrack=null;$('vid').srcObject=null}
 function stopScan(){stopStream();if($('sc').open)$('sc').close()}
 async function torch(){const t=ztrack;if(!t)return;t._on=!t._on;try{await t.applyConstraints({advanced:[{torch:t._on}]});$('tq').classList.toggle('on',t._on)}catch(e){t._on=!t._on}}
-function toAdd(c){stopScan();go('add');$('bc').value=c;lookup();$('qty').focus()}
+function toAdd(c){if($('sc').open){if(SM!='add')setMode('add')}else go('add');SEL=null;$('bc').value=c;lookup();($('nmIn')||$('due')).focus()}
 function got(c){
  if(SM=='add')return toAdd(c);
  const n=D.entries.filter(e=>e.barcode==c).length;
