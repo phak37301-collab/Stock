@@ -4158,5 +4158,248 @@ function toggleFab(force) {
     <div class="sp-save-b"><button type="button" class="sp-btn" onclick="spReset()">ยกเลิกการแก้ไข</button><button type="button" class="sp-btn pri" id="sp_savebtn" onclick="spSave()"><i class="fa-solid fa-check"></i>บันทึก</button></div>
   </div>
 </div>
+<!-- ===== ADD-ON: แคตตาล็อกเบิกของ + หมวดหมู่ + ค้นหา + กราฟการใช้รายเดือน ===== -->
+<style>
+.cg,.ch{position:fixed;inset:0;z-index:60;background:#f8f7ff;display:flex;flex-direction:column}
+.cg.hidden,.ch.hidden{display:none}
+.cg-h,.ch-h{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-bottom:1px solid #e8e6f7}
+.cg-h button,.ch-h button{width:38px;height:38px;border-radius:50%;background:#f1f0fb;color:#4f46e5;font-size:1rem}
+.cg-t,.ch-t{font-weight:700;color:#1e1b4b;line-height:1.2}.cg-t small,.ch-t small{display:block;font-weight:500;font-size:.72rem;color:#94a3b8}
+.cg-s{position:relative;padding:10px 14px 4px;background:#fff}
+.cg-s i{position:absolute;left:28px;top:50%;transform:translateY(-35%);color:#94a3b8}
+.cg-s input,.cb-s input{width:100%;border:2px solid #e0defa;border-radius:14px;padding:.7rem .9rem .7rem 2.4rem;font-size:1rem;outline:0;background:#fff}
+.cg-s input:focus,.cb-s input:focus{border-color:#6366f1}
+.cg-c,.cb-chips{display:flex;gap:8px;overflow-x:auto;padding:8px 14px 10px;background:#fff;border-bottom:1px solid #e8e6f7;scrollbar-width:none}
+.cb-chips{padding:8px 0 2px;background:none;border:0;flex-wrap:wrap;overflow:visible}
+.cg-c .chip,.cb-chips .chip{flex:none;white-space:nowrap}
+.cg-g{flex:1;overflow-y:auto;padding:12px 14px 96px;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));align-content:start}
+.cg-k{background:#fff;border:2px solid #ece9fb;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.cg-k.on{border-color:#6366f1;background:#f5f3ff}
+.cg-n{font-weight:600;color:#1e1b4b;line-height:1.3}.cg-m{font-size:.75rem;color:#64748b}.cg-m .lw{color:#e11d48}
+.cg-w{background:#ffe4e6;color:#e11d48;border-radius:99px;padding:1px 8px;font-size:.68rem;font-weight:700}
+.cg-add{margin-top:auto;border-radius:12px;padding:.55rem;background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;font-weight:700}
+.cs{margin-top:auto;display:flex;align-items:center;gap:6px}
+.cs button{width:42px;height:42px;border-radius:12px;background:#6366f1;color:#fff;font-size:1.3rem;font-weight:700}
+.cs input{flex:1;min-width:0;text-align:center;font-weight:700;font-size:1.05rem;border:2px solid #c7d2fe;border-radius:12px;height:42px}
+.cg-b{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid #e8e6f7;box-shadow:0 -8px 24px rgba(30,27,75,.12)}
+.cg-b b{color:#4f46e5;font-size:1.2rem}.cg-e{color:#94a3b8;font-size:.85rem;margin:auto}
+.cg-go{border-radius:99px;padding:.75rem 1.4rem;background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;font-weight:700}
+.cb{margin-bottom:12px}.cb-top{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cb-s{position:relative;flex:1;min-width:220px}.cb-s i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8}
+.cb-chips .chip b{margin-left:4px}.cb-chips .chip em{font-style:normal;color:#e11d48;font-weight:700;margin-left:4px;font-size:.72rem}
+.ch-b{flex:1;overflow-y:auto;padding:14px;max-width:820px;width:100%;margin:0 auto}
+.chs{width:100%;height:auto}.chs .hit{fill:transparent;cursor:pointer}
+.chb rect:not(.hit){fill:#a5b4fc;transition:fill .15s}.chb:hover rect:not(.hit){fill:#818cf8}.chb.on rect:not(.hit){fill:#4f46e5}
+.chs .v{font-size:11px;fill:#475569;font-weight:700}.chs .l{font-size:11px;fill:#94a3b8}
+.chs .ln{fill:none;stroke:#6366f1;stroke-width:3}.chs .dt{fill:#fff;stroke:#6366f1;stroke-width:3;cursor:pointer}.chs .dt.on{fill:#6366f1}
+.ch-r{display:block;width:100%;text-align:left;background:#fff;border:1px solid #ece9fb;border-radius:14px;padding:10px 12px;margin-top:8px}
+.ch-r .bar{height:6px;border-radius:9px;background:#eef2ff;margin-top:6px}.ch-r .bar i{display:block;height:100%;border-radius:9px;background:#6366f1}
+.ce{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:.85rem;text-align:left}
+.ce select{border:1px solid #cbd5e1;border-radius:8px;padding:2px 4px;max-width:140px}
+</style>
+<script>
+(function () {
+  /* ---------- หมวดหมู่: เดาจากชื่อ + แอดมินปรับได้ (เก็บในเบราว์เซอร์เครื่องนี้) ---------- */
+  const RULES = [
+    ['เข้าเล่ม', '📚', /สัน|ปกใส|ปกหลัง|ปกอ่อน|กระดูกงู|เข้าเล่ม/],
+    ['หมึก/ตลับ', '🖨️', /หมึก|โทนเนอร์|ตลับ|ริบบอน|toner|ink/i],
+    ['กระดาษ', '📄', /กระดาษ|a3|a4|a5|b5|สติ[กี๊]*เกอร์|ฉลาก/i],
+    ['เครื่องเขียน', '✏️', /ปากกา|ดินสอ|ยางลบ|ไม้บรรทัด|ไฮไลท์|เน้นข้อความ|มาร์[คก]เกอร์|น้ำยาลบ|ลบคำผิด|คัตเตอร์|กรรไกร|ไส้ปากกา|เมจิก|ชอล์ก/],
+    ['แฟ้ม/อุปกรณ์สำนักงาน', '🗂️', /แฟ้ม|คลิป|ลวดเย็บ|ที่เย็บ|เครื่องเย็บ|เทป|กาว|หนังยาง|โพสต์อิท|โน้ต|ซอง|สมุด|ตรายาง|แม็ก|เข็มหมุด|ที่เจาะ|ป้าย|เชือก/],
+    ['ของใช้ทั่วไป', '🧻', /ทิชชู|สบู่|น้ำยา|ถุง|แก้ว|ถ่าน|แบตเตอรี่|ปลั๊ก|หลอดไฟ|ผ้า|ไม้กวาด|ถัง|น้ำดื่ม|กาแฟ/]
+  ];
+  const OTHER = 'อื่นๆ', ICON = { [OTHER]: '📦' };
+  RULES.forEach(r => ICON[r[0]] = r[1]);
+  const guess = n => { n = String(n || ''); for (const r of RULES) if (r[2].test(n)) return r[0]; return OTHER; };
+  /* หมวดที่แอดมินแก้ เก็บที่ชีท (แท็บ "หมวดวัสดุ") ผ่าน getCatMap/saveCatMap มีผลกับทุกคน; localStorage เป็นแค่ตัวช่วยโชว์ทันทีระหว่างรอโหลด */
+  let CATMAP = {}, catBook = '';
+  const ckey = () => 'catMap_' + book;
+  const getOv = () => { if (catBook !== book) { catBook = book; try { CATMAP = JSON.parse(localStorage.getItem(ckey()) || '{}'); } catch (e) { CATMAP = {}; } } return CATMAP; };
+  const catOf = i => getOv()[i.code] || guess(i.name);
+  function loadCatMap() {
+    const b = book; if (!b) return;
+    api('getCatMap', b).then(m => {
+      if (b !== book) return;
+      m = m && typeof m === 'object' ? m : {}; catBook = b;
+      if (JSON.stringify(m) === JSON.stringify(CATMAP)) return;
+      CATMAP = m; try { localStorage.setItem(ckey(), JSON.stringify(m)); } catch (e) {}
+      try { renderInventory(); if (!$('cg').classList.contains('hidden')) { cgChips(); cgGrid(); } } catch (e) {}
+    }).catch(() => {});
+  }
+  const _aa = window.applyAll;
+  window.applyAll = function (all, cached) { _aa.apply(this, arguments); if (!cached) loadCatMap(); };
+  const cats = () => {
+    const m = {}; stock.forEach(i => { const k = catOf(i), o = m[k] || (m[k] = { k: k, n: 0, low: 0 }); o.n++; if (i.isLow) o.low++; });
+    return Object.keys(m).sort((a, b) => (a === OTHER) - (b === OTHER) || m[b].n - m[a].n).map(k => m[k]);
+  };
+  const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'th');
+
+  /* ---------- 1) หน้าเบิกแบบแคตตาล็อก (ผู้ใช้ทั่วไป) ---------- */
+  const G = { sel: '', q: '' };
+  document.body.insertAdjacentHTML('beforeend',
+    `<div id="cg" class="cg hidden"><div class="cg-h"><button type="button" onclick="cgClose()" aria-label="กลับ"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="cg-t">ขอเบิกวัสดุ<small id="cgBk"></small></div></div>
+      <div class="cg-s"><i class="fa-solid fa-magnifying-glass"></i><input id="cgQ" placeholder="ค้นหาชื่อหรือรหัสวัสดุ..." autocomplete="off"></div>
+      <div id="cgChips" class="cg-c"></div><div id="cgGrid" class="cg-g"></div><div id="cgBar" class="cg-b"></div></div>`);
+  const qtyOf = c => { const x = outCart.find(y => y.code === c); return x ? x.qty : 0; };
+  const ctl = (c, q) => q
+    ? `<div class="cs"><button type="button" data-a="-">−</button><input type="number" inputmode="decimal" min="0" step="any" value="${q}" data-a="set"><button type="button" data-a="+">+</button></div>`
+    : `<button type="button" class="cg-add" data-a="+">+ เบิก</button>`;
+  const card = i => { const q = qtyOf(i.code);
+    return `<div class="cg-k ${q ? 'on' : ''}" data-c="${esc(i.code)}"><div class="cg-n">${esc(i.name)}</div>
+      <div class="cg-m">${esc(i.code)} · คงเหลือ <b class="${i.isLow ? 'lw' : ''}">${num(i.balance)}</b> ${esc(i.unit)} ${i.isLow ? `<span class="cg-w">${i.balance <= 0 ? 'หมด' : 'ใกล้หมด'}</span>` : ''}</div>
+      <div class="ctl">${ctl(i.code, q)}</div></div>`; };
+  function cgChips() {
+    const all = [{ k: '', n: stock.length }].concat(cats());
+    $('cgChips').innerHTML = all.map(o => `<button type="button" class="chip ${G.sel === o.k ? 'on' : ''}" data-k="${esc(o.k)}">${o.k ? ICON[o.k] || '📦' : '🔎'} ${esc(o.k || 'ทั้งหมด')} <b>${o.n}</b></button>`).join('');
+  }
+  function cgGrid() {
+    const q = G.q.trim().toLowerCase();
+    const rows = stock.filter(i => (!G.sel || catOf(i) === G.sel) && (!q || (i.code + ' ' + i.name).toLowerCase().includes(q))).sort(byName);
+    $('cgGrid').innerHTML = rows.length ? rows.map(card).join('') : '<div class="text-center text-slate-400 py-16" style="grid-column:1/-1">ไม่พบวัสดุที่ค้นหา</div>';
+  }
+  function cgBar() {
+    const n = outCart.length;
+    $('cgBar').innerHTML = n ? `<div><b>${n}</b> รายการที่เลือก</div><button type="button" class="cg-go" onclick="cgSend()">ส่งคำขอเบิก <i class="fa-solid fa-paper-plane ml-1"></i></button>`
+      : '<div class="cg-e">แตะ “+ เบิก” ที่วัสดุเพื่อเลือก</div>';
+  }
+  function cgSet(c, q) {
+    q = Math.round(q * 1e6) / 1e6;
+    const ix = outCart.findIndex(x => x.code === c), m = stock.find(x => x.code === c); if (!m) return;
+    if (!(q > 0)) { if (ix >= 0) outCart.splice(ix, 1); }
+    else if (ix >= 0) outCart[ix].qty = q; else outCart.push({ code: c, name: m.name, unit: m.unit, qty: q });
+    const el = $('cgGrid').querySelector(`[data-c="${CSS.escape(c)}"]`);
+    if (el) { el.classList.toggle('on', q > 0); el.querySelector('.ctl').innerHTML = ctl(c, q > 0 ? q : 0); }
+    cgBar(); try { paintCart(); } catch (e) {}
+  }
+  const grid = $('cgGrid');
+  grid.addEventListener('click', e => { const b = e.target.closest('button[data-a]'); if (!b) return; const c = b.closest('[data-c]').dataset.c; cgSet(c, qtyOf(c) + (b.dataset.a === '-' ? -1 : 1)); });
+  grid.addEventListener('change', e => { if (e.target.dataset.a === 'set') cgSet(e.target.closest('[data-c]').dataset.c, Number(e.target.value)); });
+  $('cgChips').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; G.sel = b.dataset.k; cgChips(); cgGrid(); });
+  $('cgQ').addEventListener('input', e => { G.q = e.target.value; cgGrid(); });
+  window.cgClose = () => { $('cg').classList.add('hidden'); document.body.style.overflow = ''; };
+  window.cgSend = () => {
+    if (!outCart.length) return;
+    Swal.fire({ title: 'ยืนยันส่งคำขอเบิก', input: 'text', inputPlaceholder: 'หมายเหตุ (ไม่บังคับ)', inputAttributes: { maxlength: 200 },
+      html: '<div style="text-align:left;max-height:40vh;overflow:auto;font-size:.9rem">' + outCart.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed #e2e8f0"><span>${esc(x.name)}${cartWarn(x) ? `<br><small style="color:#e11d48">${esc(cartWarn(x))}</small>` : ''}</span><b style="white-space:nowrap">${esc(x.qty)} ${esc(x.unit)}</b></div>`).join('') + '</div>',
+      showCancelButton: true, confirmButtonText: 'ส่งคำขอ', cancelButtonText: 'กลับไปแก้' }).then(r => {
+      if (!r.isConfirmed) return;
+      if (!$('out_date').value) setDate('out_date', ymd(new Date()));
+      fillMyName(); $('out_person').value = myName(); $('out_note').value = r.value || '';
+      cgClose(); sendReq();
+    });
+  }
+  function openCatalog() {
+    if (!book) return;
+    if (!myName()) { askMyName(false); return; }
+    G.sel = ''; G.q = ''; $('cgQ').value = ''; $('cgBk').textContent = bookName();
+    cgChips(); cgGrid(); cgBar();
+    $('cg').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  const _openTx = window.openTx;
+  window.openTx = function (t) { if (t === 'out' && !isAdmin) return openCatalog(); return _openTx.apply(this, arguments); };
+
+  /* ---------- 2) แอดมิน: แถบหมวด + ช่องค้นหาใหญ่ ---------- */
+  const C = { sel: '' };
+  const host = $('invFilters'), bar = document.createElement('div');
+  bar.className = 'cb';
+  bar.innerHTML = `<div class="cb-top"><div class="cb-s"><i class="fa-solid fa-magnifying-glass"></i><input id="catQ" placeholder="ค้นหาวัสดุ รหัส/ชื่อ (กด / เพื่อค้นหา)" autocomplete="off"></div>
+    <button type="button" class="chip admin-only" data-x="chart">📊 กราฟการใช้ต่อเดือน</button><button type="button" class="chip admin-only" data-x="edit">🏷️ จัดหมวด</button></div><div class="cb-chips" id="catChips"></div>`;
+  host.parentNode.insertBefore(bar, host);
+  function paintBar() {
+    $('catChips').innerHTML = [{ k: '', n: stock.length, low: stock.filter(i => i.isLow).length }].concat(cats()).map(o =>
+      `<button type="button" class="chip ${C.sel === o.k ? 'on' : ''}" data-k="${esc(o.k)}">${o.k ? ICON[o.k] || '📦' : '🔎'} ${esc(o.k || 'ทั้งหมด')}<b>${o.n}</b>${o.low ? `<em>ใกล้หมด ${o.low}</em>` : ''}</button>`).join('');
+    const q = $('catQ'); if (q && document.activeElement !== q && q.value !== F.inv.q) q.value = F.inv.q;
+  }
+  bar.addEventListener('click', e => {
+    const k = e.target.closest('[data-k]'), x = e.target.closest('[data-x]');
+    if (k) { C.sel = k.dataset.k; refresh('inv'); }
+    else if (x) x.dataset.x === 'chart' ? openChart() : editCats();
+  });
+  $('catQ').addEventListener('input', e => mq('inv', e.target.value));
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && isAdmin && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('panel-inventory').classList.contains('hidden')) { e.preventDefault(); $('catQ').focus(); }
+    if (e.key === 'Escape') { cgClose(); $('ch').classList.add('hidden'); }
+  });
+  const _passes = window.passes;
+  window.passes = (c, it) => (c === 'inv' && C.sel && catOf(it) !== C.sel) ? false : _passes(c, it);
+  const _ri = window.renderInventory;
+  window.renderInventory = function () { _ri.apply(this, arguments); paintBar(); };
+  const _cf = window.clearF;
+  window.clearF = function (c) { if (c === 'inv') C.sel = ''; return _cf.apply(this, arguments); };
+  function editCats() {
+    if (needAdmin()) return;
+    const names = Object.keys(ICON), ov = getOv();
+    Swal.fire({ title: 'จัดหมวดวัสดุ', width: 560, showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก',
+      html: '<div style="font-size:.75rem;color:#94a3b8;text-align:left;margin-bottom:6px">ระบบเดาหมวดจากชื่อให้แล้ว แก้ได้ตามต้องการ (บันทึกลงชีท ทุกคนเห็นตรงกัน)</div><div style="max-height:50vh;overflow:auto">' +
+        stock.slice().sort(byName).map(i => { const cur = catOf(i); return `<div class="ce"><span>${esc(i.name)}</span><select data-c="${esc(i.code)}">${names.map(n => `<option ${n === cur ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>`; }).join('') + '</div>',
+      preConfirm: () => { const o = {}; document.querySelectorAll('.swal2-html-container select[data-c]').forEach(s => { const i = stock.find(x => x.code === s.dataset.c); if (i && s.value !== guess(i.name)) o[s.dataset.c] = s.value; }); return o; }
+    }).then(async r => {
+      if (!r.isConfirmed) return;
+      Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+      try {
+        await api('saveCatMap', Object.assign(admArgs(), { book: book, map: r.value }));
+        CATMAP = r.value; catBook = book; try { localStorage.setItem(ckey(), JSON.stringify(r.value)); } catch (e) {}
+        refresh('inv'); Swal.fire({ icon: 'success', title: 'บันทึกหมวดแล้ว ทุกคนจะเห็นตรงกัน', timer: 1800, showConfirmButton: false });
+      } catch (e) { showError(e); }
+    });
+  }
+
+  /* ---------- 3) กราฟการใช้ต่อเดือน: เดือน → วัสดุ → แนวโน้ม ---------- */
+  const TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const mkey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+  const V = { m: '', c: '' };
+  document.body.insertAdjacentHTML('beforeend', `<div id="ch" class="ch hidden"><div class="ch-h"><button type="button" onclick="chBack()" aria-label="ย้อนกลับ"><i class="fa-solid fa-arrow-left"></i></button><div class="ch-t" id="chT"></div></div><div class="ch-b" id="chB"></div></div>`);
+  const MS = () => { const a = [], n = new Date(); for (let i = 11; i >= 0; i--) { const d = new Date(n.getFullYear(), n.getMonth() - i, 1); a.push({ k: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), l: TH[d.getMonth()], y: d.getFullYear() + 543 }); } return a; };
+  function rowsAll() {
+    const cm = {}; stock.forEach(i => cm[i.code] = i);
+    return histAll.filter(h => (h.type === 'เบิกจ่าย' || h.type === 'คืนเบิก') && h.rawDate && (!C.sel || (cm[h.code] && catOf(cm[h.code]) === C.sel)));
+  }
+  function bars(data, sel) {
+    const W = 600, H = 210, bw = W / data.length, mx = Math.max(1, ...data.map(d => d.v));
+    return `<svg viewBox="0 0 ${W} ${H}" class="chs">` + data.map((d, i) => { const h = (H - 50) * d.v / mx, x = i * bw + 6, y = H - 28 - h;
+      return `<g class="chb ${sel === d.k ? 'on' : ''}" data-m="${d.k}"><rect class="hit" x="${i * bw}" y="0" width="${bw}" height="${H}"/><rect x="${x}" y="${y}" width="${bw - 12}" height="${Math.max(h, 2)}" rx="6"/><text class="v" x="${x + (bw - 12) / 2}" y="${y - 5}" text-anchor="middle">${d.v || ''}</text><text class="l" x="${x + (bw - 12) / 2}" y="${H - 10}" text-anchor="middle">${d.l}</text></g>`; }).join('') + '</svg>';
+  }
+  function line(data, sel) {
+    const W = 600, H = 190, mx = Math.max(1, ...data.map(d => d.v)), st = (W - 40) / (data.length - 1);
+    const P = data.map((d, i) => [20 + i * st, H - 32 - (H - 66) * Math.max(d.v, 0) / mx]);
+    return `<svg viewBox="0 0 ${W} ${H}" class="chs"><polyline class="ln" points="${P.map(p => p.join(',')).join(' ')}"/>` + data.map((d, i) =>
+      `<g data-m="${d.k}"><circle class="dt ${sel === d.k ? 'on' : ''}" cx="${P[i][0]}" cy="${P[i][1]}" r="6"/><text class="v" x="${P[i][0]}" y="${P[i][1] - 12}" text-anchor="middle">${d.v || ''}</text><text class="l" x="${P[i][0]}" y="${H - 8}" text-anchor="middle">${d.l}</text></g>`).join('') + '</svg>';
+  }
+  function chPaint() {
+    const ms = MS(), rows = rowsAll(), mo = ms.find(x => x.k === V.m), mat = stock.find(x => x.code === V.c);
+    const scope = C.sel ? ` · หมวด ${C.sel}` : '';
+    let h = '';
+    if (!V.c) {
+      $('chT').innerHTML = `การเบิกวัสดุต่อเดือน<small>12 เดือนล่าสุด · นับจำนวนครั้งที่เบิก${esc(scope)}</small>`;
+      h = `<div class="card p-4">${bars(ms.map(m => ({ k: m.k, l: m.l, v: rows.filter(r => r.type === 'เบิกจ่าย' && mkey(r.rawDate) === m.k).length })), V.m)}</div>`;
+      if (mo) {
+        const g = {}; rows.filter(r => mkey(r.rawDate) === mo.k).forEach(r => { const o = g[r.code] || (g[r.code] = { code: r.code, name: r.name, unit: r.unit, n: 0, q: 0 }); const s = r.type === 'เบิกจ่าย' ? 1 : -1; if (s > 0) o.n++; o.q += s * (Number(r.quantity) || 0); });
+        const top = Object.values(g).filter(o => o.n > 0).sort((a, b) => b.n - a.n).slice(0, 10), mx = top.length ? top[0].n : 1;
+        h += `<div class="font-semibold text-sm mt-5">ใช้มากที่สุด · ${mo.l} ${mo.y}</div>` + (top.length ? top.map((o, i) =>
+          `<button type="button" class="ch-r" data-code="${esc(o.code)}"><div class="flex justify-between gap-3"><span class="font-semibold">${i + 1}. ${esc(o.name)}</span><span class="text-sm text-indigo-600 font-bold whitespace-nowrap">${o.n} ครั้ง</span></div>
+          <div class="text-xs text-slate-500">รวมสุทธิ ${num(Math.round(o.q * 100) / 100)} ${esc(o.unit)} · กดดูแนวโน้ม</div><div class="bar"><i style="width:${Math.round(o.n * 100 / mx)}%"></i></div></button>`).join('') : '<div class="text-slate-400 text-sm py-6 text-center">เดือนนี้ไม่มีการเบิก</div>');
+      } else h += '<div class="text-slate-400 text-sm py-5 text-center">กดแท่งเดือนที่ต้องการเพื่อดูว่าใช้อะไรบ้าง</div>';
+    } else {
+      const mine = rows.filter(r => r.code === V.c), unit = mat ? mat.unit : '';
+      $('chT').innerHTML = `${esc(mat ? mat.name : V.c)}<small>ปริมาณที่ใช้สุทธิต่อเดือน (${esc(unit)})</small>`;
+      h = `<div class="card p-4">${line(ms.map(m => ({ k: m.k, l: m.l, v: Math.round(mine.filter(r => mkey(r.rawDate) === m.k).reduce((s, r) => s + (r.type === 'เบิกจ่าย' ? 1 : -1) * (Number(r.quantity) || 0), 0) * 100) / 100 })), V.m)}</div>`;
+      const list = mine.filter(r => !V.m || mkey(r.rawDate) === V.m).sort((a, b) => b.rawDate - a.rawDate).slice(0, 40);
+      h += `<div class="font-semibold text-sm mt-5">รายการ${mo ? ' · ' + mo.l + ' ' + mo.y : 'ล่าสุด'} (กดจุดบนกราฟเพื่อเลือกเดือน)</div>` + (list.length ? list.map(r =>
+        `<div class="ch-r"><div class="flex justify-between gap-3"><span>${esc(r.person || '-')}</span><b class="${r.type === 'คืนเบิก' ? 'text-emerald-600' : 'text-rose-600'} whitespace-nowrap">${r.type === 'คืนเบิก' ? '+' : '−'}${num(r.quantity)} ${esc(r.unit)}</b></div><div class="text-xs text-slate-400">${thDate(String(r.date))} · ${esc(r.type)}${r.note ? ' · ' + esc(r.note) : ''}</div></div>`).join('') : '<div class="text-slate-400 text-sm py-6 text-center">ไม่มีรายการ</div>');
+    }
+    $('chB').innerHTML = h;
+  }
+  $('chB').addEventListener('click', e => {
+    const r = e.target.closest('[data-code]'), m = e.target.closest('[data-m]');
+    if (r) { V.c = r.dataset.code; chPaint(); $('chB').scrollTop = 0; }
+    else if (m) { V.m = V.m === m.dataset.m && !V.c ? '' : m.dataset.m; chPaint(); }
+  });
+  window.chBack = () => { if (V.c) { V.c = ''; chPaint(); } else if (V.m) { V.m = ''; chPaint(); } else $('ch').classList.add('hidden'); };
+  function openChart() { if (needAdmin()) return; V.m = ''; V.c = ''; chPaint(); $('ch').classList.remove('hidden'); }
+  paintBar();
+})();
+</script>
+
 </body>
 </html>
