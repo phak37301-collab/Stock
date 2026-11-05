@@ -4196,6 +4196,7 @@ function toggleFab(force) {
 .ch-r .bar{height:6px;border-radius:9px;background:#eef2ff;margin-top:6px}.ch-r .bar i{display:block;height:100%;border-radius:9px;background:#6366f1}
 .ce{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:.85rem;text-align:left}
 .ce select{border:1px solid #cbd5e1;border-radius:8px;padding:2px 4px;max-width:140px}
+.dc-g{display:grid;gap:16px}@media(min-width:1024px){.dc-g{grid-template-columns:1.1fr 1fr}}.dc-g .scr{max-height:300px;overflow:auto}@media(max-width:639px){#dashChart{display:none!important}}
 </style>
 <script>
 (function () {
@@ -4227,7 +4228,7 @@ function toggleFab(force) {
     }).catch(() => {});
   }
   const _aa = window.applyAll;
-  window.applyAll = function (all, cached) { _aa.apply(this, arguments); if (!cached) loadCatMap(); };
+  window.applyAll = function (all, cached) { _aa.apply(this, arguments); chPaint(); if (!cached) loadCatMap(); };
   const cats = () => {
     const m = {}; stock.forEach(i => { const k = catOf(i), o = m[k] || (m[k] = { k: k, n: 0, low: 0 }); o.n++; if (i.isLow) o.low++; });
     return Object.keys(m).sort((a, b) => (a === OTHER) - (b === OTHER) || m[b].n - m[a].n).map(k => m[k]);
@@ -4304,7 +4305,7 @@ function toggleFab(force) {
   const host = $('invFilters'), bar = document.createElement('div');
   bar.className = 'cb';
   bar.innerHTML = `<div class="cb-top"><div class="cb-s"><i class="fa-solid fa-magnifying-glass"></i><input id="catQ" placeholder="ค้นหาวัสดุ รหัส/ชื่อ (กด / เพื่อค้นหา)" autocomplete="off"></div>
-    <button type="button" class="chip admin-only" data-x="chart">📊 กราฟการใช้ต่อเดือน</button><button type="button" class="chip admin-only" data-x="edit">🏷️ จัดหมวด</button></div><div class="cb-chips" id="catChips"></div>`;
+    <button type="button" class="chip admin-only" data-x="edit">🏷️ จัดหมวด</button></div><div class="cb-chips" id="catChips"></div>`;
   host.parentNode.insertBefore(bar, host);
   function paintBar() {
     $('catChips').innerHTML = [{ k: '', n: stock.length, low: stock.filter(i => i.isLow).length }].concat(cats()).map(o =>
@@ -4313,13 +4314,13 @@ function toggleFab(force) {
   }
   bar.addEventListener('click', e => {
     const k = e.target.closest('[data-k]'), x = e.target.closest('[data-x]');
-    if (k) { C.sel = k.dataset.k; refresh('inv'); }
-    else if (x) x.dataset.x === 'chart' ? openChart() : editCats();
+    if (k) { C.sel = k.dataset.k; V.m = ''; V.c = ''; refresh('inv'); chPaint(); }
+    else if (x) editCats();
   });
   $('catQ').addEventListener('input', e => mq('inv', e.target.value));
   document.addEventListener('keydown', e => {
     if (e.key === '/' && isAdmin && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('panel-inventory').classList.contains('hidden')) { e.preventDefault(); $('catQ').focus(); }
-    if (e.key === 'Escape') { cgClose(); $('ch').classList.add('hidden'); }
+    if (e.key === 'Escape') cgClose();
   });
   const _passes = window.passes;
   window.passes = (c, it) => (c === 'inv' && C.sel && catOf(it) !== C.sel) ? false : _passes(c, it);
@@ -4345,11 +4346,13 @@ function toggleFab(force) {
     });
   }
 
-  /* ---------- 3) กราฟการใช้ต่อเดือน: เดือน → วัสดุ → แนวโน้ม ---------- */
+  /* ---------- 3) กราฟการใช้ต่อเดือน: การ์ดบนหน้าภาพรวมแอดมิน (ซ่อนในโทรศัพท์) เดือน → วัสดุ → แนวโน้ม ---------- */
   const TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
   const mkey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
   const V = { m: '', c: '' };
-  document.body.insertAdjacentHTML('beforeend', `<div id="ch" class="ch hidden"><div class="ch-h"><button type="button" onclick="chBack()" aria-label="ย้อนกลับ"><i class="fa-solid fa-arrow-left"></i></button><div class="ch-t" id="chT"></div></div><div class="ch-b" id="chB"></div></div>`);
+  const dc = document.createElement('div'); dc.id = 'dashChart'; dc.className = 'card p-5 admin-only';
+  dc.innerHTML = `<div class="flex items-center gap-3 mb-3"><button type="button" id="dcBack" class="chip hidden"><i class="fa-solid fa-arrow-left mr-1"></i>ย้อนกลับ</button><div class="min-w-0"><div class="font-semibold text-sm" id="dcT"></div><div class="text-xs text-slate-400" id="dcS"></div></div></div><div id="dcB"></div>`;
+  const fcard = host.closest('.card'); fcard.parentNode.insertBefore(dc, fcard);
   const MS = () => { const a = [], n = new Date(); for (let i = 11; i >= 0; i--) { const d = new Date(n.getFullYear(), n.getMonth() - i, 1); a.push({ k: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), l: TH[d.getMonth()], y: d.getFullYear() + 543 }); } return a; };
   function rowsAll() {
     const cm = {}; stock.forEach(i => cm[i.code] = i);
@@ -4361,42 +4364,94 @@ function toggleFab(force) {
       return `<g class="chb ${sel === d.k ? 'on' : ''}" data-m="${d.k}"><rect class="hit" x="${i * bw}" y="0" width="${bw}" height="${H}"/><rect x="${x}" y="${y}" width="${bw - 12}" height="${Math.max(h, 2)}" rx="6"/><text class="v" x="${x + (bw - 12) / 2}" y="${y - 5}" text-anchor="middle">${d.v || ''}</text><text class="l" x="${x + (bw - 12) / 2}" y="${H - 10}" text-anchor="middle">${d.l}</text></g>`; }).join('') + '</svg>';
   }
   function line(data, sel) {
-    const W = 600, H = 190, mx = Math.max(1, ...data.map(d => d.v)), st = (W - 40) / (data.length - 1);
+    const W = 600, H = 210, mx = Math.max(1, ...data.map(d => d.v)), st = (W - 40) / (data.length - 1);
     const P = data.map((d, i) => [20 + i * st, H - 32 - (H - 66) * Math.max(d.v, 0) / mx]);
     return `<svg viewBox="0 0 ${W} ${H}" class="chs"><polyline class="ln" points="${P.map(p => p.join(',')).join(' ')}"/>` + data.map((d, i) =>
       `<g data-m="${d.k}"><circle class="dt ${sel === d.k ? 'on' : ''}" cx="${P[i][0]}" cy="${P[i][1]}" r="6"/><text class="v" x="${P[i][0]}" y="${P[i][1] - 12}" text-anchor="middle">${d.v || ''}</text><text class="l" x="${P[i][0]}" y="${H - 8}" text-anchor="middle">${d.l}</text></g>`).join('') + '</svg>';
   }
   function chPaint() {
+    if (!$('dcB')) return;
     const ms = MS(), rows = rowsAll(), mo = ms.find(x => x.k === V.m), mat = stock.find(x => x.code === V.c);
-    const scope = C.sel ? ` · หมวด ${C.sel}` : '';
-    let h = '';
+    let L = '', R = '';
+    $('dcBack').classList.toggle('hidden', !(V.m || V.c));
     if (!V.c) {
-      $('chT').innerHTML = `การเบิกวัสดุต่อเดือน<small>12 เดือนล่าสุด · นับจำนวนครั้งที่เบิก${esc(scope)}</small>`;
-      h = `<div class="card p-4">${bars(ms.map(m => ({ k: m.k, l: m.l, v: rows.filter(r => r.type === 'เบิกจ่าย' && mkey(r.rawDate) === m.k).length })), V.m)}</div>`;
+      $('dcT').innerHTML = '📊 การเบิกวัสดุต่อเดือน';
+      $('dcS').textContent = '12 เดือนล่าสุด · นับจำนวนครั้งที่เบิก' + (C.sel ? ' · หมวด ' + C.sel : '') + ' · กดแท่งเพื่อดูรายละเอียด';
+      L = bars(ms.map(m => ({ k: m.k, l: m.l, v: rows.filter(r => r.type === 'เบิกจ่าย' && mkey(r.rawDate) === m.k).length })), V.m);
       if (mo) {
         const g = {}; rows.filter(r => mkey(r.rawDate) === mo.k).forEach(r => { const o = g[r.code] || (g[r.code] = { code: r.code, name: r.name, unit: r.unit, n: 0, q: 0 }); const s = r.type === 'เบิกจ่าย' ? 1 : -1; if (s > 0) o.n++; o.q += s * (Number(r.quantity) || 0); });
         const top = Object.values(g).filter(o => o.n > 0).sort((a, b) => b.n - a.n).slice(0, 10), mx = top.length ? top[0].n : 1;
-        h += `<div class="font-semibold text-sm mt-5">ใช้มากที่สุด · ${mo.l} ${mo.y}</div>` + (top.length ? top.map((o, i) =>
+        R = `<div class="font-semibold text-sm">ใช้มากที่สุด · ${mo.l} ${mo.y}</div>` + (top.length ? top.map((o, i) =>
           `<button type="button" class="ch-r" data-code="${esc(o.code)}"><div class="flex justify-between gap-3"><span class="font-semibold">${i + 1}. ${esc(o.name)}</span><span class="text-sm text-indigo-600 font-bold whitespace-nowrap">${o.n} ครั้ง</span></div>
           <div class="text-xs text-slate-500">รวมสุทธิ ${num(Math.round(o.q * 100) / 100)} ${esc(o.unit)} · กดดูแนวโน้ม</div><div class="bar"><i style="width:${Math.round(o.n * 100 / mx)}%"></i></div></button>`).join('') : '<div class="text-slate-400 text-sm py-6 text-center">เดือนนี้ไม่มีการเบิก</div>');
-      } else h += '<div class="text-slate-400 text-sm py-5 text-center">กดแท่งเดือนที่ต้องการเพื่อดูว่าใช้อะไรบ้าง</div>';
+      } else R = '<div class="text-slate-400 text-sm py-10 text-center">กดแท่งเดือนที่ต้องการ<br>เพื่อดูว่าใช้วัสดุอะไรบ้าง</div>';
     } else {
       const mine = rows.filter(r => r.code === V.c), unit = mat ? mat.unit : '';
-      $('chT').innerHTML = `${esc(mat ? mat.name : V.c)}<small>ปริมาณที่ใช้สุทธิต่อเดือน (${esc(unit)})</small>`;
-      h = `<div class="card p-4">${line(ms.map(m => ({ k: m.k, l: m.l, v: Math.round(mine.filter(r => mkey(r.rawDate) === m.k).reduce((s, r) => s + (r.type === 'เบิกจ่าย' ? 1 : -1) * (Number(r.quantity) || 0), 0) * 100) / 100 })), V.m)}</div>`;
+      $('dcT').innerHTML = '📈 ' + esc(mat ? mat.name : V.c);
+      $('dcS').textContent = 'ปริมาณที่ใช้สุทธิต่อเดือน (' + unit + ') · กดจุดเพื่อเลือกเดือน';
+      L = line(ms.map(m => ({ k: m.k, l: m.l, v: Math.round(mine.filter(r => mkey(r.rawDate) === m.k).reduce((s, r) => s + (r.type === 'เบิกจ่าย' ? 1 : -1) * (Number(r.quantity) || 0), 0) * 100) / 100 })), V.m);
       const list = mine.filter(r => !V.m || mkey(r.rawDate) === V.m).sort((a, b) => b.rawDate - a.rawDate).slice(0, 40);
-      h += `<div class="font-semibold text-sm mt-5">รายการ${mo ? ' · ' + mo.l + ' ' + mo.y : 'ล่าสุด'} (กดจุดบนกราฟเพื่อเลือกเดือน)</div>` + (list.length ? list.map(r =>
+      R = `<div class="font-semibold text-sm">รายการ${mo ? ' · ' + mo.l + ' ' + mo.y : 'ล่าสุด'}</div>` + (list.length ? list.map(r =>
         `<div class="ch-r"><div class="flex justify-between gap-3"><span>${esc(r.person || '-')}</span><b class="${r.type === 'คืนเบิก' ? 'text-emerald-600' : 'text-rose-600'} whitespace-nowrap">${r.type === 'คืนเบิก' ? '+' : '−'}${num(r.quantity)} ${esc(r.unit)}</b></div><div class="text-xs text-slate-400">${thDate(String(r.date))} · ${esc(r.type)}${r.note ? ' · ' + esc(r.note) : ''}</div></div>`).join('') : '<div class="text-slate-400 text-sm py-6 text-center">ไม่มีรายการ</div>');
     }
-    $('chB').innerHTML = h;
+    $('dcB').innerHTML = `<div class="dc-g"><div>${L}</div><div class="scr">${R}</div></div>`;
   }
-  $('chB').addEventListener('click', e => {
+  $('dcB').addEventListener('click', e => {
     const r = e.target.closest('[data-code]'), m = e.target.closest('[data-m]');
-    if (r) { V.c = r.dataset.code; chPaint(); $('chB').scrollTop = 0; }
+    if (r) { V.c = r.dataset.code; chPaint(); }
     else if (m) { V.m = V.m === m.dataset.m && !V.c ? '' : m.dataset.m; chPaint(); }
   });
-  window.chBack = () => { if (V.c) { V.c = ''; chPaint(); } else if (V.m) { V.m = ''; chPaint(); } else $('ch').classList.add('hidden'); };
-  function openChart() { if (needAdmin()) return; V.m = ''; V.c = ''; chPaint(); $('ch').classList.remove('hidden'); }
+  $('dcBack').addEventListener('click', () => { if (V.c) V.c = ''; else V.m = ''; chPaint(); });
+  chPaint();
+
+  /* ---------- 4) ปรับสีธีม: เลื่อนเฉดสีม่วง/น้ำเงินทั้งหน้าเว็บ (สีแดง/เขียว/ส้มของสถานะไม่เปลี่ยน) เก็บในเบราว์เซอร์เครื่องนี้ ---------- */
+  const BASE = 245, orig = new Map();
+  const toHsl = (r, g, b) => { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn; let h = 0, s = 0;
+    if (d) { s = d / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; } return [h, s, l]; };
+  const toRgb = (h, s, l) => { const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2; const a = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x]; return a.map(v => Math.round((v + m) * 255)); };
+  const shift = (r, g, b, d) => { const [h, s, l] = toHsl(r, g, b); return (s < .2 || h < 222 || h > 292) ? [r, g, b] : toRgb((h + d + 360) % 360, s, l); };
+  const recolor = (t, d) => !d ? t : t.replace(/#([0-9a-f]{6})([0-9a-f]{2})?\b/gi, (m, x, a) => { const n = parseInt(x, 16); return '#' + shift(n >> 16 & 255, n >> 8 & 255, n & 255, d).map(v => v.toString(16).padStart(2, '0')).join('') + (a || ''); })
+    .replace(/(rgba?\()(\d+)([,\s]+)(\d+)([,\s]+)(\d+)/g, (m, p, r, s1, g, s2, b) => { const c = shift(+r, +g, +b, d); return p + c[0] + s1 + c[1] + s2 + c[2]; });
+  function applyTheme(h) {
+    const d = Math.round(h - BASE);
+    document.querySelectorAll('style').forEach(st => {
+      if (st.id === 'themeX') return;
+      if (!orig.has(st)) { const t = st.textContent; if (!t || t.includes('--tw-')) return; orig.set(st, t); }
+      st.textContent = recolor(orig.get(st), d);
+    });
+    document.querySelectorAll('[style]').forEach(el => {
+      const s0 = el.dataset.os !== undefined ? el.dataset.os : el.getAttribute('style'), n = recolor(s0, d);
+      if (n === s0 && el.dataset.os === undefined) return;
+      el.dataset.os = s0; el.setAttribute('style', n);
+    });
+    let t = $('themeX'); if (!t) { t = document.createElement('style'); t.id = 'themeX'; document.head.appendChild(t); }
+    const A = recolor('#6366f1', d), A2 = recolor('#4338ca', d), A0 = recolor('#eef2ff', d);
+    t.textContent = `.text-indigo-600,.text-indigo-700{color:${A}!important}.bg-indigo-600{background-color:${A}!important}.bg-indigo-700,.hover\\:bg-indigo-700:hover{background-color:${A2}!important}.bg-indigo-50{background-color:${A0}!important}.border-indigo-500{border-color:${A}!important}`;
+  }
+  const getHue = () => { try { const v = Number(localStorage.getItem('uiHue')); return isFinite(v) && localStorage.getItem('uiHue') !== null ? v : BASE; } catch (e) { return BASE; } };
+  const PRE = [['ม่วง', 245], ['ฟ้า', 205], ['เขียวมิ้นต์', 165], ['เขียว', 135], ['ส้ม', 25], ['ชมพู', 330], ['แดง', 355]];
+  function themeDlg() {
+    const cur = getHue(); let raf = 0;
+    const live = h => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => applyTheme(h)); };
+    Swal.fire({ title: '🎨 ปรับสีหน้าเว็บ', showCancelButton: true, showDenyButton: true, confirmButtonText: 'ใช้สีนี้', denyButtonText: 'ค่าเริ่มต้น', cancelButtonText: 'ยกเลิก',
+      html: `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0 14px">${PRE.map(p => `<button type="button" data-h="${p[1]}" style="padding:6px 12px;border-radius:99px;color:#fff;font-weight:600;font-size:.8rem;background:hsl(${p[1]},65%,52%)">${p[0]}</button>`).join('')}</div>
+        <div style="font-size:.75rem;color:#64748b;text-align:left;margin-bottom:4px">หรือเลื่อนเลือกเฉดสีเอง</div>
+        <input id="thR" type="range" min="0" max="360" value="${cur}" style="width:100%;height:12px;border-radius:9px;appearance:none;background:linear-gradient(90deg,hsl(0,70%,55%),hsl(60,70%,50%),hsl(120,60%,45%),hsl(180,65%,45%),hsl(240,70%,58%),hsl(300,65%,55%),hsl(360,70%,55%))">
+        <div style="font-size:.72rem;color:#94a3b8;margin-top:10px">สีแดง/เขียวของสถานะสต็อกจะไม่เปลี่ยน · บันทึกในเบราว์เซอร์เครื่องนี้</div>`,
+      didOpen: () => {
+        const r = $('thR'); r.addEventListener('input', () => live(+r.value));
+        Swal.getHtmlContainer().querySelectorAll('[data-h]').forEach(b => b.addEventListener('click', () => { r.value = b.dataset.h; live(+b.dataset.h); }));
+      },
+      preConfirm: () => +$('thR').value
+    }).then(r => {
+      if (r.isConfirmed) { try { localStorage.setItem('uiHue', String(r.value)); } catch (e) {} applyTheme(r.value); }
+      else if (r.isDenied) { try { localStorage.removeItem('uiHue'); } catch (e) {} applyTheme(BASE); }
+      else applyTheme(cur);
+    });
+  }
+  const rb = $('refreshBtn');
+  if (rb) { const tb = document.createElement('button'); tb.type = 'button'; tb.id = 'themeBtn'; tb.className = 'icon-btn'; tb.title = 'ปรับสีหน้าเว็บ'; tb.setAttribute('aria-label', 'ปรับสีหน้าเว็บ'); tb.innerHTML = '<i class="fa-solid fa-palette"></i>'; tb.onclick = themeDlg; rb.parentNode.insertBefore(tb, rb); }
+  if (getHue() !== BASE) applyTheme(getHue());
   paintBar();
 })();
 </script>
