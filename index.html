@@ -2462,9 +2462,10 @@ function paintLowChip(low, ok) {
     `<button type="button" class="lc low" onclick="goInventory('low')"><i class="fa-solid fa-triangle-exclamation"></i><span class="lt">ใกล้หมด</span> ${num(low)}</button>` +
     `<button type="button" class="lc ok" onclick="goInventory('ok')"><i class="fa-solid fa-circle-check"></i><span class="lt">ปกติ</span> ${num(ok)}</button>`;
 }
+var adminRestoring = false;
 (async function restoreAdmin() {
   let p = ''; try { p = sessionStorage.getItem('adm') || ''; } catch (e) {}
-  if (p) { setAdminBusy(true); const r = await adminLogin(p); setAdminBusy(false); if (r !== true) applyRole(); } else applyRole();
+  if (p) { adminRestoring = true; setAdminBusy(true); let r; try { r = await adminLogin(p); } catch (e) { r = false; } adminRestoring = false; setAdminBusy(false); if (r !== true) applyRole(); } else applyRole();
   if (!isAdmin && !myName()) askMyName(false);   // เข้าเว็บครั้งแรก: ขอชื่อไว้ก่อน
 })();
 
@@ -3152,6 +3153,7 @@ function buildForm(t) {
 }
 function openTx(t) {
   if (!book) return;
+  if (adminRestoring) { Swal.fire({ icon: 'info', title: 'กำลังตรวจสอบสิทธิ์แอดมิน', text: 'รอสักครู่แล้วกดใหม่อีกครั้ง', timer: 1600, showConfirmButton: false }); return; }
   if (t !== 'out' && needAdmin()) return;
   if (t === 'out') {
     $('out_ttl').innerText = isAdmin ? 'บันทึกการเบิกวัสดุ (แอดมิน: ตัดสต็อกทันที)' : 'ขอเบิกวัสดุ';
@@ -3227,15 +3229,23 @@ function submitForm(e, t) {
     if (!outCart.length) return Swal.fire({ icon: 'info', title: 'ยังไม่มีรายการเบิก', text: 'เลือกวัสดุและจำนวน แล้วกด “เพิ่มเข้ารายการเบิก”' });
     return sendReq();
   }
+  const sel = $(t + '_sel').value, qty = Number($(t + '_qty').value);
+  if (!sel) return Swal.fire({ icon: 'info', title: 'เลือกวัสดุก่อน' });
+  if (!isFinite(qty) || qty <= 0) return Swal.fire({ icon: 'info', title: 'ใส่จำนวนให้มากกว่า 0' });
   sendTx(t, false);
 }
 function sendTx(t, force) {
   const btn = $(t + '_btn'), label = btn.innerHTML;
   btn.disabled = true; busy(t === 'in' ? 'กำลังบันทึกรับเข้า...' : (isAdmin ? 'กำลังบันทึกการเบิก...' : 'กำลังส่งคำขอเบิก...'));
-  const done = () => { btn.disabled = false; btn.innerHTML = label; };
+  let finished = false;
+  const done = () => { finished = true; clearTimeout(tm); btn.disabled = false; btn.innerHTML = label; };
+  const tm = setTimeout(() => { if (finished) return; finished = true; btn.disabled = false; btn.innerHTML = label; Swal.fire({ icon: 'warning', title: 'เซิร์ฟเวอร์ตอบช้า', text: 'ระบบอาจบันทึกไปแล้ว ตรวจที่แท็บ “ประวัติ” ก่อนกดซ้ำ เพื่อไม่ให้เบิกซ้ำ' }); }, 60000);
   google.script.run
     .withSuccessHandler(r => {
+      if (finished) return;
       done();
+      try {
+      r = r || {};
       if (r.needConfirm) {
         return Swal.fire({
           icon: 'warning', title: 'เบิกเกินยอดคงเหลือ',
@@ -3248,8 +3258,9 @@ function sendTx(t, force) {
       Swal.fire({ icon: 'success', title: r.id ? 'ส่งคำขอแล้ว' : 'สำเร็จ', text: r.message, timer: r.id ? 4500 : 1800, showConfirmButton: !!r.id, confirmButtonText: 'ตกลง' });
       ['qty', 'person', 'note'].forEach(k => $(t + '_' + k).value = '');
       $(t + '_sel').selectedIndex = 0; $(t + '_unit').innerText = 'หน่วย'; loadAllData();
+      } catch (e) { showError(e); }
     })
-    .withFailureHandler(err => { done(); showError(err); })
+    .withFailureHandler(err => { if (finished) return; done(); showError(err); })
     [(t === 'out' && !isAdmin) ? 'submitRequest' : 'recordTransaction']({ book: book, type: t === 'in' ? 'IN' : 'OUT', txDate: $(t + '_date').value, materialCode: $(t + '_sel').value, quantity: $(t + '_qty').value, personName: $(t + '_person').value, note: $(t + '_note').value, force: force });
 }
 
@@ -4199,6 +4210,8 @@ function toggleFab(force) {
 .cg-cart{display:flex;flex-direction:column;background:#fff;border:1px solid #ece9fb;border-radius:20px;min-height:0;overflow:hidden;box-shadow:0 10px 30px rgba(79,70,229,.1)}
 .cg-ch{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #f1f0fb;background:linear-gradient(135deg,#f5f3ff,#fff1f2)}
 .cg-ch b{font-size:1rem;color:#1e1b4b}.cg-cn{background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;border-radius:99px;padding:1px 11px;font-size:.8rem;font-weight:700}
+.cg-clr{margin-left:auto;font-size:.75rem;color:#e11d48;background:#fff1f2;border-radius:99px;padding:5px 11px;font-weight:600}.cg-clr+.cg-cx{margin-left:8px}
+.cg-clr2{margin-top:10px;width:100%;padding:.65rem;border-radius:12px;background:#fff1f2;color:#e11d48;font-weight:600;font-size:.85rem}
 .cg-cx{margin-left:auto;display:none;width:34px;height:34px;border-radius:50%;background:#fff}
 .cg-cl{flex:1;overflow-y:auto;padding:4px 0}.cg-ci{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f6f5fd}
 .cg-cin{flex:1;min-width:0;font-size:.85rem;line-height:1.3}.cg-cin b{display:block;font-weight:600;color:#1e1b4b}.cg-cin small{display:block;color:#94a3b8;font-size:.7rem;margin-top:1px}.cg-cin .lw{color:#e11d48;font-weight:700}
@@ -4292,7 +4305,7 @@ function toggleFab(force) {
   const stockOf = c => stock.find(x => x.code === c);
   document.body.insertAdjacentHTML('beforeend',
     `<div id="cg" class="cg hidden">
-      <div class="cg-s1"><div class="cg-top"><button type="button" class="cg-bk" onclick="cgClose()" aria-label="ปิด">${ARW}</button>
+      <div class="cg-s1"><div class="cg-top"><button type="button" class="cg-bk" onclick="cgExit()" aria-label="ปิด">${ARW}</button>
         <div class="cg-t">🛒 เลือกวัสดุที่จะเบิก<small id="cgBk"></small></div>
         <div class="cg-s"><i class="fa-solid fa-magnifying-glass"></i><input id="cgQ" placeholder="ค้นหาชื่อหรือรหัสวัสดุ..." autocomplete="off"></div></div>
         <div class="cg-main"><nav id="cgCats" class="cg-cats"></nav><section id="cgList" class="cg-list"></section><aside id="cgCart" class="cg-cart"></aside></div>
@@ -4322,7 +4335,7 @@ function toggleFab(force) {
   }
   function cgCart() {
     const n = outCart.length;
-    $('cgCart').innerHTML = `<div class="cg-ch"><b>🧺 รายการที่จะเบิก</b><span class="cg-cn">${n}</span><button type="button" class="cg-cx" onclick="cgSheet(false)" aria-label="ปิด"><i class="fa-solid fa-chevron-down"></i></button></div>` +
+    $('cgCart').innerHTML = `<div class="cg-ch"><b>🧺 รายการที่จะเบิก</b><span class="cg-cn">${n}</span>${n ? '<button type="button" class="cg-clr" onclick="cgClear()">🗑️ ล้าง</button>' : ''}<button type="button" class="cg-cx" onclick="cgSheet(false)" aria-label="ปิด"><i class="fa-solid fa-chevron-down"></i></button></div>` +
       (n ? `<div class="cg-cl">${outCart.map(x => `<div class="cg-ci" data-c="${esc(x.code)}"><div class="cg-em sm">${emoOf(stockOf(x.code) || x)}</div><div class="cg-cin"><b>${esc(x.name)}</b><small>${cartWarn(x) ? `<span class="lw">${esc(cartWarn(x))}</span>` : esc(x.unit)}</small></div>${stp(x.qty, x.unit, true)}</div>`).join('')}</div>`
         : '<div class="cg-ce"><div><em>🛒</em>ยังไม่ได้เลือกวัสดุ<br><small>แตะ “＋ เบิก” ที่รายการ<br>ของที่เลือกจะมาแสดงตรงนี้</small></div></div>') +
       `<div class="cg-cf"><div class="cg-tot">รวม <b>${n}</b> รายการ</div><button type="button" class="cg-go" ${n ? '' : 'disabled'} onclick="cgStep(2)">ดูสรุป / ส่งคำขอ →</button></div>`;
@@ -4335,7 +4348,7 @@ function toggleFab(force) {
     $('cgSum').innerHTML = `<div class="cg-sg"><div><div class="cg-card"><label class="cg-lb" for="cgName">👤 ผู้เบิก</label><input id="cgName" class="cg-in" maxlength="60" autocomplete="off" placeholder="กรอกชื่อ-นามสกุลผู้เบิก" value="${esc(G.name)}"><div class="cg-hint">ใช้ชื่อเดิมทุกครั้ง เพื่อให้ระบบนับยอดเบิก-คืนของคุณถูกต้อง (ระบบจำชื่อนี้ไว้ในเครื่อง)</div></div>
       <div class="cg-card"><label class="cg-lb" for="cgDate">📅 วันที่เบิก</label><input id="cgDate" type="date" class="cg-in" value="${esc(G.date)}"></div>
       <div class="cg-card"><label class="cg-lb" for="cgNote">📝 หมายเหตุ</label><input id="cgNote" class="cg-in" maxlength="200" placeholder="ไม่บังคับ เช่น ใช้กับงานอะไร" value="${esc(G.note)}"></div></div>
-      <div class="cg-card"><div class="cg-lb">📦 รายการที่เบิก (${outCart.length} รายการ)</div>${items}</div></div>`;
+      <div class="cg-card"><div class="cg-lb">📦 รายการที่เบิก (${outCart.length} รายการ)</div>${items}<button type="button" class="cg-clr2" onclick="cgClear()">🗑️ ล้างรายการทั้งหมด</button></div></div>`;
     $('cgSendBtn').disabled = !outCart.length;
   }
   window.cgSheet = o => $('cg').classList.toggle('open', !!o);
@@ -4350,7 +4363,7 @@ function toggleFab(force) {
     const ix = outCart.findIndex(x => x.code === c), m = stockOf(c); if (!m) return;
     if (!(q > 0)) { if (ix >= 0) outCart.splice(ix, 1); }
     else if (ix >= 0) outCart[ix].qty = q; else outCart.push({ code: c, name: m.name, unit: m.unit, qty: q });
-    try { paintCart(); } catch (e) {}
+    G.t = Date.now(); try { paintCart(); } catch (e) {}
     if ($('cg').classList.contains('s2')) { if (!outCart.length) return cgStep(1); cgSum(); return; }
     const el = $('cgList').querySelector(`[data-c="${CSS.escape(c)}"]`);
     if (el) { el.classList.toggle('on', q > 0); el.querySelector('.cg-rc').innerHTML = rctl(m, q > 0 ? q : 0); }
@@ -4375,8 +4388,21 @@ function toggleFab(force) {
     $('out_person').value = nm; $('out_note').value = normName(G.note);
     cgClose(); sendReq();
   };
+  function cgWipe() { outCart = []; G.t = 0; try { paintCart(); } catch (e) {} cgSheet(false); if ($('cg').classList.contains('s2')) cgStep(1); else cgPaintAll(); }
+  window.cgClear = () => {
+    if (!outCart.length) return;
+    Swal.fire({ icon: 'warning', title: 'ล้างรายการที่เลือกทั้งหมด?', text: 'ตะกร้าจะว่างและต้องเลือกใหม่', showCancelButton: true, confirmButtonText: 'ล้างทั้งหมด', cancelButtonText: 'ไม่ล้าง', confirmButtonColor: '#e11d48' })
+      .then(r => { if (r.isConfirmed) cgWipe(); });
+  };
+  window.cgExit = () => {
+    if (!outCart.length) return cgClose();
+    Swal.fire({ title: 'ยังมีรายการที่เลือกไว้ ' + outCart.length + ' รายการ', text: 'จะเก็บไว้เบิกต่อ หรือล้างทิ้ง?', showDenyButton: true, showCancelButton: true,
+      confirmButtonText: 'เก็บไว้ ปิดหน้านี้', denyButtonText: 'ล้างทิ้งแล้วปิด', cancelButtonText: 'กลับไปเลือกต่อ', denyButtonColor: '#e11d48' })
+      .then(r => { if (r.isConfirmed) cgClose(); else if (r.isDenied) { cgWipe(); cgClose(); } });
+  };
   function openCatalog() {
     if (!book) return;
+    if (outCart.length && G.t && Date.now() - G.t > 30 * 60 * 1000) { outCart = []; G.t = 0; try { paintCart(); } catch (e) {} Swal.fire({ toast: true, position: 'top', icon: 'info', title: 'ล้างรายการเก่าที่ค้างไว้เกิน 30 นาทีให้แล้ว', timer: 3500, showConfirmButton: false }); }
     G.sel = ''; G.q = ''; G.name = myName(); G.date = ymd(new Date()); G.note = '';
     $('cgQ').value = ''; $('cgBk').textContent = bookName();
     $('cg').classList.remove('s2', 'open'); cgPaintAll(); $('cgList').scrollTop = 0;
@@ -4405,7 +4431,7 @@ function toggleFab(force) {
   $('catQ').addEventListener('input', e => mq('inv', e.target.value));
   document.addEventListener('keydown', e => {
     if (e.key === '/' && isAdmin && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('panel-inventory').classList.contains('hidden')) { e.preventDefault(); $('catQ').focus(); }
-    if (e.key === 'Escape') cgClose();
+    if (e.key === 'Escape' && !$('cg').classList.contains('hidden') && !document.querySelector('.swal2-container')) cgExit();
   });
   const _passes = window.passes;
   window.passes = (c, it) => (c === 'inv' && C.sel && catOf(it) !== C.sel) ? false : _passes(c, it);
