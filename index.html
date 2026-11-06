@@ -4176,6 +4176,73 @@ function toggleFab(force) {
 .chs .v{font-size:12px;fill:#334155;font-weight:700}.chs .l{font-size:11px;fill:#94a3b8}.chs .l2{font-size:10px;fill:#b6bfcc}
 .chs .ln{fill:none;stroke:#6366f1;stroke-width:3}.chs .ar{fill:rgba(99,102,241,.1)}.chs .dt{fill:#fff;stroke:#6366f1;stroke-width:3;cursor:pointer}.chs .dt.on{fill:#6366f1}
 /* --- หน้าเบิก 2 ขั้น: เลือก → สรุป (class ขึ้นต้น cg- กันชนกับของเดิม) --- */
+.cg{position:fixed;inset:0;z-index:60;background:linear-gradient(180deg,#f6f5ff,#fdf4ff)}.cg.hidden{display:none}
+.cg-s1,.cg-s2{display:flex;flex-direction:column;height:100%}.cg.s2 .cg-s1,.cg:not(.s2) .cg-s2{display:none}
+.cg-top{flex:none;display:flex;align-items:center;gap:14px;padding:12px 24px;background:#fff;border-bottom:1px solid #e8e6f7;box-shadow:0 2px 10px rgba(79,70,229,.06)}
+.cg-bk{flex:none;width:42px;height:42px;border-radius:50%;background:#f1f0fb;color:#4f46e5}
+.cg-t{font-weight:700;font-size:1.1rem;color:#1e1b4b;line-height:1.2;white-space:nowrap}.cg-t small{display:block;font-weight:500;font-size:.72rem;color:#94a3b8}
+.cg-s{position:relative;flex:1;max-width:620px;margin-left:auto}.cg-s i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#94a3b8}
+.cg-s input{width:100%;border:2px solid #e0defa;border-radius:14px;padding:.65rem 1rem .65rem 2.6rem;font-size:1rem;outline:0;background:#fff}.cg-s input:focus{border-color:#6366f1}
+.cg-main{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr) 380px;gap:20px;padding:18px 24px;width:100%;max-width:1760px;margin:0 auto}
+.cg-cats{overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.cg-cc{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;text-align:left;font-size:.9rem;font-weight:600;color:#475569;background:#fff;border:1px solid #ece9fb}
+.cg-cc span{font-size:1.15rem}.cg-cc b{margin-left:auto;font-size:.72rem;background:#eef2ff;color:#4f46e5;border-radius:99px;padding:1px 9px}
+.cg-cc.on{background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(79,70,229,.3)}.cg-cc.on b{background:rgba(255,255,255,.25);color:#fff}
+.cg-list{overflow-y:auto;min-height:0;padding:0 6px 20px 0}
+.cg-gh{position:sticky;top:0;z-index:1;background:#f8f6ff;padding:8px 4px;margin:0 0 8px;font-size:.82rem;font-weight:700;color:#6d28d9}
+.cg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px;margin-bottom:12px}
+.cg-rw{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:2px solid #ece9fb;border-radius:18px;transition:border-color .15s,box-shadow .15s}
+.cg-rw:hover{box-shadow:0 6px 18px rgba(79,70,229,.1)}.cg-rw.on{border-color:#6366f1;background:#f5f3ff}
+.cg-em{flex:none;width:48px;height:48px;border-radius:15px;background:#f1f0fb;display:grid;place-items:center;font-size:1.6rem}.cg-em.sm{width:38px;height:38px;border-radius:12px;font-size:1.25rem}
+.cg-rw.on .cg-em{background:#e0e7ff}
+.cg-rb{flex:1;min-width:0}.cg-rn{font-weight:600;color:#1e1b4b;font-size:.95rem;line-height:1.3}.cg-rm{font-size:.75rem;color:#64748b;margin-top:2px}.cg-rm .lw{color:#e11d48;font-weight:700}
+.cg-bd{display:inline-block;background:#ffe4e6;color:#e11d48;border-radius:99px;padding:0 7px;font-size:.66rem;font-weight:700;margin-left:6px}
+.cg-ra{flex:none;border-radius:99px;padding:.55rem 1.1rem;background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:0 4px 12px rgba(244,63,94,.25)}
+.cg-st{display:flex;align-items:center;gap:6px;flex:none}.cg-st button{width:38px;height:38px;border-radius:12px;background:#6366f1;color:#fff;font-size:1.25rem;font-weight:700;line-height:1}
+.cg-st input{width:58px;height:38px;text-align:center;font-weight:700;font-size:1rem;border:2px solid #c7d2fe;border-radius:12px;background:#fff;color:#1e1b4b}
+.cg-u{font-size:.75rem;color:#64748b;min-width:30px}
+.cg-cart{display:flex;flex-direction:column;background:#fff;border:1px solid #ece9fb;border-radius:20px;min-height:0;overflow:hidden;box-shadow:0 10px 30px rgba(79,70,229,.1)}
+.cg-ch{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #f1f0fb;background:linear-gradient(135deg,#f5f3ff,#fff1f2)}
+.cg-ch b{font-size:1rem;color:#1e1b4b}.cg-cn{background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;border-radius:99px;padding:1px 11px;font-size:.8rem;font-weight:700}
+.cg-cx{margin-left:auto;display:none;width:34px;height:34px;border-radius:50%;background:#fff}
+.cg-cl{flex:1;overflow-y:auto;padding:4px 0}.cg-ci{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f6f5fd}
+.cg-cin{flex:1;min-width:0;font-size:.85rem;line-height:1.3}.cg-cin b{display:block;font-weight:600;color:#1e1b4b}.cg-cin small{display:block;color:#94a3b8;font-size:.7rem;margin-top:1px}.cg-cin .lw{color:#e11d48;font-weight:700}
+.cg-ci .cg-st button{width:32px;height:32px}.cg-ci .cg-st input{width:48px;height:32px}
+.cg-ce{flex:1;display:grid;place-items:center;text-align:center;color:#94a3b8;font-size:.88rem;padding:30px 20px}.cg-ce em{display:block;font-style:normal;font-size:2.6rem;margin-bottom:6px}
+.cg-cf{padding:14px 16px;border-top:1px solid #f1f0fb;display:flex;flex-direction:column;gap:10px}.cg-tot{font-size:.85rem;color:#64748b}.cg-tot b{color:#4f46e5;font-size:1.2rem}
+.cg-bar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid #e8e6f7;box-shadow:0 -6px 18px rgba(30,27,75,.08)}
+.cg-s1 .cg-bar{display:none}.cg-bd2{display:none}
+.cg-mini{display:flex;align-items:center;gap:8px;min-width:0;text-align:left;flex:1}.cg-mini .em{display:flex;gap:2px;font-size:1.2rem;white-space:nowrap}.cg-mini small{color:#64748b;font-size:.78rem}.cg-mini b{color:#4f46e5;font-size:1.2rem}
+.cg-go{border-radius:14px;padding:.85rem 1.4rem;background:linear-gradient(135deg,#fb923c,#f43f5e);color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(244,63,94,.28)}.cg-go:disabled{opacity:.4;box-shadow:none}
+.cg-s2 .cg-bar{justify-content:center}.cg-s2 .cg-go{width:100%;max-width:1100px}
+.cg-sb{flex:1;overflow-y:auto;padding:18px 24px;width:100%;max-width:1150px;margin:0 auto}
+.cg-sg{display:grid;gap:12px;grid-template-columns:1fr;align-items:start}@media(min-width:900px){.cg-sg{grid-template-columns:380px minmax(0,1fr);gap:18px}}
+.cg-card{background:#fff;border:1px solid #ece9fb;border-radius:18px;padding:16px;margin-bottom:12px}
+.cg-lb{display:block;font-weight:700;font-size:.85rem;color:#1e1b4b;margin-bottom:8px}
+.cg-in{width:100%;border:2px solid #e0defa;border-radius:12px;padding:.7rem .9rem;font-size:1rem;outline:0;background:#fff}.cg-in:focus{border-color:#6366f1}
+.cg-hint{font-size:.72rem;color:#94a3b8;margin-top:6px}
+.cg-it{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed #ece9fb}.cg-it:last-child{border:0}
+.cg-itn{flex:1;min-width:0;font-weight:600;font-size:.92rem}.cg-itn small{display:block;color:#94a3b8;font-weight:500;font-size:.72rem}.cg-itn .lw{color:#e11d48;font-weight:700}
+.cg-x{flex:none;width:34px;height:34px;border-radius:50%;background:#fff1f2;color:#e11d48}
+@media(max-width:819px){
+ .cg-top{padding:8px 10px;gap:8px}.cg-t small{display:none}.cg-t{font-size:.9rem}
+ .cg-main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px;padding:8px 10px}
+ .cg-cats{flex-direction:row;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.cg-cc{flex:none;white-space:nowrap;padding:7px 12px;font-size:.85rem}
+ .cg-grid{grid-template-columns:1fr;gap:8px}.cg-rw{padding:10px 12px;gap:10px;flex-wrap:wrap}.cg-rw.on .cg-rc{flex-basis:100%;display:flex;justify-content:flex-end}
+ .cg-em{width:42px;height:42px;font-size:1.4rem}
+ .cg-s1 .cg-bar{display:flex}.cg-sb{padding:12px 10px}
+ .cg-cart{position:fixed;left:0;right:0;bottom:0;z-index:4;max-height:82vh;border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform .22s}
+ .cg.open .cg-cart{transform:none}.cg-cx{display:block}.cg.open .cg-s1 .cg-bar{display:none}
+ .cg-bd2{display:block;position:fixed;inset:0;z-index:3;background:rgba(15,23,42,.45);opacity:0;pointer-events:none;transition:opacity .2s}.cg.open .cg-bd2{opacity:1;pointer-events:auto}
+ .cg-it{flex-wrap:wrap}.cg-itn{flex:1 1 calc(100% - 100px)}.cg-itc{order:3;flex-basis:100%}.cg-x{order:2}
+}
+/* --- กราฟแอดมิน --- */
+#dashChart{display:block}@media(max-width:639px){#dashChart{display:none!important}}
+.chs{display:block;width:100%}.chs .gl{stroke:#eceaf7;stroke-width:1}.chs .hit{fill:transparent;cursor:pointer}.chs .sel{fill:transparent}
+.chb.on .sel{fill:rgba(99,102,241,.12)}.chb:hover .sel{fill:rgba(99,102,241,.07)}
+.chs .v{font-size:12px;fill:#334155;font-weight:700}.chs .l{font-size:11px;fill:#94a3b8}.chs .l2{font-size:10px;fill:#b6bfcc}
+.chs .ln{fill:none;stroke:#6366f1;stroke-width:3}.chs .ar{fill:rgba(99,102,241,.1)}.chs .dt{fill:#fff;stroke:#6366f1;stroke-width:3;cursor:pointer}.chs .dt.on{fill:#6366f1}
+/* --- หน้าเบิก 2 ขั้น: เลือก → สรุป (class ขึ้นต้น cg- กันชนกับของเดิม) --- */
 .cg{position:fixed;inset:0;z-index:60;background:#f6f5ff}.cg.hidden{display:none}
 .cg-s1,.cg-s2{display:flex;flex-direction:column;height:100%}.cg.s2 .cg-s1,.cg:not(.s2) .cg-s2{display:none}
 .cg-top{flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;border-bottom:1px solid #e8e6f7}
@@ -4261,25 +4328,28 @@ function toggleFab(force) {
   };
   const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'th');
 
-  /* ---------- 1) หน้าเบิก 2 ขั้น: เลือกวัสดุ → สรุป (วันที่ + ชื่อ + แก้จำนวน + หมายเหตุ) ---------- */
+  /* ---------- 1) หน้าเบิก 2 ขั้น: เลือกวัสดุ (คอม: มีตะกร้าอยู่ขวา / มือถือ: แถบเล็กด้านล่างกดดูรายการ) → สรุป ---------- */
   const G = { sel: '', q: '', name: '', date: '', note: '' };
   const ARW = '<i class="fa-solid fa-arrow-left"></i>';
+  const EMO = [[/กรรไกร/, '✂️'], [/คัตเตอร์/, '🔪'], [/ปากกา|ไส้ปากกา/, '🖊️'], [/ดินสอ/, '✏️'], [/ยางลบ|ลบคำผิด|น้ำยาลบ/, '🧽'], [/ไม้บรรทัด/, '📏'], [/ไฮไลท์|เน้นข้อความ|มาร์[คก]เกอร์|เมจิก/, '🖍️'], [/กาว/, '🧴'], [/เทป/, '📼'], [/คลิป/, '📎'], [/แม็ก|ลวดเย็บ|ที่เย็บ|เครื่องเย็บ/, '📌'], [/ซอง/, '✉️'], [/สมุด/, '📒'], [/แฟ้ม/, '📁'], [/โพสต์อิท|โน้ต/, '🗒️'], [/ถ่าน|แบตเตอรี่/, '🔋'], [/ปลั๊ก/, '🔌'], [/หลอดไฟ/, '💡'], [/ทิชชู/, '🧻'], [/หมึก|โทนเนอร์|ตลับ/, '🖨️'], [/สัน/, '📚'], [/ปกใส|ปกหลัง|ปกอ่อน|ปกแข็ง/, '📘'], [/สติ[กี๊]*เกอร์|ฉลาก/, '🏷️'], [/กระดาษ/, '📄']];
+  const emoOf = i => { const n = String((i && i.name) || ''); for (const r of EMO) if (r[0].test(n)) return r[1]; return ICON[catOf(i)] || '📦'; };
+  const stockOf = c => stock.find(x => x.code === c);
   document.body.insertAdjacentHTML('beforeend',
     `<div id="cg" class="cg hidden">
       <div class="cg-s1"><div class="cg-top"><button type="button" class="cg-bk" onclick="cgClose()" aria-label="ปิด">${ARW}</button>
-        <div class="cg-t">เลือกวัสดุที่จะเบิก<small id="cgBk"></small></div>
+        <div class="cg-t">🛒 เลือกวัสดุที่จะเบิก<small id="cgBk"></small></div>
         <div class="cg-s"><i class="fa-solid fa-magnifying-glass"></i><input id="cgQ" placeholder="ค้นหาชื่อหรือรหัสวัสดุ..." autocomplete="off"></div></div>
-        <div class="cg-main"><nav id="cgCats" class="cg-cats"></nav><section id="cgList" class="cg-list"></section></div>
-        <div id="cgBar" class="cg-bar"></div></div>
+        <div class="cg-main"><nav id="cgCats" class="cg-cats"></nav><section id="cgList" class="cg-list"></section><aside id="cgCart" class="cg-cart"></aside></div>
+        <div id="cgBar" class="cg-bar"></div><div class="cg-bd2" onclick="cgSheet(false)"></div></div>
       <div class="cg-s2"><div class="cg-top"><button type="button" class="cg-bk" onclick="cgStep(1)" aria-label="กลับ">${ARW}</button>
-        <div class="cg-t">สรุปรายการเบิก<small>ตรวจสอบก่อนส่งคำขอ</small></div></div>
+        <div class="cg-t">📝 สรุปรายการเบิก<small>ตรวจสอบก่อนส่งคำขอ</small></div></div>
         <div id="cgSum" class="cg-sb"></div>
-        <div class="cg-bar"><button type="button" id="cgSendBtn" class="cg-go" style="width:100%" onclick="cgSend()"><i class="fa-solid fa-paper-plane mr-2"></i>ส่งคำขอเบิก</button></div></div></div>`);
+        <div class="cg-bar"><button type="button" id="cgSendBtn" class="cg-go" onclick="cgSend()"><i class="fa-solid fa-paper-plane mr-2"></i>ส่งคำขอเบิก</button></div></div></div>`);
   const qtyOf = c => { const x = outCart.find(y => y.code === c); return x ? x.qty : 0; };
-  const stp = (q, u) => `<div class="cg-st"><button type="button" data-a="-" aria-label="ลด">−</button><input type="number" inputmode="decimal" min="0" step="any" value="${q}" data-a="set" aria-label="จำนวน"><button type="button" data-a="+" aria-label="เพิ่ม">+</button><span class="cg-u">${esc(u)}</span></div>`;
+  const stp = (q, u, nu) => `<div class="cg-st"><button type="button" data-a="-" aria-label="ลด">−</button><input type="number" inputmode="decimal" min="0" step="any" value="${q}" data-a="set" aria-label="จำนวน"><button type="button" data-a="+" aria-label="เพิ่ม">+</button>${nu ? '' : `<span class="cg-u">${esc(u)}</span>`}</div>`;
   const rctl = (i, q) => q ? stp(q, i.unit) : '<button type="button" class="cg-ra" data-a="+">＋ เบิก</button>';
   const rowH = i => { const q = qtyOf(i.code);
-    return `<div class="cg-rw ${q ? 'on' : ''}" data-c="${esc(i.code)}"><div class="cg-rb"><div class="cg-rn">${esc(i.name)}</div>
+    return `<div class="cg-rw ${q ? 'on' : ''}" data-c="${esc(i.code)}"><div class="cg-em">${emoOf(i)}</div><div class="cg-rb"><div class="cg-rn">${esc(i.name)}</div>
       <div class="cg-rm">${esc(i.code)} · คงเหลือ <b class="${i.isLow ? 'lw' : ''}">${num(i.balance)}</b> ${esc(i.unit)}${i.isLow ? `<span class="cg-bd">${i.balance <= 0 ? 'หมด' : 'ใกล้หมด'}</span>` : ''}</div></div><div class="cg-rc">${rctl(i, q)}</div></div>`; };
   function cgCats() {
     const all = [{ k: '', n: stock.length }].concat(cats());
@@ -4290,37 +4360,45 @@ function toggleFab(force) {
     const rows = stock.filter(i => (!G.sel || catOf(i) === G.sel) && (!q || (i.code + ' ' + i.name).toLowerCase().includes(q))).sort(byName);
     let h = '';
     if (!rows.length) h = '<div class="text-center text-slate-400 py-16 text-sm">ไม่พบวัสดุที่ค้นหา</div>';
-    else if (!G.sel && !q) cats().forEach(c => { const l = rows.filter(i => catOf(i) === c.k); if (l.length) h += `<div class="cg-gh">${ICON[c.k] || '📦'} ${esc(c.k)} · ${l.length}</div>` + l.map(rowH).join(''); });
-    else h = rows.map(rowH).join('');
+    else if (!G.sel && !q) cats().forEach(c => { const l = rows.filter(i => catOf(i) === c.k); if (l.length) h += `<div class="cg-gh">${ICON[c.k] || '📦'} ${esc(c.k)} · ${l.length}</div><div class="cg-grid">${l.map(rowH).join('')}</div>`; });
+    else h = `<div class="cg-grid">${rows.map(rowH).join('')}</div>`;
     $('cgList').innerHTML = h; $('cgList').scrollTop = sc;
   }
-  function cgBar() {
+  function cgCart() {
     const n = outCart.length;
-    $('cgBar').innerHTML = `<div class="cg-bs">${n ? `เลือกแล้ว <b>${n}</b> รายการ` : 'ยังไม่ได้เลือกวัสดุ แตะ “＋ เบิก” ที่รายการ'}</div><button type="button" class="cg-go" ${n ? '' : 'disabled'} onclick="cgStep(2)">ดูสรุป / ส่งคำขอ →</button>`;
+    $('cgCart').innerHTML = `<div class="cg-ch"><b>🧺 รายการที่จะเบิก</b><span class="cg-cn">${n}</span><button type="button" class="cg-cx" onclick="cgSheet(false)" aria-label="ปิด"><i class="fa-solid fa-chevron-down"></i></button></div>` +
+      (n ? `<div class="cg-cl">${outCart.map(x => `<div class="cg-ci" data-c="${esc(x.code)}"><div class="cg-em sm">${emoOf(stockOf(x.code) || x)}</div><div class="cg-cin"><b>${esc(x.name)}</b><small>${cartWarn(x) ? `<span class="lw">${esc(cartWarn(x))}</span>` : esc(x.unit)}</small></div>${stp(x.qty, x.unit, true)}</div>`).join('')}</div>`
+        : '<div class="cg-ce"><div><em>🛒</em>ยังไม่ได้เลือกวัสดุ<br><small>แตะ “＋ เบิก” ที่รายการ<br>ของที่เลือกจะมาแสดงตรงนี้</small></div></div>') +
+      `<div class="cg-cf"><div class="cg-tot">รวม <b>${n}</b> รายการ</div><button type="button" class="cg-go" ${n ? '' : 'disabled'} onclick="cgStep(2)">ดูสรุป / ส่งคำขอ →</button></div>`;
+    const ems = outCart.slice(0, 6).map(x => emoOf(stockOf(x.code) || x)).join('');
+    $('cgBar').innerHTML = n ? `<button type="button" class="cg-mini" onclick="cgSheet(true)"><span class="em">${ems}</span><span><b>${n}</b> <small>รายการ · แตะเพื่อดู ▲</small></span></button><button type="button" class="cg-go" onclick="cgStep(2)">สรุป →</button>`
+      : '<div style="margin:auto;color:#94a3b8;font-size:.85rem">ยังไม่ได้เลือกวัสดุ แตะ “＋ เบิก” ที่รายการ</div>';
   }
   function cgSum() {
-    const items = outCart.map(x => `<div class="cg-it" data-c="${esc(x.code)}"><div class="cg-itn">${esc(x.name)}<small>${esc(x.code)}${cartWarn(x) ? ` · <span class="lw">${esc(cartWarn(x))}</span>` : ''}</small></div><div class="cg-itc">${stp(x.qty, x.unit)}</div><button type="button" class="cg-x" data-a="del" aria-label="เอาออก"><i class="fa-solid fa-trash-can"></i></button></div>`).join('');
-    $('cgSum').innerHTML = `<div class="cg-card"><label class="cg-lb" for="cgName">👤 ผู้เบิก</label><input id="cgName" class="cg-in" maxlength="60" autocomplete="off" placeholder="กรอกชื่อ-นามสกุลผู้เบิก" value="${esc(G.name)}"><div class="cg-hint">ใช้ชื่อเดิมทุกครั้ง เพื่อให้ระบบนับยอดเบิก-คืนของคุณถูกต้อง (ระบบจำชื่อนี้ไว้ในเครื่อง)</div></div>
+    const items = outCart.map(x => `<div class="cg-it" data-c="${esc(x.code)}"><div class="cg-em sm">${emoOf(stockOf(x.code) || x)}</div><div class="cg-itn">${esc(x.name)}<small>${esc(x.code)}${cartWarn(x) ? ` · <span class="lw">${esc(cartWarn(x))}</span>` : ''}</small></div><div class="cg-itc">${stp(x.qty, x.unit)}</div><button type="button" class="cg-x" data-a="del" aria-label="เอาออก"><i class="fa-solid fa-trash-can"></i></button></div>`).join('');
+    $('cgSum').innerHTML = `<div class="cg-sg"><div><div class="cg-card"><label class="cg-lb" for="cgName">👤 ผู้เบิก</label><input id="cgName" class="cg-in" maxlength="60" autocomplete="off" placeholder="กรอกชื่อ-นามสกุลผู้เบิก" value="${esc(G.name)}"><div class="cg-hint">ใช้ชื่อเดิมทุกครั้ง เพื่อให้ระบบนับยอดเบิก-คืนของคุณถูกต้อง (ระบบจำชื่อนี้ไว้ในเครื่อง)</div></div>
       <div class="cg-card"><label class="cg-lb" for="cgDate">📅 วันที่เบิก</label><input id="cgDate" type="date" class="cg-in" value="${esc(G.date)}"></div>
-      <div class="cg-card"><div class="cg-lb">📦 รายการที่เบิก (${outCart.length} รายการ)</div>${items}</div>
-      <div class="cg-card"><label class="cg-lb" for="cgNote">📝 หมายเหตุ</label><input id="cgNote" class="cg-in" maxlength="200" placeholder="ไม่บังคับ เช่น ใช้กับงานอะไร" value="${esc(G.note)}"></div>`;
+      <div class="cg-card"><label class="cg-lb" for="cgNote">📝 หมายเหตุ</label><input id="cgNote" class="cg-in" maxlength="200" placeholder="ไม่บังคับ เช่น ใช้กับงานอะไร" value="${esc(G.note)}"></div></div>
+      <div class="cg-card"><div class="cg-lb">📦 รายการที่เบิก (${outCart.length} รายการ)</div>${items}</div></div>`;
     $('cgSendBtn').disabled = !outCart.length;
   }
-  window.cgPaintAll = () => { cgCats(); cgList(); cgBar(); };
+  window.cgSheet = o => $('cg').classList.toggle('open', !!o);
+  window.cgPaintAll = () => { cgCats(); cgList(); cgCart(); };
   window.cgStep = n => {
+    cgSheet(false);
     if (n === 2) { if (!outCart.length) return; cgSum(); $('cg').classList.add('s2'); $('cgSum').scrollTop = 0; }
-    else { $('cg').classList.remove('s2'); cgList(); cgBar(); }
+    else { $('cg').classList.remove('s2'); cgList(); cgCart(); }
   };
   function cgSet(c, q) {
     q = Math.round(q * 1e6) / 1e6;
-    const ix = outCart.findIndex(x => x.code === c), m = stock.find(x => x.code === c); if (!m) return;
+    const ix = outCart.findIndex(x => x.code === c), m = stockOf(c); if (!m) return;
     if (!(q > 0)) { if (ix >= 0) outCart.splice(ix, 1); }
     else if (ix >= 0) outCart[ix].qty = q; else outCart.push({ code: c, name: m.name, unit: m.unit, qty: q });
     try { paintCart(); } catch (e) {}
     if ($('cg').classList.contains('s2')) { if (!outCart.length) return cgStep(1); cgSum(); return; }
     const el = $('cgList').querySelector(`[data-c="${CSS.escape(c)}"]`);
     if (el) { el.classList.toggle('on', q > 0); el.querySelector('.cg-rc').innerHTML = rctl(m, q > 0 ? q : 0); }
-    cgBar();
+    cgCart(); if (!outCart.length) cgSheet(false);
   }
   $('cg').addEventListener('click', e => {
     const b = e.target.closest('button[data-a]');
@@ -4330,7 +4408,7 @@ function toggleFab(force) {
   $('cg').addEventListener('change', e => { if (e.target.dataset.a === 'set') cgSet(e.target.closest('[data-c]').dataset.c, Number(e.target.value)); });
   $('cg').addEventListener('input', e => { const id = e.target.id; if (id === 'cgName') G.name = e.target.value; else if (id === 'cgDate') G.date = e.target.value; else if (id === 'cgNote') G.note = e.target.value; });
   $('cgQ').addEventListener('input', e => { G.q = e.target.value; $('cgList').scrollTop = 0; cgList(); });
-  window.cgClose = () => { $('cg').classList.remove('s2'); $('cg').classList.add('hidden'); document.body.style.overflow = ''; };
+  window.cgClose = () => { $('cg').classList.remove('s2', 'open'); $('cg').classList.add('hidden'); document.body.style.overflow = ''; };
   window.cgSend = () => {
     const nm = normName(G.name);
     if (!outCart.length) return;
@@ -4345,7 +4423,7 @@ function toggleFab(force) {
     if (!book) return;
     G.sel = ''; G.q = ''; G.name = myName(); G.date = ymd(new Date()); G.note = '';
     $('cgQ').value = ''; $('cgBk').textContent = bookName();
-    $('cg').classList.remove('s2'); cgPaintAll(); $('cgList').scrollTop = 0;
+    $('cg').classList.remove('s2', 'open'); cgPaintAll(); $('cgList').scrollTop = 0;
     $('cg').classList.remove('hidden'); document.body.style.overflow = 'hidden';
   }
   const _openTx = window.openTx;
