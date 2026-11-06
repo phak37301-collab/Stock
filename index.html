@@ -45,43 +45,43 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
 /* ===== ดีไซน์ป๊อปอัพ/แจ้งเตือนแบบใหม่ (SweetAlert2): การ์ดโค้งมน + ไอคอนวงกลมสี + ปุ่มเม็ดยา; มือถือเป็นแผ่นเลื่อนขึ้นจากล่าง; แจ้งเตือนสั้นๆ เป็นแคปซูลลอยด้านบน ===== */
-.swal2-container{backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
-.swal2-container.swal2-backdrop-show{background:rgba(30,27,75,.42)!important}
-.swal2-container.swal2-top,.swal2-container.swal2-top-start,.swal2-container.swal2-top-end{background:transparent!important;backdrop-filter:none;-webkit-backdrop-filter:none;padding-top:calc(env(safe-area-inset-top,0px) + .6rem)}
-.swal2-popup:not(.swal2-toast){font-family:inherit;border-radius:28px;padding:1.7rem 1.4rem 1.35rem;box-shadow:0 30px 80px rgba(30,27,75,.35);border:1px solid rgba(255,255,255,.6)}
-.swal2-popup:not(.swal2-toast) .swal2-title{padding:0 .4rem;margin:0 0 .35rem;font-size:1.18rem;font-weight:700;line-height:1.35;color:#1e1b4b}
-.swal2-popup:not(.swal2-toast) .swal2-html-container{margin:.15rem 0 0;padding:0 .2rem;font-size:.92rem;line-height:1.6;color:#64748b}
+html body .swal2-container{backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+html body .swal2-container.swal2-backdrop-show{background:rgba(30,27,75,.42)!important}
+html body .swal2-container.swal2-top,html body .swal2-container.swal2-top-start,html body .swal2-container.swal2-top-end{background:transparent!important;backdrop-filter:none;-webkit-backdrop-filter:none;padding-top:calc(env(safe-area-inset-top,0px) + .6rem)}
+html body .swal2-popup:not(.swal2-toast){font-family:inherit;border-radius:28px;padding:1.7rem 1.4rem 1.35rem;box-shadow:0 30px 80px rgba(30,27,75,.35);border:1px solid rgba(255,255,255,.6)}
+html body .swal2-popup:not(.swal2-toast) .swal2-title{padding:0 .4rem;margin:0 0 .35rem;font-size:1.18rem;font-weight:700;line-height:1.35;color:#1e1b4b}
+html body .swal2-popup:not(.swal2-toast) .swal2-html-container{margin:.15rem 0 0;padding:0 .2rem;font-size:.92rem;line-height:1.6;color:#64748b}
 /* ไอคอน: วงกลมสีอ่อน ไม่มีวงแหวน */
-.swal2-popup:not(.swal2-toast) .swal2-icon{font-size:13px;margin:.1rem auto 1rem}
-.swal2-icon{border:0!important}
-.swal2-icon.swal2-success{background:#dcfce7;color:#16a34a}
-.swal2-icon.swal2-error{background:#ffe4e6;color:#e11d48}
-.swal2-icon.swal2-warning{background:#fef3c7;color:#d97706}
-.swal2-icon.swal2-info{background:#e0e7ff;color:#4f46e5}
-.swal2-icon.swal2-question{background:#ede9fe;color:#7c3aed}
-.swal2-icon.swal2-success [class^=swal2-success-circular-line],.swal2-icon.swal2-success .swal2-success-fix,.swal2-icon.swal2-success .swal2-success-ring{display:none!important}
-.swal2-icon.swal2-success [class^=swal2-success-line]{background-color:#16a34a}
-.swal2-icon.swal2-error [class^=swal2-x-mark-line]{background-color:#e11d48}
+html body .swal2-popup:not(.swal2-toast) .swal2-icon{font-size:13px;margin:.1rem auto 1rem}
+html body .swal2-icon{border:0!important}
+html body .swal2-icon.swal2-success{background:#dcfce7;color:#16a34a}
+html body .swal2-icon.swal2-error{background:#ffe4e6;color:#e11d48}
+html body .swal2-icon.swal2-warning{background:#fef3c7;color:#d97706}
+html body .swal2-icon.swal2-info{background:#e0e7ff;color:#4f46e5}
+html body .swal2-icon.swal2-question{background:#ede9fe;color:#7c3aed}
+html body .swal2-icon.swal2-success [class^=swal2-success-circular-line],html body .swal2-icon.swal2-success .swal2-success-fix,html body .swal2-icon.swal2-success .swal2-success-ring{display:none!important}
+html body .swal2-icon.swal2-success [class^=swal2-success-line]{background-color:#16a34a}
+html body .swal2-icon.swal2-error [class^=swal2-x-mark-line]{background-color:#e11d48}
 /* ปุ่ม: เม็ดยาเต็มความกว้าง เรียงแนวตั้ง */
-.swal2-popup:not(.swal2-toast) .swal2-actions{margin:1.3rem 0 0;padding:0;width:100%;flex-direction:column;gap:.5rem}
-.swal2-popup:not(.swal2-toast) .swal2-styled{margin:0!important;width:100%;border-radius:999px;padding:.82rem 1.2rem;font-size:.95rem;font-weight:600;box-shadow:none!important;transition:transform .12s,filter .12s}
-.swal2-popup:not(.swal2-toast) .swal2-styled:active{transform:scale(.98)}
-.swal2-styled:focus{box-shadow:0 0 0 4px rgba(99,102,241,.25)!important}
-.swal2-styled.swal2-confirm{background-color:#4f46e5}
-.swal2-styled.swal2-cancel,.swal2-styled.swal2-deny{background:#f1f5f9!important;color:#475569!important}
-.swal2-styled.swal2-deny{background:#fff1f2!important;color:#e11d48!important}
+html body .swal2-popup:not(.swal2-toast) .swal2-actions{margin:1.3rem 0 0;padding:0;width:100%;flex-direction:column;gap:.5rem}
+html body .swal2-popup:not(.swal2-toast) .swal2-styled{margin:0!important;width:100%;border-radius:999px;padding:.82rem 1.2rem;font-size:.95rem;font-weight:600;box-shadow:none!important;transition:transform .12s,filter .12s}
+html body .swal2-popup:not(.swal2-toast) .swal2-styled:active{transform:scale(.98)}
+html body .swal2-styled:focus{box-shadow:0 0 0 4px rgba(99,102,241,.25)!important}
+html body .swal2-styled.swal2-confirm{background-color:#4f46e5}
+html body .swal2-styled.swal2-cancel,html body .swal2-styled.swal2-deny{background:#f1f5f9!important;color:#475569!important}
+html body .swal2-styled.swal2-deny{background:#fff1f2!important;color:#e11d48!important}
 /* ช่องกรอกในป๊อปอัพ */
-.swal2-popup .swal2-input,.swal2-popup .swal2-textarea,.swal2-popup .swal2-select{margin:1rem 0 0;width:100%;box-sizing:border-box;border-radius:16px;border:1.5px solid #e2e8f0;background:#f8fafc;box-shadow:none;font-size:16px}
-.swal2-popup .swal2-input:focus,.swal2-popup .swal2-textarea:focus{border-color:#818cf8;box-shadow:0 0 0 4px rgba(99,102,241,.15)}
-.swal2-validation-message{margin:.8rem 0 0;border-radius:14px;background:#fff1f2;color:#be123c;font-size:.82rem}
-.swal2-validation-message:before{background:#e11d48}
-.swal2-close{border-radius:50%}
+html body .swal2-popup .swal2-input,html body .swal2-popup .swal2-textarea,html body .swal2-popup .swal2-select{margin:1rem 0 0;width:100%;box-sizing:border-box;border-radius:16px;border:1.5px solid #e2e8f0;background:#f8fafc;box-shadow:none;font-size:16px}
+html body .swal2-popup .swal2-input:focus,html body .swal2-popup .swal2-textarea:focus{border-color:#818cf8;box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+html body .swal2-validation-message{margin:.8rem 0 0;border-radius:14px;background:#fff1f2;color:#be123c;font-size:.82rem}
+html body .swal2-validation-message:before{background:#e11d48}
+html body .swal2-close{border-radius:50%}
 /* แจ้งเตือนสั้นๆ (toast) = แคปซูลลอยด้านบน */
-.swal2-popup.swal2-toast{width:auto;max-width:min(92vw,28rem);padding:.5rem 1.1rem .5rem .55rem;border-radius:999px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #e0e7ff;box-shadow:0 14px 36px rgba(49,46,129,.25);align-items:center;font-family:inherit}
-.swal2-toast .swal2-icon{width:2.1em;height:2.1em;min-width:2.1em;margin:0 .15rem 0 0;font-size:1rem}
-.swal2-toast .swal2-title{margin:0 .35rem;padding:0;font-size:.92rem;font-weight:600;color:#1e1b4b;text-align:left}
-.swal2-toast .swal2-html-container{margin:0 .35rem;padding:0;font-size:.8rem;color:#64748b}
-.swal2-toast .swal2-timer-progress-bar{background:linear-gradient(90deg,#6366f1,#a78bfa);height:3px}
+html body .swal2-popup.swal2-toast{width:auto;max-width:min(92vw,28rem);padding:.5rem 1.1rem .5rem .55rem;border-radius:999px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #e0e7ff;box-shadow:0 14px 36px rgba(49,46,129,.25);align-items:center;font-family:inherit}
+html body .swal2-toast .swal2-icon{width:2.1em;height:2.1em;min-width:2.1em;margin:0 .15rem 0 0;font-size:1rem}
+html body .swal2-toast .swal2-title{margin:0 .35rem;padding:0;font-size:.92rem;font-weight:600;color:#1e1b4b;text-align:left}
+html body .swal2-toast .swal2-html-container{margin:0 .35rem;padding:0;font-size:.8rem;color:#64748b}
+html body .swal2-toast .swal2-timer-progress-bar{background:linear-gradient(90deg,#6366f1,#a78bfa);height:3px}
 /* แอนิเมชัน */
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
 @keyframes sheetDown{to{transform:translateY(100%)}}
@@ -89,19 +89,21 @@ function logoReplay(img){try{img.classList.remove('jump');void img.offsetWidth;i
 @keyframes cardOut{to{opacity:0;transform:translateY(8px) scale(.96)}}
 @keyframes capIn{from{opacity:0;transform:translateY(-20px) scale(.9)}to{opacity:1;transform:none}}
 @keyframes capOut{to{opacity:0;transform:translateY(-14px) scale(.94)}}
-.swal2-popup:not(.swal2-toast).swal2-show{animation:cardIn .26s cubic-bezier(.2,.9,.3,1.15)}
-.swal2-popup:not(.swal2-toast).swal2-hide{animation:cardOut .16s ease-in forwards}
-.swal2-popup.swal2-toast.swal2-show{animation:capIn .32s cubic-bezier(.2,.9,.3,1.2)}
-.swal2-popup.swal2-toast.swal2-hide{animation:capOut .2s ease-in forwards}
+html body .swal2-popup:not(.swal2-toast).swal2-show{animation:cardIn .26s cubic-bezier(.2,.9,.3,1.15)}
+html body .swal2-popup:not(.swal2-toast).swal2-hide{animation:cardOut .16s ease-in forwards}
+html body .swal2-popup.swal2-toast.swal2-show{animation:capIn .32s cubic-bezier(.2,.9,.3,1.2)}
+html body .swal2-popup.swal2-toast.swal2-hide{animation:capOut .2s ease-in forwards}
 /* มือถือ: แผ่นเลื่อนขึ้นจากขอบล่าง */
 @media(max-width:640px){
-  .swal2-container.swal2-center{align-items:flex-end;padding:0}
-  .swal2-popup:not(.swal2-toast){width:100%!important;max-width:none;margin:0;border-radius:28px 28px 0 0;padding:1.1rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom,0px));border-bottom:0}
-  .swal2-popup:not(.swal2-toast)::before{content:"";grid-column:1/-1;justify-self:center;width:42px;height:5px;border-radius:99px;background:#e2e8f0;margin:0 0 1rem}
-  .swal2-popup:not(.swal2-toast).swal2-show{animation:sheetUp .32s cubic-bezier(.2,.9,.25,1)}
-  .swal2-popup:not(.swal2-toast).swal2-hide{animation:sheetDown .2s ease-in forwards}
+  html body .swal2-container.swal2-center{align-items:flex-end;padding:0}
+  html body .swal2-popup:not(.swal2-toast){width:100%!important;max-width:none;margin:0;border-radius:28px 28px 0 0;padding:1.1rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom,0px));border-bottom:0}
+  html body .swal2-popup:not(.swal2-toast)::before{content:"";grid-column:1/-1;justify-self:center;width:42px;height:5px;border-radius:99px;background:#e2e8f0;margin:0 0 1rem}
+  html body .swal2-popup:not(.swal2-toast).swal2-show{animation:sheetUp .32s cubic-bezier(.2,.9,.25,1)}
+  html body .swal2-popup:not(.swal2-toast).swal2-hide{animation:sheetDown .2s ease-in forwards}
 }
-@media (prefers-reduced-motion:reduce){.swal2-popup.swal2-show,.swal2-popup.swal2-hide{animation-duration:.01s!important}}
+@media (prefers-reduced-motion:reduce){html body .swal2-popup.swal2-show,html body .swal2-popup.swal2-hide{animation-duration:.01s!important}}
+
+html body .adm-ico .swal2-icon-content{font-size:2em}
 </style>
 <script>
 /* แจ้งเตือนสั้นๆ ที่หายเอง (มี timer ไม่มีปุ่ม) -> แสดงเป็นแคปซูล toast ด้านบน ไม่บังหน้าจอ */
@@ -1353,7 +1355,9 @@ window.onAuthLost = function () {
 async function adminToggle() {
   if (isAdmin) return adminLogout();
   await Swal.fire({
-    title: 'เข้าสู่โหมดแอดมิน', input: 'password', inputPlaceholder: 'รหัสผ่านแอดมิน',
+    icon: 'info', iconHtml: '<i class="fa-solid fa-lock"></i>', customClass: { icon: 'adm-ico' },
+    title: 'เข้าสู่โหมดแอดมิน', text: 'ใส่รหัสผ่านเพื่ออนุมัติคำขอ บันทึกเบิก/รับเข้า และจัดการคลัง',
+    input: 'password', inputPlaceholder: 'รหัสผ่านแอดมิน', inputAttributes: { autocomplete: 'current-password', autocapitalize: 'off' },
     showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5',
     showLoaderOnConfirm: true, allowOutsideClick: () => !Swal.isLoading(), allowEscapeKey: () => !Swal.isLoading(),
     // กด "เข้าสู่ระบบ" แล้วปุ่มจะหมุน (กำลังตรวจรหัส) ถ้ารหัสผิดจะแจ้งในกล่องเดิมให้พิมพ์ใหม่ได้เลย
