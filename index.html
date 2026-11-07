@@ -101,6 +101,14 @@ html body .swal2-popup.swal2-toast.swal2-hide{animation:capOut .2s ease-in forwa
   html body .swal2-popup:not(.swal2-toast).swal2-show{animation:sheetUp .32s cubic-bezier(.2,.9,.25,1)}
   html body .swal2-popup:not(.swal2-toast).swal2-hide{animation:sheetDown .2s ease-in forwards}
 }
+/* กล่องที่มีช่องกรอก (รหัสผ่าน/ชื่อ): ไม่ใช้แผ่นล่าง เพราะคีย์บอร์ดจะบังหรือทำให้ลอยกลางจอ -> ใช้การ์ดมุมมนครบ วางด้านบน */
+@media(max-width:640px){
+  html body .swal2-container.swal2-center:has(.swal2-input,.swal2-textarea,.swal2-select){align-items:flex-start;padding:10vh 12px 12px}
+  html body .swal2-container.swal2-center:has(.swal2-input,.swal2-textarea,.swal2-select) .swal2-popup:not(.swal2-toast){width:100%!important;border-radius:28px;border:1px solid rgba(255,255,255,.7);padding:1.5rem 1.25rem 1.25rem;margin:0}
+  html body .swal2-container.swal2-center:has(.swal2-input,.swal2-textarea,.swal2-select) .swal2-popup:not(.swal2-toast)::before{display:none}
+  html body .swal2-container.swal2-center:has(.swal2-input,.swal2-textarea,.swal2-select) .swal2-popup:not(.swal2-toast).swal2-show{animation:cardIn .26s cubic-bezier(.2,.9,.3,1.15)}
+  html body .swal2-container.swal2-center:has(.swal2-input,.swal2-textarea,.swal2-select) .swal2-popup:not(.swal2-toast).swal2-hide{animation:cardOut .16s ease-in forwards}
+}
 @media (prefers-reduced-motion:reduce){html body .swal2-popup.swal2-show,html body .swal2-popup.swal2-hide{animation-duration:.01s!important}}
 
 html body .adm-ico .swal2-icon-content{font-size:2em}
@@ -571,6 +579,12 @@ html body .adm-ico .swal2-icon-content{font-size:2em}
   .pk-s{display:flex;align-items:center;gap:.5rem;padding:.6rem .8rem;border-bottom:1px solid #eeeafc;background:#faf9ff;color:#a5b4fc}
   .pk-s input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:.85rem;color:#1e293b}
   @media(max-width:640px){.pk-s input{font-size:16px}}
+  #pkPanel.pk-full{border-radius:0;border:0;box-shadow:none;animation:none}
+  #pkPanel.pk-full .pk-l{flex:1;max-height:none}
+  #pkPanel.pk-full .pk-s{padding:.75rem .8rem}
+  .pk-x{display:none;flex:none;padding:.4rem .9rem;border-radius:999px;background:#eef2ff;color:#4f46e5;font-weight:600;font-size:.85rem}
+  #pkPanel.pk-full .pk-x{display:block}
+  .pk-s input[type=search]{-webkit-appearance:none;appearance:none}
   .pk-l{overflow-y:auto;overscroll-behavior:contain;padding:.35rem}
   .pk-o{display:flex;align-items:center;gap:.55rem;padding:.55rem .6rem;border-radius:12px;cursor:pointer;font-size:.84rem}
   .pk-o:hover,.pk-o.act{background:#eef2ff}
@@ -3132,15 +3146,15 @@ function enhancePick(sel) {
 function pkEnsure() {
   if (PKR.el) return;
   const d = document.createElement('div'); d.id = 'pkPanel';
-  d.innerHTML = '<div class="pk-s"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="pkQ" placeholder="ค้นหารหัส / ชื่อวัสดุ" autocomplete="off"></div><div id="pkL" class="pk-l" role="listbox"></div>';
+  d.innerHTML = '<div class="pk-s"><i class="fa-solid fa-magnifying-glass"></i><input type="search" id="pkQ" name="pk-search" placeholder="ค้นหารหัส / ชื่อวัสดุ" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><button type="button" id="pkX" class="pk-x">ปิด</button></div><div id="pkL" class="pk-l" role="listbox"></div>';
   document.body.appendChild(d); PKR.el = d;
   $('pkQ').addEventListener('input', () => pkRender());
+  $('pkX').addEventListener('click', () => pkClose());
   $('pkQ').addEventListener('keydown', pkKey);
   $('pkL').addEventListener('click', e => { const o = e.target.closest('.pk-o'); if (o) pkPick(o.dataset.c); });
   document.addEventListener('mousedown', e => { if (PKR.sel && !d.contains(e.target) && !(PKR.sel._pk && PKR.sel._pk.contains(e.target))) pkClose(); }, true);
   // เปิดคีย์บอร์ดบนมือถือทำให้เกิด resize (ความสูงเปลี่ยน แต่ความกว้างเท่าเดิม) -> อย่าปิด แค่จัดตำแหน่งใหม่
-  let pkW = window.innerWidth;
-  window.addEventListener('resize', () => { const w = window.innerWidth; if (w !== pkW) { pkW = w; pkClose(); } else pkPlace(); });
+  window.addEventListener('resize', () => pkPlace());   // ไม่ปิดเอง แค่จัดตำแหน่งใหม่ (กันแผ่นปิดเองตอนคีย์บอร์ดขึ้น/หมุนจอ)
   if (window.visualViewport) { visualViewport.addEventListener('resize', () => pkPlace()); visualViewport.addEventListener('scroll', () => pkPlace()); }
   window.addEventListener('scroll', e => { if (PKR.sel && !d.contains(e.target)) pkPlace(); }, true);
 }
@@ -3152,7 +3166,7 @@ function pkOpen(sel) {
   $('pkQ').value = ''; pkRender();
   PKR.el.classList.add('show'); pkPlace();
   const cur = $('pkL').querySelector('.pk-o.cur'); if (cur) cur.scrollIntoView({ block: 'center' });
-  if (window.innerWidth > 640) $('pkQ').focus();
+  try { $('pkQ').focus({ preventScroll: true }); } catch (e) { $('pkQ').focus(); }
 }
 function pkClose() {
   if (!PKR.el) return;
@@ -3162,10 +3176,18 @@ function pkClose() {
 }
 function pkPlace() {
   if (!PKR.sel || !PKR.el) return;
-  const vv = window.visualViewport, r = PKR.sel._pk.getBoundingClientRect(), vh = window.innerHeight, vTop = vv ? vv.offsetTop : 0, vBot = vv ? vv.offsetTop + vv.height : vh, below = vBot - r.bottom - 10, above = r.top - vTop - 10;
+  const vv = window.visualViewport, s = PKR.el.style;
+  if (window.innerWidth <= 640) {   // มือถือ: แผ่นเต็มพื้นที่ที่มองเห็นจริง ยึดตาม visual viewport คีย์บอร์ดขึ้นแล้วไม่เด้ง/ไม่กระโดด
+    PKR.el.classList.add('pk-full');
+    s.left = (vv ? vv.offsetLeft : 0) + 'px'; s.top = (vv ? vv.offsetTop : 0) + 'px';
+    s.width = (vv ? vv.width : window.innerWidth) + 'px'; s.height = (vv ? vv.height : window.innerHeight) + 'px';
+    s.maxHeight = 'none'; s.bottom = 'auto'; $('pkL').style.maxHeight = 'none'; return;
+  }
+  PKR.el.classList.remove('pk-full'); s.height = '';
+  const r = PKR.sel._pk.getBoundingClientRect(), vh = window.innerHeight, vTop = vv ? vv.offsetTop : 0, vBot = vv ? vv.offsetTop + vv.height : vh, below = vBot - r.bottom - 10, above = r.top - vTop - 10;
   const down = below >= 230 || below >= above, room = Math.max(160, Math.min(340, down ? below : above));
   const w = Math.min(Math.max(r.width, 260), window.innerWidth - 16), left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
-  const s = PKR.el.style; s.width = w + 'px'; s.left = left + 'px'; s.maxHeight = room + 'px';
+  s.width = w + 'px'; s.left = left + 'px'; s.maxHeight = room + 'px';
   if (down) { s.top = (r.bottom + 6) + 'px'; s.bottom = 'auto'; } else { s.bottom = (vh - r.top + 6) + 'px'; s.top = 'auto'; }
   $('pkL').style.maxHeight = (room - 50) + 'px';
 }
