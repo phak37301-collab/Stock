@@ -4363,6 +4363,36 @@ function toggleFab(force) {
 .dc-p{border:1px solid #ece9fb;border-radius:14px;padding:12px 14px}.dc-p h4{font-weight:700;font-size:.82rem;color:#1e1b4b;margin-bottom:6px}.dc-p .scr{max-height:330px;overflow:auto}
 .dc-r{display:block;width:100%;text-align:left;padding:7px 4px;border-bottom:1px dashed #ece9fb}.dc-r:hover{background:#f8f7ff}
 .dc-r .bar{height:5px;border-radius:9px;background:#eef2ff;margin-top:5px}.dc-r .bar i{display:block;height:100%;border-radius:9px}
+/* --- หน้าคืนเบิก (ผู้ใช้ทั่วไป) หน้าตาเหมือนหน้าเบิก แต่เป็นสีเขียวคงเดิมของระบบคืน (class: cr / cr-) --- */
+.cr{z-index:61;background:linear-gradient(180deg,#effcf9,#f6fffb)}
+.cr .cg-top{border-bottom-color:#d5f2ec;box-shadow:0 2px 10px rgba(13,148,136,.08)}
+.cr .cg-bk{background:#e6f7f3;color:#0d9488}
+.cr .cg-t{color:#134e4a}
+.cr .cg-s input{border-color:#cdeee7}.cr .cg-s input:focus{border-color:#14b8a6}
+.cr .cg-cc{border-color:#d5f2ec}.cr .cg-cc b{background:#e6f7f3;color:#0f766e}
+.cr .cg-cc.on{background:linear-gradient(135deg,#2dd4bf,#0d9488);color:#fff;box-shadow:0 6px 16px rgba(13,148,136,.3)}.cr .cg-cc.on b{background:rgba(255,255,255,.25);color:#fff}
+.cr .cg-gh{background:#effcf9;color:#0f766e}
+.cr .cg-rw{border-color:#d5f2ec}.cr .cg-rw:hover{box-shadow:0 6px 18px rgba(13,148,136,.12)}.cr .cg-rw.on{border-color:#14b8a6;background:#f0fdfa}
+.cr .cg-em{background:#e9f8f4}.cr .cg-rw.on .cg-em{background:#ccfbf1}
+.cr .cg-rn{color:#134e4a}.cr .gd{color:#0f766e}
+.cr .cg-ra{background:linear-gradient(135deg,#2dd4bf,#0d9488);box-shadow:0 4px 12px rgba(13,148,136,.28)}
+.cr .cg-go{background:linear-gradient(135deg,#2dd4bf,#0d9488);box-shadow:0 6px 16px rgba(13,148,136,.3)}.cr .cg-go:disabled{box-shadow:none}
+.cr .cg-st button{background:#0d9488}.cr .cg-st input{border-color:#99f6e4;color:#134e4a}
+.cr .cg-cart{border-color:#d5f2ec;box-shadow:0 10px 30px rgba(13,148,136,.12)}
+.cr .cg-ch{border-bottom-color:#d5f2ec;background:linear-gradient(135deg,#ecfdf5,#f0fdfa)}.cr .cg-ch b{color:#134e4a}
+.cr .cg-cn{background:linear-gradient(135deg,#2dd4bf,#0d9488)}
+.cr .cg-cf{border-top-color:#d5f2ec}.cr .cg-tot b,.cr .cg-mini b{color:#0d9488}
+.cr .cg-ci{border-bottom-color:#eaf7f3}.cr .cg-cin b,.cr .cg-itn{color:#134e4a}
+.cr .cg-bar{border-top-color:#d5f2ec}
+.cr .cg-card{border-color:#d5f2ec}.cr .cg-lb{color:#134e4a}
+.cr .cg-in{border-color:#cdeee7}.cr .cg-in:focus{border-color:#14b8a6}
+.cr .cg-it{border-bottom-color:#d5f2ec}
+.cr-all{flex:none;margin-left:2px;border-radius:99px;padding:7px 11px;background:#e6f7f3;color:#0f766e;font-weight:700;font-size:.75rem;white-space:nowrap}
+.cr-who-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 12px;padding:9px 14px;border-radius:14px;background:#e6f7f3;border:1px solid #bdeadf;color:#115e59;font-size:.82rem}
+.cr .cr-chg{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:5px 12px;background:#fff;color:#0f766e;border:1px solid #99f6e4;font-weight:600;font-size:.75rem}
+.cr-box{border-radius:16px;padding:14px 16px;font-size:.9rem;line-height:1.6}.cr-box small{display:block;margin:4px 0 10px;font-size:.78rem;opacity:.85}
+.cr-box.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}.cr-box.bad{background:#fff1f2;border:1px solid #fecdd3;color:#be123c}
+.cr-who{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.cr-wn{flex:1;min-width:80px;font-weight:700;color:#134e4a}
 </style>
 <script>
 (function () {
@@ -4514,6 +4544,143 @@ function toggleFab(force) {
   }
   const _openTx = window.openTx;
   window.openTx = function (t) { if (t === 'out' && !isAdmin) return openCatalog(); return _openTx.apply(this, arguments); };
+
+  /* ---------- 1b) หน้าคืนเบิก (ผู้ใช้ทั่วไป): หน้าตาเหมือนหน้าเบิก 2 ขั้น แต่เป็นสีเขียว ----------
+   * ใช้ข้อมูลและฟังก์ชันส่งคำขอคืนเดิมทั้งหมด (RETB / retbLoad / sendRetPublic) ไม่แตะลอจิกเดิม
+   * แอดมินยังใช้ฟอร์มคืนเบิกเดิม */
+  const CR = { sel: '', q: '', date: '', note: '' };
+  document.body.insertAdjacentHTML('beforeend',
+    `<div id="cr" class="cg cr hidden">
+      <div class="cg-s1"><div class="cg-top"><button type="button" class="cg-bk" onclick="crExit()" aria-label="ปิด">${ARW}</button>
+        <div class="cg-t">↩️ เลือกของที่จะคืน<small id="crBk"></small></div>
+        <div class="cg-s"><i class="fa-solid fa-magnifying-glass"></i><input id="crQ" placeholder="ค้นหาชื่อหรือรหัสวัสดุ..." autocomplete="off"></div></div>
+        <div class="cg-main"><nav id="crCats" class="cg-cats"></nav><section id="crList" class="cg-list"></section><aside id="crCart" class="cg-cart"></aside></div>
+        <div id="crBar" class="cg-bar"></div><div class="cg-bd2" onclick="crSheet(false)"></div></div>
+      <div class="cg-s2"><div class="cg-top"><button type="button" class="cg-bk" onclick="crStep(1)" aria-label="กลับ">${ARW}</button>
+        <div class="cg-t">📝 สรุปรายการคืน<small>ตรวจสอบก่อนส่งคำขอ</small></div></div>
+        <div id="crSum" class="cg-sb"></div>
+        <div class="cg-bar"><button type="button" id="crSendBtn" class="cg-go" onclick="crSend()"><i class="fa-solid fa-rotate-left mr-2"></i>ส่งคำขอคืน</button></div></div></div>`);
+  const crOn = () => !$('cr').classList.contains('hidden');
+  const crPicked = () => (RETB.list || []).filter(o => Number(o.q) > 0);
+  const crOver = o => Number(o.q) > o.left + 1e-9;
+  const crWarn = o => crOver(o) ? 'คืนได้สูงสุด ' + num(o.left) + ' ' + (o.unit || '') : '';
+  const crEmo = o => emoOf(stockOf(o.code) || o);
+  const crCat = o => catOf(stockOf(o.code) || o);
+  const crCtl = o => Number(o.q) > 0 ? stp(o.q, o.unit) + '<button type="button" class="cr-all" data-a="all">ทั้งหมด</button>' : '<button type="button" class="cg-ra" data-a="+">＋ คืน</button>';
+  const crChg = '<button type="button" class="cr-chg" onclick="askMyName(true)"><i class="fa-solid fa-repeat"></i> ไม่ใช่ฉัน? เปลี่ยนชื่อ</button>';
+  const crRow = (o, i) => { const w = crWarn(o);
+    return `<div class="cg-rw ${Number(o.q) > 0 ? 'on' : ''}" data-i="${i}"><div class="cg-em">${crEmo(o)}</div><div class="cg-rb"><div class="cg-rn">${esc(o.name)}</div>
+      <div class="cg-rm">${esc(o.code)} · เบิกไว้ ${num(o.withdrawn)}${o.returned ? ' · คืน/รอคืนแล้ว ' + num(o.returned) : ''} · คืนได้ <b class="gd">${num(o.left)}</b> ${esc(o.unit)}${w ? ` <span class="lw">· ${esc(w)}</span>` : ''}</div></div><div class="cg-rc">${crCtl(o)}</div></div>`; };
+  function crCats() {
+    const L = RETB.list || [], m = {}; L.forEach(o => { const k = crCat(o); m[k] = (m[k] || 0) + 1; });
+    const ks = Object.keys(m).sort((a, b) => (a === OTHER) - (b === OTHER) || m[b] - m[a]);
+    if (CR.sel && !m[CR.sel]) CR.sel = '';
+    $('crCats').innerHTML = L.length ? [['', L.length]].concat(ks.map(k => [k, m[k]])).map(a => `<button type="button" class="cg-cc ${CR.sel === a[0] ? 'on' : ''}" data-k="${esc(a[0])}"><span>${a[0] ? ICON[a[0]] || '📦' : '🔎'}</span>${esc(a[0] || 'ทั้งหมด')}<b>${a[1]}</b></button>`).join('') : '';
+  }
+  function crList() {
+    const box = $('crList'), sc = box.scrollTop, L = RETB.list || [], nm = RETB.name || '';
+    let h = '';
+    if (!RETB.loaded) h = '<div class="text-center text-slate-400 py-16 text-sm"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังดึงรายการที่คุณเบิกไว้...</div>';
+    else if (RETB.err) h = `<div class="cr-box bad">โหลดรายการที่เบิกไว้ไม่สำเร็จ: ${esc(RETB.err)}<br><button type="button" class="cr-chg" onclick="retbLoad()">ลองอีกครั้ง</button></div>`;
+    else if (!nm) h = '<div class="cr-box warn">กรอกชื่อผู้คืนก่อน ระบบจะแสดงของที่ชื่อนี้เบิกไว้<br><button type="button" class="cr-chg" onclick="askMyName(false)">กรอกชื่อ</button></div>';
+    else if (!L.length) h = `<div class="cr-box warn">ไม่พบรายการที่ “${esc(nm)}” เบิกไว้และยังคืนได้<small>คืนได้เฉพาะของที่เบิกผ่านระบบในชื่อนี้ (ที่แอดมินอนุมัติแล้ว) ถ้าเบิกด้วยชื่ออื่น ให้กด “ไม่ใช่ฉัน? เปลี่ยนชื่อ”</small>${crChg}</div>`;
+    else {
+      const q = CR.q.trim().toLowerCase();
+      const rows = L.map((o, i) => ({ o: o, i: i })).filter(x => (!CR.sel || crCat(x.o) === CR.sel) && (!q || (x.o.code + ' ' + x.o.name).toLowerCase().includes(q))).sort((a, b) => byName(a.o, b.o));
+      h = `<div class="cr-who-note">คืนในชื่อ <b>${esc(nm)}</b> · คืนได้เฉพาะของที่เบิกในชื่อนี้ ${crChg}</div>`;
+      if (!rows.length) h += '<div class="text-center text-slate-400 py-16 text-sm">ไม่พบวัสดุที่ค้นหา</div>';
+      else if (!CR.sel && !q) {
+        const g = {}; rows.forEach(x => { const k = crCat(x.o); (g[k] = g[k] || []).push(x); });
+        Object.keys(g).sort((a, b) => (a === OTHER) - (b === OTHER) || g[b].length - g[a].length).forEach(k => { h += `<div class="cg-gh">${ICON[k] || '📦'} ${esc(k)} · ${g[k].length}</div><div class="cg-grid">${g[k].map(x => crRow(x.o, x.i)).join('')}</div>`; });
+      } else h += `<div class="cg-grid">${rows.map(x => crRow(x.o, x.i)).join('')}</div>`;
+    }
+    box.innerHTML = h; box.scrollTop = sc;
+  }
+  function crCart() {
+    const idx = []; (RETB.list || []).forEach((o, i) => { if (Number(o.q) > 0) idx.push(i); });
+    const n = idx.length;
+    $('crCart').innerHTML = `<div class="cg-ch"><b>↩️ รายการที่จะคืน</b><span class="cg-cn">${n}</span>${n ? '<button type="button" class="cg-clr" onclick="crClear()">🗑️ ล้าง</button>' : ''}<button type="button" class="cg-cx" onclick="crSheet(false)" aria-label="ปิด"><i class="fa-solid fa-chevron-down"></i></button></div>` +
+      (n ? `<div class="cg-cl">${idx.map(i => { const o = RETB.list[i], w = crWarn(o); return `<div class="cg-ci" data-i="${i}"><div class="cg-em sm">${crEmo(o)}</div><div class="cg-cin"><b>${esc(o.name)}</b><small>${w ? `<span class="lw">${esc(w)}</span>` : 'คืนได้ ' + num(o.left) + ' ' + esc(o.unit)}</small></div>${stp(o.q, o.unit, true)}</div>`; }).join('')}</div>`
+        : '<div class="cg-ce"><div><em>↩️</em>ยังไม่ได้เลือกของที่จะคืน<br><small>แตะ “＋ คืน” ที่รายการ<br>ของที่เลือกจะมาแสดงตรงนี้</small></div></div>') +
+      `<div class="cg-cf"><div class="cg-tot">รวม <b>${n}</b> รายการ</div><button type="button" class="cg-go" ${n ? '' : 'disabled'} onclick="crStep(2)">ดูสรุป / ส่งคำขอ →</button></div>`;
+    const ems = idx.slice(0, 6).map(i => crEmo(RETB.list[i])).join('');
+    $('crBar').innerHTML = n ? `<button type="button" class="cg-mini" onclick="crSheet(true)"><span class="em">${ems}</span><span><b>${n}</b> <small>รายการ · แตะเพื่อดู ▲</small></span></button><button type="button" class="cg-go" onclick="crStep(2)">สรุป →</button>`
+      : '<div style="margin:auto;color:#94a3b8;font-size:.85rem">ยังไม่ได้เลือกของ แตะ “＋ คืน” ที่รายการ</div>';
+  }
+  function crSum() {
+    const who = normName(($('ret_person') || {}).value) || myName(), idx = [];
+    (RETB.list || []).forEach((o, i) => { if (Number(o.q) > 0) idx.push(i); });
+    const items = idx.map(i => { const o = RETB.list[i], w = crWarn(o), docs = o.docs || [];
+      return `<div class="cg-it" data-i="${i}"><div class="cg-em sm">${crEmo(o)}</div><div class="cg-itn">${esc(o.name)}<small>${esc(o.code)}${w ? ` · <span class="lw">${esc(w)}</span>` : ''} · อ้างอิงใบเบิก: ${docs.slice(-3).reverse().map(d => esc(retbDocLabel(d))).join(' · ')}${docs.length > 3 ? ' …' : ''}</small></div><div class="cg-itc">${stp(o.q, o.unit)}</div><button type="button" class="cg-x" data-a="del" aria-label="ลบรายการ"><i class="fa-solid fa-trash"></i></button></div>`; }).join('');
+    $('crSum').innerHTML = `<div class="cg-sg"><div><div class="cg-card"><div class="cg-lb">👤 ผู้คืน</div><div class="cr-who"><div class="cg-em sm">${petFor(who)[0]}</div><div class="cr-wn">${esc(who)}</div>${crChg}</div><div class="cg-hint">ต้องเป็นชื่อเดียวกับที่เบิก เพื่อให้ระบบนับยอดเบิก-คืนของคุณถูกต้อง</div></div>
+      <div class="cg-card"><label class="cg-lb" for="crDate">📅 วันที่คืน</label><input id="crDate" type="date" class="cg-in" value="${esc(CR.date)}"></div>
+      <div class="cg-card"><label class="cg-lb" for="crNote">📝 หมายเหตุ</label><input id="crNote" class="cg-in" maxlength="200" placeholder="ไม่บังคับ เช่น งานยกเลิก / ใช้ไม่หมด" value="${esc(CR.note)}"></div></div>
+      <div class="cg-card"><div class="cg-lb">📦 รายการที่คืน (${idx.length} รายการ)</div>${items}<button type="button" class="cg-clr2" onclick="crClear()">🗑️ ล้างรายการทั้งหมด</button></div></div>`;
+    $('crSendBtn').disabled = !idx.length;
+  }
+  window.crSheet = o => $('cr').classList.toggle('open', !!o);
+  window.crPaintAll = () => {
+    if (!crOn()) return;
+    crCats(); crList(); crCart();
+    if ($('cr').classList.contains('s2')) { if (!crPicked().length) return crStep(1); crSum(); }
+  };
+  window.crStep = n => {
+    crSheet(false);
+    if (n === 2) { if (!crPicked().length) return; crSum(); $('cr').classList.add('s2'); $('crSum').scrollTop = 0; }
+    else { $('cr').classList.remove('s2'); crList(); crCart(); }
+  };
+  function crSet(i, q, cap) {
+    const o = (RETB.list || [])[i]; if (!o) return;
+    q = Math.round(q * 1e6) / 1e6; if (cap && q > o.left) q = o.left;
+    o.q = q > 0 ? q : '';
+    if ($('cr').classList.contains('s2')) { if (!crPicked().length) return crStep(1); crSum(); crCart(); return; }
+    const el = $('crList').querySelector(`[data-i="${i}"]`); if (el) el.outerHTML = crRow(o, i);
+    crCart(); if (!crPicked().length) crSheet(false);
+  }
+  $('cr').addEventListener('click', e => {
+    const b = e.target.closest('button[data-a]');
+    if (b) {
+      const h = b.closest('[data-i]'); if (!h) return;
+      const i = +h.dataset.i, o = (RETB.list || [])[i]; if (!o) return;
+      const a = b.dataset.a, q = Number(o.q) || 0;
+      if (a === 'del') crSet(i, 0); else if (a === 'all') crSet(i, o.left); else if (a === '-') crSet(i, q - 1);
+      else crSet(i, q ? q + 1 : Math.min(1, o.left), true);
+      return;
+    }
+    const k = e.target.closest('.cg-cc[data-k]'); if (k) { CR.sel = k.dataset.k; crCats(); $('crList').scrollTop = 0; crList(); }
+  });
+  $('cr').addEventListener('change', e => { if (e.target.dataset.a === 'set') { const h = e.target.closest('[data-i]'); if (h) crSet(+h.dataset.i, Number(e.target.value) || 0); } });
+  $('cr').addEventListener('input', e => { const id = e.target.id; if (id === 'crDate') CR.date = e.target.value; else if (id === 'crNote') CR.note = e.target.value; });
+  $('crQ').addEventListener('input', e => { CR.q = e.target.value; $('crList').scrollTop = 0; crList(); });
+  window.crClear = () => {
+    if (!crPicked().length) return;
+    Swal.fire({ icon: 'warning', title: 'ล้างรายการที่เลือกทั้งหมด?', text: 'รายการที่เลือกไว้จะว่าง และต้องเลือกใหม่', showCancelButton: true, confirmButtonText: 'ล้างทั้งหมด', cancelButtonText: 'ไม่ล้าง', confirmButtonColor: '#e11d48' })
+      .then(r => { if (r.isConfirmed) { (RETB.list || []).forEach(o => { o.q = ''; }); crSheet(false); crPaintAll(); } });
+  };
+  window.crExit = () => {
+    const n = crPicked().length; if (!n) return closeTx();
+    Swal.fire({ title: 'ยังมีรายการที่เลือกไว้ ' + n + ' รายการ', text: 'ถ้าปิดหน้านี้ รายการที่เลือกจะถูกล้าง', showCancelButton: true, confirmButtonText: 'ปิดและล้างรายการ', cancelButtonText: 'กลับไปเลือกต่อ', confirmButtonColor: '#0d9488' })
+      .then(r => { if (r.isConfirmed) closeTx(); });
+  };
+  // ส่งคำขอคืน: ใส่ค่าลงฟอร์มคืนเดิม แล้วเรียก sendRetPublic() ตัวเดิม (ตรวจจำนวน/อ้างอิงใบเบิก/ส่งคำขอ ทำงานเหมือนเดิมทุกอย่าง)
+  window.crSend = () => {
+    if (!crPicked().length) return;
+    if (!CR.date) { Swal.fire({ icon: 'info', title: 'กรุณาเลือกวันที่คืน' }); return; }
+    setDate('ret_date', CR.date); $('ret_note').value = CR.note;
+    sendRetPublic();
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && crOn() && !document.querySelector('.swal2-container')) crExit(); });
+  const _openRet = window.openRet, _closeTx = window.closeTx, _retbPaint = window.retbPaint;
+  window.openRet = function () {
+    const r = _openRet.apply(this, arguments);
+    if (isAdmin || !book) return r;
+    CR.sel = ''; CR.q = ''; CR.date = ymd(new Date()); CR.note = '';
+    $('crQ').value = ''; $('crBk').textContent = bookName();
+    $('cr').classList.remove('s2', 'open', 'hidden'); crPaintAll(); $('crList').scrollTop = 0;
+    return r;
+  };
+  window.closeTx = function () { $('cr').classList.remove('s2', 'open'); $('cr').classList.add('hidden'); return _closeTx.apply(this, arguments); };
+  window.retbPaint = function () { const r = _retbPaint.apply(this, arguments); if (crOn()) crPaintAll(); return r; };
 
   /* ---------- 2) แอดมิน: แถบหมวด + ช่องค้นหาใหญ่ ---------- */
   const C = { sel: '' };
