@@ -4387,6 +4387,7 @@ function toggleFab(force) {
 .cr .cg-card{border-color:#d5f2ec}.cr .cg-lb{color:#134e4a}
 .cr .cg-in{border-color:#cdeee7}.cr .cg-in:focus{border-color:#14b8a6}
 .cr .cg-it{border-bottom-color:#d5f2ec}
+.cr-ref{margin-top:2px;font-size:.68rem;line-height:1.35;color:#4f706a;word-break:break-all}
 .cr-all{flex:none;margin-left:2px;border-radius:99px;padding:7px 11px;background:#e6f7f3;color:#0f766e;font-weight:700;font-size:.75rem;white-space:nowrap}
 .cr-who-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 12px;padding:9px 14px;border-radius:14px;background:#e6f7f3;border:1px solid #bdeadf;color:#115e59;font-size:.82rem}
 .cr .cr-chg{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:5px 12px;background:#fff;color:#0f766e;border:1px solid #99f6e4;font-weight:600;font-size:.75rem}
@@ -4568,9 +4569,10 @@ function toggleFab(force) {
   const crCat = o => catOf(stockOf(o.code) || o);
   const crCtl = o => Number(o.q) > 0 ? stp(o.q, o.unit) + '<button type="button" class="cr-all" data-a="all">ทั้งหมด</button>' : '<button type="button" class="cg-ra" data-a="+">＋ คืน</button>';
   const crChg = '<button type="button" class="cr-chg" onclick="askMyName(true)"><i class="fa-solid fa-repeat"></i> ไม่ใช่ฉัน? เปลี่ยนชื่อ</button>';
+  const crRef = o => { const d = o.docs || []; return d.length ? `<div class="cr-ref">ใบเบิก: ${d.slice(-2).reverse().map(x => esc(retbDocLabel(x))).join(' · ')}${d.length > 2 ? ' …' : ''}</div>` : ''; };
   const crRow = (o, i) => { const w = crWarn(o);
     return `<div class="cg-rw ${Number(o.q) > 0 ? 'on' : ''}" data-i="${i}"><div class="cg-em">${crEmo(o)}</div><div class="cg-rb"><div class="cg-rn">${esc(o.name)}</div>
-      <div class="cg-rm">${esc(o.code)} · เบิกไว้ ${num(o.withdrawn)}${o.returned ? ' · คืน/รอคืนแล้ว ' + num(o.returned) : ''} · คืนได้ <b class="gd">${num(o.left)}</b> ${esc(o.unit)}${w ? ` <span class="lw">· ${esc(w)}</span>` : ''}</div></div><div class="cg-rc">${crCtl(o)}</div></div>`; };
+      <div class="cg-rm">${esc(o.code)} · เบิกไว้ ${num(o.withdrawn)}${o.returned ? ' · คืน/รอคืนแล้ว ' + num(o.returned) : ''} · คืนได้ <b class="gd">${num(o.left)}</b> ${esc(o.unit)}${w ? ` <span class="lw">· ${esc(w)}</span>` : ''}</div>${crRef(o)}</div><div class="cg-rc">${crCtl(o)}</div></div>`; };
   function crCats() {
     const L = RETB.list || [], m = {}; L.forEach(o => { const k = crCat(o); m[k] = (m[k] || 0) + 1; });
     const ks = Object.keys(m).sort((a, b) => (a === OTHER) - (b === OTHER) || m[b] - m[a]);
